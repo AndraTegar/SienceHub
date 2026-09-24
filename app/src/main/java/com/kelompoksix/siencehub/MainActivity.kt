@@ -1,26 +1,17 @@
-package com.kelompoksix.siencehub
+package com.kelompoksix.siencehub // Sesuaikan dengan nama package lo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.kelompoksix.siencehub.ui.screens.BerandaScreen
-import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
+import androidx.compose.material3.MaterialTheme
+import com.kelompoksix.siencehub.ui.screens.MateriScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            SienceHubTheme {
-                BerandaScreen()
+            MaterialTheme {
+                MateriScreen()
             }
         }
     }
