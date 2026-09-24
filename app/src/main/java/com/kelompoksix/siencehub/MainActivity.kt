@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             SienceHubTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Ridho Gantengg",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
