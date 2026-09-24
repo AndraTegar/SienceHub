@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
+import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,12 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SienceHubTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Ridho Gantengg",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                WelcomeScreen()
             }
         }
     }
