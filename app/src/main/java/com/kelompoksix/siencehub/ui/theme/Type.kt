@@ -8,14 +8,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // 1. Definisikan FontFamily untuk Poppins
-val Poppins = FontFamily(
-    Font(R.font.poppins_regular, FontWeight.Normal),
-    Font(R.font.poppins_medium, FontWeight.Medium), // Opsional, tambahkan jika Anda memasukkan file medium
-    Font(R.font.poppins_bold, FontWeight.Bold),
-    Font(R.font.poppins_extrabold, FontWeight.ExtraBold) // Digunakan untuk teks "Welcome" di gambar sebelumnya
+    val Poppins = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium), // Opsional, tambahkan jika Anda memasukkan file medium
+        Font(R.font.poppins_bold, FontWeight.Bold),
+        Font(R.font.poppins_extrabold, FontWeight.ExtraBold) // Digunakan untuk teks "Welcome" di gambar sebelumnya
 )
 
-// 2. Terapkan Poppins ke Material Typography
+// 2. Typography
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = Poppins, // Ganti FontFamily.Default menjadi Poppins
