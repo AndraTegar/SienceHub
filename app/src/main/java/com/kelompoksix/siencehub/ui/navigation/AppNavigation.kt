@@ -8,8 +8,9 @@ import com.kelompoksix.siencehub.ui.screens.LoginScreen
 import com.kelompoksix.siencehub.ui.screens.SignupScreen
 import com.kelompoksix.siencehub.ui.screens.SplashScreen
 import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
+import com.kelompoksix.siencehub.ui.screens.KerangkaAplikasi // <--- Pastikan ini di-import
 
-@Composable // <--- JANGAN SAMPAI KETINGGALAN INI
+@Composable
 fun AppNavigation() {
     val navController = rememberNavController()
 
@@ -31,8 +32,15 @@ fun AppNavigation() {
 
         composable(Routes.LOGIN) {
             LoginScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
                 onLoginSuccess = {
-                    // TODO: Arahkan ke Beranda setelah login sukses
+                    // MENGARAHKAN KE BERANDA SETELAH LOGIN SUKSES
+                    navController.navigate(Routes.HOME) {
+                        // Menghapus riwayat login agar saat di-back dari beranda tidak kembali ke form login
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
                 },
                 onNavigateToSignup = {
                     navController.navigate(Routes.SIGNUP)
@@ -43,12 +51,20 @@ fun AppNavigation() {
         composable(Routes.SIGNUP) {
             SignupScreen(
                 onCreateAccountSuccess = {
-                    // TODO: Aksi saat akun berhasil dibuat
+                    // Bisa langsung diarahkan ke Home atau Login setelah akun jadi
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.SIGNUP) { inclusive = true }
+                    }
                 },
                 onNavigateToLogin = {
                     navController.popBackStack()
                 }
             )
+        }
+
+        // MENAMBAHKAN HALAMAN BERANDA KE DALAM NAVIGASI
+        composable(Routes.HOME) {
+            KerangkaAplikasi()
         }
     }
 }
