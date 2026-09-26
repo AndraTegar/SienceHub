@@ -1,7 +1,5 @@
 package com.kelompoksix.siencehub.ui.screens
 
-package com.kelompoksix.siencehub.ui.screens
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,8 +18,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -74,9 +72,8 @@ fun SignupScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
 
-        // Background melengkung dengan tekstur
         Image(
-            painter = painterResource(id = R.drawable.texture_bg), // Menggunakan texture_bg
+            painter = painterResource(id = R.drawable.texture_bg),
             contentDescription = "Background Wavy",
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,7 +85,6 @@ fun SignupScreen(
 
         Column(modifier = Modifier.fillMaxSize().padding(top = 180.dp)) {
 
-            // Header Statis
             Column(modifier = Modifier.padding(horizontal = 32.dp)) {
                 Text("Sign up", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = darkText)
                 Spacer(modifier = Modifier.height(4.dp))
@@ -97,7 +93,6 @@ fun SignupScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Form Input Scrollable
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

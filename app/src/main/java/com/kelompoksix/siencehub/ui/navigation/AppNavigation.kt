@@ -9,7 +9,7 @@ import com.kelompoksix.siencehub.ui.screens.SignupScreen
 import com.kelompoksix.siencehub.ui.screens.SplashScreen
 import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
 
-@Composable
+@Composable // <--- JANGAN SAMPAI KETINGGALAN INI
 fun AppNavigation() {
     val navController = rememberNavController()
 

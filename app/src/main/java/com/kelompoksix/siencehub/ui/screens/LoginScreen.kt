@@ -15,8 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -66,9 +66,8 @@ fun LoginScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
 
-        // Background melengkung dengan tekstur
         Image(
-            painter = painterResource(id = R.drawable.texture_bg), // Menggunakan texture_bg
+            painter = painterResource(id = R.drawable.texture_bg),
             contentDescription = "Background Wavy",
             modifier = Modifier
                 .fillMaxWidth()
