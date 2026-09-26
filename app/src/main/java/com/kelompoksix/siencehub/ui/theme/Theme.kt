@@ -1,6 +1,5 @@
 package com.kelompoksix.siencehub.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -15,30 +14,26 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = GreenBackground,
     secondary = GreenLight,
-    tertiary = Color.White
+    tertiary = Color.White,
+    background = Color(0xFF1E201E),
+    surface = Color(0xFF2B2D2A)
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = GreenBackground,
     secondary = GreenLight,
-    tertiary = Color(0xFF424242)
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    tertiary = GrayColor,
+    background = SurfaceWhite,
+    surface = Color.White,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
     onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onSurface = Color(0xFF1C1B1F)
 )
 
 @Composable
 fun SienceHubTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Set false to preserve Figma brand theme
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
