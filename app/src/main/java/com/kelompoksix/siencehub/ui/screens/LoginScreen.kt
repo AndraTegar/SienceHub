@@ -23,7 +23,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.R
-// Import WavyShape yang sudah kita buat sebelumnya
 import com.kelompoksix.siencehub.ui.components.WavyShape
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,166 +33,173 @@ fun LoginScreen() {
     var passwordVisible by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
 
-    // Warna utama hijau dari desain
     val primaryGreen = Color(0xFF7A8B76)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF9F9FC))
-            .imePadding() // PENTING: Menyesuaikan layar dengan keyboard
+            .background(Color(0xFFF9F9FC)) // Background dasar layar
+            .imePadding()
     ) {
 
-        // 1. Gambar Latar Belakang Hijau Bergelombang (sama seperti WelcomeScreen)
+        // 1. Gambar Latar Belakang Hijau Bergelombang (Diam di tempat)
         Image(
-            painter = painterResource(id = R.drawable.texture_bg), // Sesuaikan ID
+            painter = painterResource(id = R.drawable.texture_bg),
             contentDescription = "Background",
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Crop, // Gunakan FillBounds jika gambar kurang lebar
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.5f) // Mengambil 50% layar
-                .clip(WavyShape()) // Gunakan WavyShape yang sama
+                .fillMaxHeight(0.35f)
+                .clip(WavyShape())
         )
 
-        // 2. Konten Form (Bisa di-scroll saat keyboard muncul)
+        // 2. Area Scrollable
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()) // PENTING: Agar form bisa digeser ke atas
+                .verticalScroll(rememberScrollState())
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = 32.dp),
-            verticalArrangement = Arrangement.Bottom // Dorong form ke bawah
         ) {
-            // Jarak atas agar form tidak menabrak gelombang terlalu atas saat belum discroll
-            Spacer(modifier = Modifier.height(280.dp))
+            // Spacer transparan (tanpa background) agar gambar hijau terlihat
+            // Tingginya bisa Anda sesuaikan agar pas dengan batas lengkungan
+            Spacer(modifier = Modifier.height(290.dp))
 
-            // Judul "Sign in"
-            Column {
-                Text(
-                    text = "Sign in",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
-                )
-                // Garis bawah hijau pada "Sign in"
-                Box(
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .width(48.dp)
-                        .height(3.dp)
-                        .background(primaryGreen)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Field Email
-            Text(text = "Email", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            TextField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = { Text("demo@email.com", color = Color.Gray) },
-                leadingIcon = {
-                    Icon(painterResource(id = R.drawable.ic_email), contentDescription = null, tint = Color.Gray) // Sesuaikan ID Ikon
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = primaryGreen,
-                    unfocusedIndicatorColor = Color.LightGray
-                ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Field Password
-            Text(text = "Password", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            TextField(
-                value = password,
-                onValueChange = { password = it },
-                placeholder = { Text("enter your password", color = Color.Gray) },
-                leadingIcon = {
-                    Icon(painterResource(id = R.drawable.ic_lock), contentDescription = null, tint = Color.Gray) // Sesuaikan ID Ikon
-                },
-                trailingIcon = {
-                    val image = if (passwordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(painterResource(id = image), contentDescription = null, tint = Color.Gray) // Sesuaikan ID Ikon
-                    }
-                },
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = primaryGreen,
-                    unfocusedIndicatorColor = Color.LightGray
-                ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Remember Me & Forgot Password
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = rememberMe,
-                        onCheckedChange = { rememberMe = it },
-                        colors = CheckboxDefaults.colors(checkedColor = primaryGreen)
-                    )
-                    Text("Remember Me", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                }
-
-                Text(
-                    text = "Forgot Password?",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = primaryGreen,
-                    modifier = Modifier.clickable { /* Aksi lupa password */ }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Tombol Login
-            Button(
-                onClick = { /* Aksi Login */ },
+            // 3. KONTEN FORM DENGAN BACKGROUND PUTIH (Ini yang akan ikut naik)
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = primaryGreen),
-                shape = RoundedCornerShape(8.dp)
+                    .background(Color(0xFFF9F9FC)) // Kunci perbaikannya ada di sini
+                    .padding(horizontal = 32.dp)
+                    .padding(top = 24.dp) // Jarak tambahan di atas tulisan "Sign in"
             ) {
-                Text("Login", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                // Judul "Sign in"
+                Column {
+                    Text(
+                        text = "Sign in",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF333333)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .width(48.dp)
+                            .height(3.dp)
+                            .background(primaryGreen)
+                    )
+                }
 
-            // Teks Sign Up
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Don't have an Account ? ", fontSize = 12.sp, color = Color.Gray)
-                Text(
-                    text = "Sign up",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = primaryGreen,
-                    modifier = Modifier.clickable { /* Aksi Sign up */ }
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Field Email
+                Text(text = "Email", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                TextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    placeholder = { Text("demo@email.com", color = Color.Gray) },
+                    leadingIcon = {
+                        Icon(painterResource(id = R.drawable.ic_email), contentDescription = null, tint = Color.Gray)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = primaryGreen,
+                        unfocusedIndicatorColor = Color.LightGray
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
-            }
 
-            Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Field Password
+                Text(text = "Password", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                TextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    placeholder = { Text("enter your password", color = Color.Gray) },
+                    leadingIcon = {
+                        Icon(painterResource(id = R.drawable.ic_lock), contentDescription = null, tint = Color.Gray)
+                    },
+                    trailingIcon = {
+                        val image = if (passwordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(painterResource(id = image), contentDescription = null, tint = Color.Gray)
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = primaryGreen,
+                        unfocusedIndicatorColor = Color.LightGray
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Remember Me & Forgot Password
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = rememberMe,
+                            onCheckedChange = { rememberMe = it },
+                            colors = CheckboxDefaults.colors(checkedColor = primaryGreen)
+                        )
+                        Text("Remember Me", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    Text(
+                        text = "Forgot Password?",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = primaryGreen,
+                        modifier = Modifier.clickable { /* Aksi lupa password */ }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // Tombol Login
+                Button(
+                    onClick = { /* Aksi Login */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryGreen),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Login", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Teks Sign Up
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text("Don't have an Account ? ", fontSize = 12.sp, color = Color.Gray)
+                    Text(
+                        text = "Sign up",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = primaryGreen,
+                        modifier = Modifier.clickable { /* Aksi Sign up */ }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(48.dp)) // Jarak tambahan di bagian paling bawah
+            }
         }
     }
 }
