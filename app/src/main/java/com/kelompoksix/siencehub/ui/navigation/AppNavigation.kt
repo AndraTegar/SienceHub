@@ -1,5 +1,6 @@
 package com.kelompoksix.siencehub.ui.navigation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -120,10 +121,14 @@ fun FigmaBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding() // Menghindari tombol/gesture bawaan Android
-            .padding(bottom = 10.dp, start = 15.dp, end = 15.dp) // Jarak melayang dari tepi layar
-            .clip(RoundedCornerShape(32.dp)), // Ubah ini jadi 32.dp (tanpa topStart/topEnd) agar bulat sempurna seperti kapsul
+            .padding(bottom = 10.dp, start = 15.dp, end = 15.dp), // Jarak melayang dari tepi layar
+        shape = RoundedCornerShape(32.dp),
         color = Color.White,
-        shadowElevation = 12.dp
+        shadowElevation = 16.dp,
+        border = BorderStroke(
+            width = 1.dp,
+            color = Color(0xFFE5E5E5)
+        )
     ) {
         Row(
             modifier = Modifier

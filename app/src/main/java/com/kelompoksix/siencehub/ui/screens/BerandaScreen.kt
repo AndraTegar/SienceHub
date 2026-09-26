@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -28,8 +32,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardStatus
 import com.kelompoksix.siencehub.ui.components.CardUtama
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun KerangkaAplikasi() {
@@ -108,6 +118,14 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit) {
 
     val scrollState = rememberScrollState()
 
+    // DATA DUMMY UNTUK KARTU YANG BISA DI-SLIDE
+    val daftarMateri = listOf(
+        Pair("Biologi: Struktur Sel", 0.1f),
+        Pair("Fisika: Hukum Newton", 0.5f),
+        Pair("Kimia: Reaksi Asam Basa", 0.8f)
+    )
+    val pagerState = rememberPagerState(pageCount = { daftarMateri.size })
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         // 1. UBAH INI: Pastikan dasar paling bawah layar berwarna putih
@@ -169,27 +187,57 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    CardUtama(
-                        judulMateri = "Biologi: Struktur Sel",
-                        progress = 0.1f,
-                        onClick = { }
-                    )
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxWidth(),
+                        pageSpacing = 16.dp // Jarak antar kartu saat digeser
+                    ) { page ->
+                        val materi = daftarMateri[page]
+                        CardUtama(
+                            judulMateri = materi.first,
+                            progress = materi.second,
+                            onClick = { println("Klik materi ${materi.first}") }
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp), // Jarak titik dari kartu di atasnya
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(daftarMateri.size) { iteration ->
+                            val isSelected = pagerState.currentPage == iteration
+
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .height(8.dp)
+                                    // Jika aktif, titik melebar jadi 24.dp (bentuk pil). Jika pasif, bulat 8.dp
+                                    .width(if (isSelected) 24.dp else 8.dp)
+                                    .clip(CircleShape)
+                                    // Warna putih terang untuk aktif, putih transparan untuk pasif
+                                    .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.4f))
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(32.dp))
                 }
 
                 // --- AREA PUTIH ---
                 val warnaBackgroundPutih = Color.White
+                // --- AREA PUTIH (Layer 2) ---
                 Surface(
                     shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                    color = warnaBackgroundPutih,
+                    color = warnaBackgroundPutih, // Pastikan variabel ini bernilai Color(0xFFFAFAFF)
                     modifier = Modifier.fillMaxWidth()
-                    // Kamu sekarang bisa MENGHAPUS .defaultMinSize()
-                    // karena latar belakang layar di bawahnya sudah putih!
                 ) {
                     Column(
                         modifier = Modifier.padding(24.dp)
                     ) {
+                        // Judul Bagian
                         Text(
                             text = "Aktivitas Seru Hari Ini",
                             fontSize = 20.sp,
@@ -199,10 +247,41 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit) {
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // ... (Panggilan CardAksi ke-1, 2, 3 tetap sama) ...
+                        // 1. Misi Kuis
+                        CardAksi(
+                            judul = "Tantangan Harian \uD83D\uDD25",
+                            deskripsi = "Selesaikan 5 soal kuis sistem pencernaan berturut-turut tanpa salah.",
+                            teksTombol = "Mulai Kuis",
+                            ikon = Icons.Default.PlayArrow,
+                            warnaBackground = Color(0xFFE8ECE7), // Hijau sage sangat muda (pastel)
+                            warnaTombol = Color(0xFF869E83),     // Hijau sage utama
+                            onClick = { /* Navigasi ke kuis */ }
+                        )
 
-                        // Spacer di paling bawah tetap butuh agar konten terakhir
-                        // tidak tertutup oleh navigasi melayang saat di-scroll mentok
+                        // 2. Misi Simulasi
+                        CardAksi(
+                            judul = "Eksperimen Virtual \uD83D\uDD2C",
+                            deskripsi = "Simulasikan bagaimana hukum gravitasi bekerja di berbagai planet.",
+                            teksTombol = "Mainkan",
+                            ikon = Icons.Default.Science,
+                            warnaBackground = Color(0xFFE8ECE7), // Hijau sage sangat muda (pastel)
+                            warnaTombol = Color(0xFF869E83),     // Hijau sage utama
+                            onClick = { /* Navigasi ke simulasi */ }
+                        )
+
+                        // 3. Misi Artikel
+                        CardAksi(
+                            judul = "Fakta Menarik \uD83D\uDCA1",
+                            deskripsi = "Kenapa langit berwarna biru? Temukan jawabannya dalam bacaan 2 menit ini.",
+                            teksTombol = "Baca Artikel",
+                            ikon = Icons.Default.Person,
+                            warnaBackground = Color(0xFFE8ECE7), // Hijau sage sangat muda (pastel)
+                            warnaTombol = Color(0xFF869E83),     // Hijau sage utama
+                            onClick = { /* Navigasi ke artikel */ }
+                        )
+
+                        // Spacer raksasa ini krusial agar card terbawah
+                        // tidak tertutup oleh navigasi navbar melayang saat di-scroll mentok
                         Spacer(modifier = Modifier.height(120.dp))
                     }
                 }
