@@ -27,7 +27,9 @@ fun AppNavigation() {
 
         // Daftarkan Login Screen
         composable(Routes.LOGIN) {
-            LoginScreen()
+            LoginScreen(
+            onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }
