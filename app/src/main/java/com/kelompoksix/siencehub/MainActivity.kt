@@ -20,7 +20,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SienceHubTheme {
-                BerandaScreen()
+                BerandaScreen(
+                    onNavigateToMateri = TODO()
+                )
             }
         }
     }
