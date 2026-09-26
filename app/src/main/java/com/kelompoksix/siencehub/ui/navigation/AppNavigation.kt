@@ -7,22 +7,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,8 +46,50 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Beranda.route
 
-    Scaffold(
-        bottomBar = {
+    // Scaffold tidak lagi menggunakan bottomBar
+    Scaffold { innerPadding ->
+
+        // Gunakan Box agar konten bisa ditumpuk (Z-Index)
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+
+            // ==========================================
+            // LAYER BELAKANG: Konten Navigasi (NavHost)
+            // ==========================================
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Beranda.route,
+                // Gunakan padding atas saja agar status bar tidak tertutup,
+                // tapi biarkan konten tembus ke paling bawah layar.
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = innerPadding.calculateTopPadding())
+            ) {
+                composable(Screen.Beranda.route) {
+                    BerandaScreen(
+                        onNavigateToMateri = {
+                            navController.navigate(Screen.Materi.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+                composable(Screen.Materi.route) {
+                    MateriScreen()
+                }
+                composable(Screen.Profil.route) {
+                    ProfilScreen()
+                }
+            }
+
+            // ==========================================
+            // LAYER DEPAN: Navbar Melayang (Floating)
+            // ==========================================
             FigmaBottomBar(
                 currentRoute = currentRoute,
                 onNavigate = { screen ->
@@ -64,34 +102,10 @@ fun AppNavigation(
                             restoreState = true
                         }
                     }
-                }
+                },
+                // Paksa posisi navbar ke bawah tengah
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
-        }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Beranda.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(Screen.Beranda.route) {
-                BerandaScreen(
-                    onNavigateToMateri = {
-                        navController.navigate(Screen.Materi.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-            composable(Screen.Materi.route) {
-                MateriScreen()
-            }
-            composable(Screen.Profil.route) {
-                ProfilScreen()
-            }
         }
     }
 }
@@ -99,12 +113,15 @@ fun AppNavigation(
 @Composable
 fun FigmaBottomBar(
     currentRoute: String,
-    onNavigate: (Screen) -> Unit
+    onNavigate: (Screen) -> Unit,
+    modifier: Modifier = Modifier // Tambahkan modifier agar posisinya bisa diatur dari luar
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
+            .navigationBarsPadding() // Menghindari tombol/gesture bawaan Android
+            .padding(bottom = 10.dp, start = 15.dp, end = 15.dp) // Jarak melayang dari tepi layar
+            .clip(RoundedCornerShape(32.dp)), // Ubah ini jadi 32.dp (tanpa topStart/topEnd) agar bulat sempurna seperti kapsul
         color = Color.White,
         shadowElevation = 12.dp
     ) {
@@ -134,7 +151,7 @@ fun FigmaBottomBar(
                                     imageVector = screen.icon,
                                     contentDescription = screen.title,
                                     tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(40.dp)
                                 )
                             }
                         }
@@ -175,9 +192,15 @@ fun FigmaBottomBar(
 }
 
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+
 @Composable
+
 fun AppNavigationPreview() {
+
     com.kelompoksix.siencehub.ui.theme.SienceHubTheme {
+
         AppNavigation()
+
     }
+
 }

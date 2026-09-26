@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
 
 // Struktur data untuk menyimpan informasi tiap menu
 data class NavItem(
@@ -30,51 +33,70 @@ data class NavItem(
 @Composable
 fun FloatingBottomNav(
     selectedIndex: Int,
-    onItemSelected: (Int) -> Unit
+    onItemSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val items = listOf(
-        NavItem("Home", Icons.Filled.Home, Icons.Outlined.Home),
-        NavItem("Materi", Icons.Filled.MenuBook, Icons.Outlined.MenuBook),
-        NavItem("Profil", Icons.Filled.Person, Icons.Outlined.Person)
+        "Beranda",
+        "Materi",
+        "Profil"
     )
 
-    // Surface bertindak sebagai pembungkus kapsul putih
     Surface(
-        shape = CircleShape,
+        modifier = modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
         color = Color.White,
-        shadowElevation = 8.dp, // Efek bayangan agar terlihat melayang
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp, vertical = 24.dp) // Jarak dari tepi layar (kiri-kanan & bawah)
+        shadowElevation = 8.dp,
+        tonalElevation = 4.dp
     ) {
         Row(
             modifier = Modifier
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .fillMaxWidth()
+                .height(64.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items.forEachIndexed { index, item ->
-                val isSelected = selectedIndex == index
-                val warnaAktif = Color(0xFF869E83) // Hijau sage
-                val warnaNonAktif = Color.LightGray
 
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape) // Efek ripple (gelombang saat diklik) berbentuk bulat
-                        .clickable { onItemSelected(index) }
-                        .padding(horizontal = 24.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        // Mengubah ikon menjadi tebal (filled) jika sedang aktif
-                        imageVector = if (isSelected) item.iconSelected else item.iconUnselected,
-                        contentDescription = item.title,
-                        tint = if (isSelected) warnaAktif else warnaNonAktif,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+            items.forEachIndexed { index, label ->
+
+                NavigationItem(
+                    label = label,
+                    selected = selectedIndex == index,
+                    onClick = {
+                        onItemSelected(index)
+                    }
+                )
             }
         }
+    }
+}
+
+@Composable
+fun NavigationItem(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val warnaHijau = Color(0xFF869E83)
+
+    Column(
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(
+            text = label,
+            color = if (selected) warnaHijau else Color.Gray,
+            fontWeight = if (selected) {
+                FontWeight.Bold
+            } else {
+
+                FontWeight.Normal
+            }
+        )
     }
 }
 
@@ -82,7 +104,7 @@ fun FloatingBottomNav(
 @Composable
 fun FloatingBottomNavPreview() {
     // Ingat, state ini hanya untuk preview interaktif di Android Studio
-    var indexAktif by remember { mutableStateOf(0) }
+    var indexAktif by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = Modifier
@@ -92,7 +114,7 @@ fun FloatingBottomNavPreview() {
     ) {
         FloatingBottomNav(
             selectedIndex = indexAktif,
-            onItemSelected = { indexAktif = it }
+            onItemSelected = { indexAktif = it },
         )
     }
 }
