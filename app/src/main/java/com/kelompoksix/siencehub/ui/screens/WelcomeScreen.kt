@@ -25,7 +25,7 @@ import com.kelompoksix.siencehub.ui.components.WavyShape
 import com.kelompoksix.siencehub.R
 
 @Composable
-fun WelcomeScreen() {
+fun WelcomeScreen(onContinueClick: () -> Unit = {}) {
     // Box utama untuk menumpuk background dan konten
     Box(
         modifier = Modifier
@@ -78,13 +78,13 @@ fun WelcomeScreen() {
             ) {
 
                 IconButton(
-                    onClick = { /* Tambahkan aksi navigasi di sini */ },
+                    onClick = onContinueClick,
                     modifier = Modifier
                         .size(48.dp)
                         .background(color = Color(0xFF7A8B76), shape = CircleShape) // Warna hijau tombol
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_forward), // Ganti dengan ID ikon Anda
+                        painter = painterResource(id = R.drawable.ic_arrow_forward),
                         contentDescription = "Continue",
                         tint = Color.White
                     )

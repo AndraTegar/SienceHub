@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
-import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
+import com.kelompoksix.siencehub.ui.navigation.AppNavigation
 
 
 class MainActivity : ComponentActivity() {
@@ -21,24 +21,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SienceHubTheme {
-                WelcomeScreen()
+                AppNavigation()
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SienceHubTheme {
-        Greeting("Android")
     }
 }
