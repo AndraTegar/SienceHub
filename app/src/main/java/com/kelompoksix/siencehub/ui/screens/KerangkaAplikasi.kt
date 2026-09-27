@@ -13,6 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.kelompoksix.siencehub.data.models.TopikMateri
+import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.ui.components.FloatingBottomNav
 
 @Composable
@@ -26,9 +28,13 @@ fun KerangkaAplikasi(
     var tampilkanAchievement by remember { mutableStateOf(false) }
     var tampilkanLeaderboard by remember { mutableStateOf(false) }
 
-    // Tombol Back Android Handler (Menutup overlay dulu atau kembali ke beranda)
-    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard) {
+    // Status untuk menyimpan topik materi yang sedang dibuka
+    var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
+
+    // Tombol Back Android Handler (Menutup overlay atau detail materi terlebih dahulu)
+    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null) {
         when {
+            topikAktif != null -> topikAktif = null
             tampilkanPengaturan -> tampilkanPengaturan = false
             tampilkanAchievement -> tampilkanAchievement = false
             tampilkanLeaderboard -> tampilkanLeaderboard = false
@@ -36,8 +42,17 @@ fun KerangkaAplikasi(
         }
     }
 
-    // Menampilkan layar penuh (overlay) jika salah satu menu khusus dipilih
-    if (tampilkanPengaturan) {
+    // Menampilkan layar penuh (overlay / detail) jika salah satu menu dipilih
+    if (topikAktif != null) {
+        DetailMateriScreen(
+            topikMateri = topikAktif!!,
+            onBackClick = { topikAktif = null },
+            onBabClick = { idBab ->
+                // Logika ketika salah satu bab diklik (bisa diarahkan ke halaman baca materi/kuis)
+                println("Bab ke-$idBab diklik")
+            }
+        )
+    } else if (tampilkanPengaturan) {
         SettingScreen(
             onBackClick = { tampilkanPengaturan = false },
             onLogoutClick = { onLogout() }
@@ -57,10 +72,28 @@ fun KerangkaAplikasi(
             // LAYER 1: KONTEN HALAMAN BERDASARKAN TAB AKTIF
             when (indexAktif) {
                 0 -> BerandaScreen(
-                    onNavigateToMateri = { indexAktif = 1 }
+                    onNavigateToMateri = {
+                        // Contoh: Ketika tombol di beranda diklik, langsung buka topik Biologi
+                        topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
+                    }
                 )
 
-                1 -> MateriScreen()
+                1 -> MateriScreen(
+                    onMateriClick = { judulKategori ->
+                        // Mencocokkan kartu materi yang diklik dengan data di repository
+                        val topikDitemukan = MateriRepository.getDaftarTopik().find {
+                            it.judul.contains(judulKategori, ignoreCase = true) ||
+                                    it.kategori.contains(judulKategori, ignoreCase = true)
+                        }
+
+                        if (topikDitemukan != null) {
+                            topikAktif = topikDitemukan
+                        } else {
+                            // Fallback jika belum ada datanya, buka topik pertama
+                            topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
+                        }
+                    }
+                )
 
                 2 -> ProfilScreen(
                     onNavigateToSettings = { tampilkanPengaturan = true },
