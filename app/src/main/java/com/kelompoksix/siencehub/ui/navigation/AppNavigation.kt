@@ -8,7 +8,7 @@ import com.kelompoksix.siencehub.ui.screens.LoginScreen
 import com.kelompoksix.siencehub.ui.screens.SignupScreen
 import com.kelompoksix.siencehub.ui.screens.SplashScreen
 import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
-import com.kelompoksix.siencehub.ui.screens.KerangkaAplikasi // <--- Pastikan ini di-import
+import com.kelompoksix.siencehub.ui.screens.KerangkaAplikasi
 
 @Composable
 fun AppNavigation() {
@@ -36,7 +36,7 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 onLoginSuccess = {
-                    // MENGARAHKAN KE BERANDA SETELAH LOGIN SUKSES
+                    // Mengarahkan ke Kerangka Aplikasi (Home) setelah login sukses
                     navController.navigate(Routes.HOME) {
                         // Menghapus riwayat login agar saat di-back dari beranda tidak kembali ke form login
                         popUpTo(Routes.LOGIN) { inclusive = true }
@@ -51,7 +51,7 @@ fun AppNavigation() {
         composable(Routes.SIGNUP) {
             SignupScreen(
                 onCreateAccountSuccess = {
-                    // Bisa langsung diarahkan ke Home atau Login setelah akun jadi
+                    // Langsung diarahkan ke Login setelah akun jadi
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.SIGNUP) { inclusive = true }
                     }
@@ -62,9 +62,22 @@ fun AppNavigation() {
             )
         }
 
-        // MENAMBAHKAN HALAMAN BERANDA KE DALAM NAVIGASI
+        // ==========================================
+        // RUTE UTAMA: KERANGKA APLIKASI & LOGOUT
+        // ==========================================
         composable(Routes.HOME) {
-            KerangkaAplikasi()
+            KerangkaAplikasi(
+                onLogout = {
+                    // Kembali ke halaman Login saat tombol Log Out ditekan
+                    navController.navigate(Routes.LOGIN) {
+                        // popUpTo(0) akan membersihkan seluruh riwayat halaman.
+                        // Ini memastikan pengguna tidak bisa menekan tombol 'Back' di HP
+                        // untuk kembali masuk secara diam-diam tanpa login ulang.
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
+
     }
 }
