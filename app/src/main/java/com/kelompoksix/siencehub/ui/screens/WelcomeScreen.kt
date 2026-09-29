@@ -57,8 +57,7 @@ fun WelcomeScreen(
             "Jelajahi keajaiban sains dan raih pengetahuan baru setiap hari.",
             "Sains adalah kunci utama untuk membuka rahasia alam semesta.",
             "Temukan berbagai wawasan, fakta, dan eksperimen menarik di sini.",
-            "Mulailah petualangan ilmiahmu bersama komunitas ScienceHub.",
-            "PRABOWO LOVE TEDDY."
+            "Mulailah petualangan ilmiahmu bersama komunitas ScienceHub."
         )
     }
     // Mengambil satu kalimat secara acak

@@ -20,29 +20,33 @@ fun CardUtama(
     progress: Float, // Nilai dari 0.0f (0%) sampai 1.0f (100%)
     onClick: () -> Unit
 ) {
-    // Warna krem/beige menyerupai desain Figma
     val warnaBeige = Color(0xFFE2D4C0)
 
     Card(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = warnaBeige),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp), // Memberikan bayangan
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(170.dp) // Tinggi fix agar konsisten
+            .height(170.dp)
             .clickable { onClick() }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp),
-            verticalArrangement = Arrangement.SpaceBetween // Mendorong elemen ke atas dan ke bawah
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // ==========================================
-            // BAGIAN ATAS: Label dan Judul Materi
-            // ==========================================
+            // BAGIAN ATAS: Label kecil dan Judul Materi
             Column {
-
+                // Label kecil penanda bagian
+                Text(
+                    text = "LANJUTKAN BELAJAR",
+                    color = Color.DarkGray.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 1.sp
+                )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -54,27 +58,23 @@ fun CardUtama(
                 )
             }
 
-            // ==========================================
             // BAGIAN BAWAH: Progress Bar
-            // ==========================================
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // LinearProgressIndicator ibarat tag <progress> di HTML
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
-                        .weight(1f) // Memenuhi sisa ruang di kiri
+                        .weight(1f)
                         .height(8.dp),
-                    color = Color(0xFF869E83), // Indikator isi menggunakan warna hijau sage
-                    trackColor = Color.White,  // Background bar
-                    strokeCap = StrokeCap.Round // Membuat ujung bar melengkung
+                    color = Color(0xFF869E83),
+                    trackColor = Color.White,
+                    strokeCap = StrokeCap.Round
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Menampilkan persentase dalam bentuk angka
                 Text(
                     text = "${(progress * 100).toInt()}%",
                     color = Color.DarkGray,
@@ -90,7 +90,6 @@ fun CardUtama(
 @Composable
 fun CardUtamaPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
-        // Contoh: Pengguna sudah menyelesaikan 75% materi Hukum Newton
         CardUtama(
             judulMateri = "Fisika: Hukum Newton",
             progress = 0.75f,
