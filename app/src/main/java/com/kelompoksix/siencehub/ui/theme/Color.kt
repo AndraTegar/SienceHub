@@ -31,10 +31,10 @@ val CardGray = Color(0xFFD9D9D9)
 // ==========================================
 // PALET WARNA UNTUK DARK MODE
 // ==========================================
-val DarkBackground = Color(0xFF121212)      // Latar belakang utama saat gelap
-val DarkSurface = Color(0xFF1E1E1E)         // Latar kartu/surface saat gelap
+val DarkBackground = Color(0xFF183034)      // Latar belakang utama saat gelap
+val DarkSurface = Color(0xFF12434D)         // Latar kartu/surface saat gelap
 val DarkSurfaceVariant = Color(0xFF455642)  // Variasi permukaan kartu
-val DarkHeaderSage = Color(0xFF6FD368)      // Sage gelap elegan untuk header saat mode gelap
-val DarkCardBg = Color(0xFF608660)          // Latar kartu dalam mode gelap
-val DarkTextPrimary = Color(0xFFE1E2E1)     // Teks utama terang
+val DarkHeaderSage = Color(0xFF628141)      // Sage gelap elegan untuk header saat mode gelap
+val DarkCardBg = Color(0xFF8BAE66)          // Latar kartu dalam mode gelap
+val DarkTextPrimary = Color(0xFFEBD5AB)     // Teks utama terang
 val DarkTextSecondary = Color(0xFFA0A5A0)   // Teks sekunder
