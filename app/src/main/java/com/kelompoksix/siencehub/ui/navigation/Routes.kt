@@ -1,6 +1,9 @@
 package com.kelompoksix.siencehub.ui.navigation
 
 object Routes {
-    const val WELCOME = "welcome_screen"
-    const val LOGIN = "login_screen"
+    const val SPLASH = "splash"
+    const val WELCOME = "welcome"
+    const val LOGIN = "login"
+    const val SIGNUP = "signup"
+    const val HOME = "home" // <--- Tambahkan rute ini untuk KerangkaAplikasi
 }
