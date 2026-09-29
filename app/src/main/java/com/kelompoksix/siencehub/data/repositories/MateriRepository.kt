@@ -6,6 +6,9 @@ import com.kelompoksix.siencehub.data.models.TopikMateri
 object MateriRepository {
     fun getDaftarTopik(): List<TopikMateri> {
         return listOf(
+            // ==========================================
+            // MATA PELAJARAN LAMA
+            // ==========================================
             TopikMateri(
                 id = "biologi_sel",
                 judul = "Biologi: Struktur Sel",
@@ -40,6 +43,46 @@ object MateriRepository {
                     BabMateri(3, "Indikator Alami dan Buatan", "12 menit", true),
                     BabMateri(4, "Perhitungan Skala pH dan pOH", "25 menit", false),
                     BabMateri(5, "Kuis Reaksi Netralisasi", "15 menit", false)
+                )
+            ),
+
+            // ==========================================
+            // MATA PELAJARAN BARU
+            // ==========================================
+            TopikMateri(
+                id = "astronomi_tata_surya",
+                judul = "Astronomi: Tata Surya",
+                kategori = "Astronomi",
+                daftarBab = listOf(
+                    BabMateri(1, "Pengantar Ilmu Astronomi", "10 menit", false),
+                    BabMateri(2, "Karakteristik Planet di Tata Surya", "20 menit", false),
+                    BabMateri(3, "Bintang, Galaksi, dan Nebula", "15 menit", false),
+                    BabMateri(4, "Fenomena Gerhana dan Fase Bulan", "12 menit", false),
+                    BabMateri(5, "Kuis Astronomi Dasar", "15 menit", false)
+                )
+            ),
+            TopikMateri(
+                id = "matematika_aljabar",
+                judul = "Matematika: Aljabar Dasar",
+                kategori = "Matematika",
+                daftarBab = listOf(
+                    BabMateri(1, "Pengenalan Variabel dan Konstanta", "10 menit", false),
+                    BabMateri(2, "Operasi Hitung Bentuk Aljabar", "15 menit", false),
+                    BabMateri(3, "Persamaan Linear Satu Variabel", "20 menit", false),
+                    BabMateri(4, "Penerapan Aljabar dalam Kehidupan", "15 menit", false),
+                    BabMateri(5, "Kuis Aljabar Dasar", "20 menit", false)
+                )
+            ),
+            TopikMateri(
+                id = "geografi_bumi",
+                judul = "Geografi: Dinamika Bumi",
+                kategori = "Geografi",
+                daftarBab = listOf(
+                    BabMateri(1, "Struktur Lapisan Bumi", "12 menit", false),
+                    BabMateri(2, "Tenaga Endogen (Tektonisme & Vulkanisme)", "18 menit", false),
+                    BabMateri(3, "Tenaga Eksogen (Pelapukan & Erosi)", "15 menit", false),
+                    BabMateri(4, "Atmosfer dan Iklim Global", "15 menit", false),
+                    BabMateri(5, "Kuis Dinamika Litosfer", "15 menit", false)
                 )
             )
         )
