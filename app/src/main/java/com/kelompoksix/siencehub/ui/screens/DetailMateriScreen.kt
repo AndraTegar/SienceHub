@@ -34,8 +34,15 @@ fun DetailMateriScreen(
     val textBlueColor = Color(0xFF1E3A8A) // Warna teks "BAB X" biru tua
 
     // Mengecek apakah topik yang dibuka adalah Fisika
-    val isFisika = topikMateri.judul.contains("Fisika", ignoreCase = true) ||
-            topikMateri.kategori.contains("Fisika", ignoreCase = true)
+    val backgroundRes: Int? = when (topikMateri.kategori.lowercase()) {
+        "fisika" -> R.drawable.fisika_bg
+        "kimia" -> R.drawable.kimia_bg
+        "biologi" -> R.drawable.biologi_bg
+        "astronomi" -> R.drawable.astronomi_bg
+        "matematika" -> R.drawable.matematika_bg
+        "geografi" -> R.drawable.geografi_bg
+        else -> null
+    }
 
     Box(
         modifier = Modifier
@@ -43,15 +50,15 @@ fun DetailMateriScreen(
             .background(darkChalkBg)
     ) {
         // Jika topik Fisika, tampilkan gambar latar belakang dari drawable yang Anda tambahkan
-        if (isFisika) {
+        backgroundRes?.let { res ->
             Image(
-                painter = painterResource(id = R.drawable.fisika_bg),
-                contentDescription = "Background Fisika",
+                painter = painterResource(id = res),
+                contentDescription = "Background ${topikMateri.kategori}",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp),
                 contentScale = ContentScale.Crop,
-                alpha = 0.45f // Transparansi agar menyatu elegan dengan tema gelap
+                alpha = 0.45f
             )
         }
 

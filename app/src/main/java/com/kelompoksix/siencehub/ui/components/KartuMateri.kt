@@ -7,9 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.R
 import com.kelompoksix.siencehub.data.models.Materi
+import com.kelompoksix.siencehub.data.repositories.MateriRepository
+import com.kelompoksix.siencehub.ui.screens.BabScreen
+import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
 
 @Composable
 fun KartuMateri(materi: Materi) {
@@ -17,7 +22,7 @@ fun KartuMateri(materi: Materi) {
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFE8ECE7)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth() ,
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -47,5 +52,17 @@ fun KartuMateri(materi: Materi) {
                 color = Color.DarkGray
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun KartuMateriPreview() {
+    SienceHubTheme {
+        BabScreen(
+            topikMateri = MateriRepository.getDaftarTopik()[1],
+            babId = 1,
+            onBackClick = {}
+        )
     }
 }

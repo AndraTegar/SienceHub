@@ -41,6 +41,42 @@ object MateriRepository {
                     BabMateri(4, "Perhitungan Skala pH dan pOH", "25 menit", false),
                     BabMateri(5, "Kuis Reaksi Netralisasi", "15 menit", false)
                 )
+            ),
+            TopikMateri(
+                id = "astronomi_tata_surya",
+                judul = "Astronomi: Tata Surya",
+                kategori = "Astronomi",
+                daftarBab = listOf(
+                    BabMateri(1, "Pengenalan Tata Surya & Matahari", "12 menit", true),
+                    BabMateri(2, "Planet Dalam dan Planet Luar", "18 menit", false),
+                    BabMateri(3, "Bulan, Asteroid, dan Komet", "15 menit", false),
+                    BabMateri(4, "Gerak Planet (Hukum Kepler)", "20 menit", false),
+                    BabMateri(5, "Kuis Evaluasi Tata Surya", "15 menit", false)
+                )
+            ),
+            TopikMateri(
+                id = "matematika_aljabar",
+                judul = "Matematika: Persamaan Linear",
+                kategori = "Matematika",
+                daftarBab = listOf(
+                    BabMateri(1, "Konsep Variabel dan Persamaan Linear", "10 menit", true),
+                    BabMateri(2, "Persamaan Linear Satu Variabel", "15 menit", false),
+                    BabMateri(3, "Sistem Persamaan Linear Dua Variabel", "20 menit", false),
+                    BabMateri(4, "Penerapan dalam Soal Cerita", "18 menit", false),
+                    BabMateri(5, "Kuis Evaluasi Persamaan Linear", "20 menit", false)
+                )
+            ),
+            TopikMateri(
+                id = "geografi_litosfer",
+                judul = "Geografi: Dinamika Litosfer",
+                kategori = "Geografi",
+                daftarBab = listOf(
+                    BabMateri(1, "Struktur Lapisan Bumi", "12 menit", true),
+                    BabMateri(2, "Tektonik Lempeng dan Pergerakannya", "18 menit", false),
+                    BabMateri(3, "Vulkanisme dan Gempa Bumi", "15 menit", false),
+                    BabMateri(4, "Mitigasi Bencana Alam di Indonesia", "15 menit", false),
+                    BabMateri(5, "Kuis Evaluasi Litosfer", "15 menit", false)
+                )
             )
         )
     }
