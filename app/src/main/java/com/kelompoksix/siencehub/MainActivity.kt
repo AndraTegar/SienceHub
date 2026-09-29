@@ -1,17 +1,17 @@
-package com.kelompoksix.siencehub // Sesuaikan dengan nama package lo
+package com.kelompoksix.siencehub
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import com.kelompoksix.siencehub.ui.screens.MateriScreen
+import com.kelompoksix.siencehub.ui.navigation.AppNavigation
+import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                MateriScreen()
+            SienceHubTheme {
+                AppNavigation()
             }
         }
     }

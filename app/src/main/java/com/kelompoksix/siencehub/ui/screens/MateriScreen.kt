@@ -2,107 +2,64 @@ package com.kelompoksix.siencehub.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kelompoksix.siencehub.ui.components.CustomBottomNavigation
+import com.kelompoksix.siencehub.data.repositories.KategoriDataProvider
+import com.kelompoksix.siencehub.ui.components.KartuKategori
 
 @Composable
-fun MateriScreen() {
-    Scaffold(
-        // Set parameter activeMenu ke "Lesson"
-        bottomBar = { CustomBottomNavigation(activeMenu = "Lesson") },
-        containerColor = Color(0xFF7A8D7B)
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(modifier = Modifier.height(32.dp))
+fun MateriScreen(
+    onMateriClick: (String) -> Unit = {}
+) {
+    val warnaHijauSage = Color(0xFF7A8B76)
+    val daftarKategori = KategoriDataProvider.getDaftarKategori()
 
-            // Teks Header
-            Text(
-                text = "Halo, Djokowi",
-                color = Color.White,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Mau belajar apa hari ini?",
-                color = Color.White.copy(alpha = 0.9f),
-                fontSize = 16.sp
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Grid Konten 2 Kolom
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Kolom Kiri
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SubjectCard("FISIKA", Color(0xFF38383D), 200.dp)
-                    SubjectCard("BIOLOGI", Color(0xFFD4E674), 220.dp)
-                    SubjectCard("", Color(0xFFFFC996), 180.dp) // Card bawah kiri
-                }
-
-                // Kolom Kanan
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SubjectCard("KIMIA", Color(0xFF8CD4CA), 160.dp)
-                    SubjectCard("ASTRONOMI", Color(0xFFF9C84F), 220.dp)
-                    SubjectCard("", Color(0xFF00C3A9), 180.dp) // Card bawah kanan
-                }
-            }
-        }
-    }
-}
-
-// Komponen Card Satuan yang bisa dipanggil berulang
-@Composable
-fun SubjectCard(title: String, bgColor: Color, height: Dp) {
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(height)
-            .clip(RoundedCornerShape(16.dp))
-            .background(bgColor)
-            .padding(16.dp)
+            .fillMaxSize()
+            .background(warnaHijauSage)
+            .padding(horizontal = 20.dp)
     ) {
-        // Area tengah ini nanti bisa kamu isi dengan komponen Image()
-        // untuk memasukkan ikon aset PNG/SVG dari Figma.
+        Spacer(modifier = Modifier.height(24.dp))
 
-        if (title.isNotEmpty()) {
-            Text(
-                text = title,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.BottomStart)
-            )
+        // Sapaan Header
+        Text(
+            text = "Halo, Ridho",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Mau belajar apa hari ini?",
+            fontSize = 16.sp,
+            color = Color.White.copy(alpha = 0.85f)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Grid Asimetris (Panjang dan Pendek ala Figma)
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            contentPadding = PaddingValues(bottom = 120.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalItemSpacing = 16.dp,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(daftarKategori) { kategori ->
+                KartuKategori(
+                    item = kategori,
+                    onClick = { onMateriClick(kategori.judul) }
+                )
+            }
         }
     }
 }
