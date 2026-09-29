@@ -30,11 +30,10 @@ fun KerangkaAplikasi(
 
     // Status untuk menyimpan topik materi yang sedang dibuka
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
-    var babAktif by remember { mutableStateOf<Int?>(null) }
+
     // Tombol Back Android Handler (Menutup overlay atau detail materi terlebih dahulu)
     BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null) {
         when {
-            babAktif != null -> babAktif = null
             topikAktif != null -> topikAktif = null
             tampilkanPengaturan -> tampilkanPengaturan = false
             tampilkanAchievement -> tampilkanAchievement = false
@@ -42,18 +41,16 @@ fun KerangkaAplikasi(
             else -> indexAktif = 0
         }
     }
+
     // Menampilkan layar penuh (overlay / detail) jika salah satu menu dipilih
-    if (topikAktif != null && babAktif != null) {
-        BabScreen(
-            topikMateri = topikAktif!!,
-            babId = babAktif!!,
-            onBackClick = { topikAktif = null; babAktif = null },
-        )
-    } else if (topikAktif != null) {
+    if (topikAktif != null) {
         DetailMateriScreen(
             topikMateri = topikAktif!!,
             onBackClick = { topikAktif = null },
-            onBabClick = { idBab -> babAktif = idBab }
+            onBabClick = { idBab ->
+                // Logika ketika salah satu bab diklik (bisa diarahkan ke halaman baca materi/kuis)
+                println("Bab ke-$idBab diklik")
+            }
         )
     } else if (tampilkanPengaturan) {
         SettingScreen(
