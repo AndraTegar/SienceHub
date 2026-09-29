@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -105,6 +106,7 @@ fun SignupScreen(
                 placeholder = { Text("Email address", color = Color.Gray, fontSize = 14.sp) },
                 leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
                 shape = RoundedCornerShape(12.dp),
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = fieldBgColor,
                     unfocusedContainerColor = fieldBgColor,
@@ -124,6 +126,7 @@ fun SignupScreen(
                 placeholder = { Text("Phone number", color = Color.Gray, fontSize = 14.sp) },
                 leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
                 shape = RoundedCornerShape(12.dp),
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = fieldBgColor,
                     unfocusedContainerColor = fieldBgColor,
@@ -150,6 +153,7 @@ fun SignupScreen(
                 },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 shape = RoundedCornerShape(12.dp),
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = fieldBgColor,
                     unfocusedContainerColor = fieldBgColor,
@@ -176,6 +180,7 @@ fun SignupScreen(
                 },
                 visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 shape = RoundedCornerShape(12.dp),
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = fieldBgColor,
                     unfocusedContainerColor = fieldBgColor,

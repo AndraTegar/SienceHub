@@ -42,7 +42,7 @@ fun FloatingBottomNav(
     // Desain Wadah Navbar Melayang yang lebih kompak tanpa teks
     Row(
         modifier = modifier
-            .width(220.dp) // Lebar disesuaikan agar pas dan elegan tanpa teks
+            .width(250.dp) // Lebar disesuaikan agar pas dan elegan tanpa teks
             .height(64.dp)
             .shadow(elevation = 12.dp, shape = CircleShape) // Efek melayang
             .background(Color.White, shape = CircleShape)
