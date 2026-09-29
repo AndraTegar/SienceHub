@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -26,18 +27,28 @@ import com.kelompoksix.siencehub.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun LoginScreen(
+    onBackClick: () -> Unit = {},
+    onLoginSuccess: () -> Unit = {},
+    onNavigateToSignup: () -> Unit = {}
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
     val primaryGreen = Color(0xFF7A8B76)
+
+    // Logika ala TikTok: Tombol login hanya aktif menyala jika kedua kolom sudah diisi
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
+
     val focusManager = LocalFocusManager.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .systemBarsPadding() // Menjaga UI dari status bar (atas) dan nav bar (bawah)
+            .imePadding() // PENTING: Mendorong seluruh Column ke atas saat keyboard muncul
     ) {
         // 1. Top Bar (Tombol Back)
         Row(
@@ -47,15 +58,20 @@ import com.kelompoksix.siencehub.R
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {
+                // Pastikan Anda sudah menambahkan ic_arrow_back di drawable
                 Icon(
+                    painter = painterResource(id = R.drawable.ic_arrow_back),
                     contentDescription = "Back",
                     tint = Color.Black
                 )
             }
         }
 
+        // 2. Konten Utama (Berada di tengah dan bisa di-scroll)
         Column(
             modifier = Modifier
+                .weight(1f) // Mendorong Footer agar selalu berada di paling bawah
+                .verticalScroll(rememberScrollState()) // Form bisa discroll saat ruang menyempit
                 .padding(horizontal = 32.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -65,6 +81,8 @@ import com.kelompoksix.siencehub.R
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF778873),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -81,10 +99,14 @@ import com.kelompoksix.siencehub.R
                 onValueChange = { email = it },
                 placeholder = { Text("Email", color = Color.LightGray) },
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = true, // Mencegah enter membuat baris baru ke bawah
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next // Mengubah tombol enter menjadi tombol "Next"
                 ),
                 colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,   // TAMBAHKAN INI: Warna teks saat kolom diklik
+                    unfocusedTextColor = Color.Black,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color(0xFF778873),
@@ -99,21 +121,29 @@ import com.kelompoksix.siencehub.R
                 onValueChange = { password = it },
                 placeholder = { Text("Password", color = Color.LightGray) },
                 trailingIcon = {
+                    val icon = if (passwordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(painter = painterResource(id = icon), contentDescription = null, tint = Color.Gray)
                     }
                 },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = true, // Mencegah enter membuat baris baru
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done // Mengubah tombol enter menjadi "Done/Centang"
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
+                        focusManager.clearFocus() // Menutup keyboard saat Done ditekan
                         if (isFormValid) {
+                            onLoginSuccess()
                         }
                     }
                 ),
                 colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,   // TAMBAHKAN INI: Warna teks saat kolom diklik
+                    unfocusedTextColor = Color.Black,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color(0xFF778873),
@@ -128,11 +158,13 @@ import com.kelompoksix.siencehub.R
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Gray,
+                modifier = Modifier.clickable { /* Aksi lupa password */ }
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
+                onClick = onLoginSuccess,
                 enabled = isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,14 +180,16 @@ import com.kelompoksix.siencehub.R
                 Text("Log in", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
 
+            // Memberikan sedikit ruang di bawah tombol agar tidak mepet dengan Footer saat discroll
             Spacer(modifier = Modifier.height(24.dp))
         }
 
+        // 3. Footer (Menempel secara absolut di bawah)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFFF8F8F8))
-                .padding(vertical = 24.dp),
+                .padding(vertical = 18.dp),
             contentAlignment = Alignment.Center
         ) {
             Row {
@@ -165,6 +199,7 @@ import com.kelompoksix.siencehub.R
                     color = primaryGreen,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
+                    modifier = Modifier.clickable { onNavigateToSignup() }
                 )
             }
         }

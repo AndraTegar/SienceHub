@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.kelompoksix.siencehub.ui.navigation.AppNavigation
 import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
-import com.kelompoksix.siencehub.ui.navigation.AppNavigation
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
