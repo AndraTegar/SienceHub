@@ -8,13 +8,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -23,7 +27,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kelompoksix.siencehub.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,18 +40,15 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val primaryGreen = Color(0xFF7A8B76)
-
-    // Logika ala TikTok: Tombol login hanya aktif menyala jika kedua kolom sudah diisi
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
-
     val focusManager = LocalFocusManager.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .systemBarsPadding() // Menjaga UI dari status bar (atas) dan nav bar (bawah)
-            .imePadding() // PENTING: Mendorong seluruh Column ke atas saat keyboard muncul
+            .systemBarsPadding()
+            .imePadding()
     ) {
         // 1. Top Bar (Tombol Back)
         Row(
@@ -58,24 +58,24 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {
-                // Pastikan Anda sudah menambahkan ic_arrow_back di drawable
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_back),
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = "Back",
                     tint = Color.Black
                 )
             }
         }
 
-        // 2. Konten Utama (Berada di tengah dan bisa di-scroll)
+        // 2. Konten Utama
         Column(
             modifier = Modifier
-                .weight(1f) // Mendorong Footer agar selalu berada di paling bawah
-                .verticalScroll(rememberScrollState()) // Form bisa discroll saat ruang menyempit
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 32.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Tulisan Log in diposisikan di tengah secara penuh
             Text(
                 text = "Log in",
                 fontSize = 28.sp,
@@ -98,19 +98,18 @@ fun LoginScreen(
                 value = email,
                 onValueChange = { email = it },
                 placeholder = { Text("Email", color = Color.LightGray) },
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), // <--- Teks ketikan menjadi hitam
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true, // Mencegah enter membuat baris baru ke bawah
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next // Mengubah tombol enter menjadi tombol "Next"
+                    imeAction = ImeAction.Next
                 ),
                 colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,   // TAMBAHKAN INI: Warna teks saat kolom diklik
-                    unfocusedTextColor = Color.Black,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color(0xFF778873),
-                    unfocusedIndicatorColor = Color.LightGray,
+                    unfocusedIndicatorColor = Color.Black,
                 )
             )
 
@@ -120,30 +119,29 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { password = it },
                 placeholder = { Text("Password", color = Color.LightGray) },
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), // <--- Teks ketikan menjadi hitam
                 trailingIcon = {
-                    val icon = if (passwordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
+                    val icon = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(painter = painterResource(id = icon), contentDescription = null, tint = Color.Gray)
+                        Icon(imageVector = icon, contentDescription = null, tint = Color.Gray)
                     }
                 },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true, // Mencegah enter membuat baris baru
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done // Mengubah tombol enter menjadi "Done/Centang"
+                    imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        focusManager.clearFocus() // Menutup keyboard saat Done ditekan
+                        focusManager.clearFocus()
                         if (isFormValid) {
                             onLoginSuccess()
                         }
                     }
                 ),
                 colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,   // TAMBAHKAN INI: Warna teks saat kolom diklik
-                    unfocusedTextColor = Color.Black,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color(0xFF778873),
@@ -158,7 +156,7 @@ fun LoginScreen(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Gray,
-                modifier = Modifier.clickable { /* Aksi lupa password */ }
+                modifier = Modifier.clickable(onClick = { /* TODO */ })
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -180,16 +178,15 @@ fun LoginScreen(
                 Text("Log in", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
 
-            // Memberikan sedikit ruang di bawah tombol agar tidak mepet dengan Footer saat discroll
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // 3. Footer (Menempel secara absolut di bawah)
+        // 3. Footer
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFFF8F8F8))
-                .padding(vertical = 18.dp),
+                .padding(vertical = 24.dp),
             contentAlignment = Alignment.Center
         ) {
             Row {
@@ -199,7 +196,7 @@ fun LoginScreen(
                     color = primaryGreen,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    modifier = Modifier.clickable { onNavigateToSignup() }
+                    modifier = Modifier.clickable(onClick = onNavigateToSignup)
                 )
             }
         }
