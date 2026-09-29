@@ -48,8 +48,12 @@ fun KerangkaAplikasi(
             topikMateri = topikAktif!!,
             onBackClick = { topikAktif = null },
             onBabClick = { idBab ->
-                // Logika ketika salah satu bab diklik (bisa diarahkan ke halaman baca materi/kuis)
+                // Logika ketika salah satu bab diklik
                 println("Bab ke-$idBab diklik")
+            },
+            onKuisClick = {
+                // Logika ketika kuis utama (ujian) diklik
+                println("Kuis utama diklik untuk topik: ${topikAktif?.judul}")
             }
         )
     } else if (tampilkanPengaturan) {
