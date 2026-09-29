@@ -28,12 +28,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
+import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
+fun BerandaScreen(
+    onNavigateToMateri: () -> Unit = {},
+    onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> }
+) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
@@ -59,35 +64,10 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Kotak Search Bar yang lebih panjang & bersih
-                        Surface(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(45.dp)
-                                .clickable { /* Aksi klik search bar */ },
-                            shape = RoundedCornerShape(24.dp),
-                            color = Color.White.copy(alpha = 0.25f)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Cari",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(
-                                    text = "Cari materi, kuis, atau artikel...",
-                                    color = Color.White.copy(alpha = 0.8f),
-                                    fontSize = 14.sp
-                                )
-                            }
-                        }
+                        SearchBarMateri(
+                            modifier = Modifier.weight(1f),
+                            onHasilClick = onHasilCari
+                        )
 
                         // Tombol Ikon Lonceng Notifikasi
                         IconButton(
@@ -282,10 +262,4 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun BerandaScreenPreview() {
-    BerandaScreen()
 }

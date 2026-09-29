@@ -76,8 +76,11 @@ fun KerangkaAplikasi(
             when (indexAktif) {
                 0 -> BerandaScreen(
                     onNavigateToMateri = {
-                        // Contoh: Ketika tombol di beranda diklik, langsung buka topik Biologi
                         topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
+                    },
+                    onHasilCari = { topik, babId ->
+                        topikAktif = topik
+                        babAktif = babId   // null = buka daftar bab, angka = langsung ke isi bab
                     }
                 )
 
