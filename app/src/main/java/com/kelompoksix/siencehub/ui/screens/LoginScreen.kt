@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -26,7 +27,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kelompoksix.siencehub.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +82,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF778873),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth() // <--- Membuat teks memenuhi lebar layar agar pas di tengah
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -98,6 +98,7 @@ fun LoginScreen(
                 value = email,
                 onValueChange = { email = it },
                 placeholder = { Text("Email", color = Color.LightGray) },
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), // <--- Teks ketikan menjadi hitam
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -108,7 +109,7 @@ fun LoginScreen(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color(0xFF778873),
-                    unfocusedIndicatorColor = Color.LightGray,
+                    unfocusedIndicatorColor = Color.Black,
                 )
             )
 
@@ -118,6 +119,7 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { password = it },
                 placeholder = { Text("Password", color = Color.LightGray) },
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), // <--- Teks ketikan menjadi hitam
                 trailingIcon = {
                     val icon = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
