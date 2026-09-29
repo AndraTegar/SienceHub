@@ -1,4 +1,4 @@
-package com.kelompoksix.siencehub.ui.screens
+package com.kelompoksix.siencehub.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.repositories.KomponenMateri
@@ -30,20 +29,17 @@ fun BacaMateriScreen(
     onBackClick: () -> Unit,
     onMulaiKuisClick: (Int) -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
-    val cardColor = Color(0xFFE4E6E3)
+    val headerColor = MaterialTheme.colorScheme.primary
+    val cardColor = MaterialTheme.colorScheme.surfaceVariant
     val redLineColor = Color(0xFFFF7A7A)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(headerColor)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // ==========================================
-            // HEADER KAPSUL
-            // ==========================================
             Spacer(modifier = Modifier.height(48.dp))
             Box(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
@@ -68,19 +64,14 @@ fun BacaMateriScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ==========================================
-            // MESIN RENDER KONTEN OTOMATIS
-            // ==========================================
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                // Looping semua blok materi yang ada di Repository
                 items(konten.daftarKomponen) { blokMateri ->
                     when (blokMateri) {
 
-                        // 1. Jika data berupa Pertanyaan Pemantik
                         is KomponenMateri.PertanyaanPemantik -> {
                             Card(
                                 shape = RoundedCornerShape(24.dp),
@@ -91,26 +82,24 @@ fun BacaMateriScreen(
                                     modifier = Modifier.fillMaxWidth().padding(20.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Ganti icon ini dengan Image() jika properti idGambarDrawable tidak null nanti
                                     Box(
-                                        modifier = Modifier.size(70.dp).clip(RoundedCornerShape(12.dp)).background(Color.LightGray),
+                                        modifier = Modifier.size(70.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(Icons.Default.DirectionsBus, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
+                                        Icon(Icons.Default.DirectionsBus, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Text(
                                         text = blokMateri.teks,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = Color.Black,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         lineHeight = 22.sp
                                     )
                                 }
                             }
                         }
 
-                        // 2. Jika data berupa Cek Pemahaman
                         is KomponenMateri.CekPemahaman -> {
                             Card(
                                 shape = RoundedCornerShape(24.dp),
@@ -118,7 +107,7 @@ fun BacaMateriScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
-                                    Text(text = "Cek Pemahaman", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black)
+                                    Text(text = "Cek Pemahaman", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
                                     Spacer(modifier = Modifier.height(16.dp))
                                     repeat(blokMateri.jumlahGaris) {
                                         Box(modifier = Modifier.fillMaxWidth(0.85f).height(12.dp).background(redLineColor, CircleShape))
@@ -128,7 +117,6 @@ fun BacaMateriScreen(
                             }
                         }
 
-                        // 3. Jika data berupa Rumus
                         is KomponenMateri.Rumus -> {
                             Card(
                                 shape = RoundedCornerShape(24.dp),
@@ -144,20 +132,19 @@ fun BacaMateriScreen(
                                         text = blokMateri.teksKiri,
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = Color.Black,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         lineHeight = 26.sp
                                     )
                                     Box(
-                                        modifier = Modifier.size(100.dp).background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
+                                        modifier = Modifier.size(100.dp).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(Icons.Default.Calculate, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(40.dp))
+                                        Icon(Icons.Default.Calculate, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(40.dp))
                                     }
                                 }
                             }
                         }
 
-                        // 4. Jika data berupa Ilustrasi Besar
                         is KomponenMateri.Ilustrasi -> {
                             Card(
                                 shape = RoundedCornerShape(24.dp),
@@ -169,27 +156,26 @@ fun BacaMateriScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Box(
-                                        modifier = Modifier.fillMaxSize().background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
+                                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(Icons.Default.TableRestaurant, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(60.dp))
-                                        Text(text = blokMateri.keterangan, fontSize = 12.sp, color = Color.DarkGray, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp))
+                                        Icon(Icons.Default.TableRestaurant, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(60.dp))
+                                        Text(text = blokMateri.keterangan, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp))
                                     }
                                 }
                             }
                         }
 
-                        // 5. Jika data berupa Teks Biasa (Tambahan untuk materi panjang)
                         is KomponenMateri.TeksBiasa -> {
                             Card(
                                 shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
                                     text = blokMateri.teks,
                                     fontSize = 15.sp,
-                                    color = Color.DarkGray,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.padding(20.dp),
                                     lineHeight = 24.sp
                                 )
@@ -198,16 +184,15 @@ fun BacaMateriScreen(
                     }
                 }
 
-                // TOMBOL LANJUT KUIS
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = { onMulaiKuisClick(konten.idBab) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier.fillMaxWidth().height(56.dp)
                     ) {
-                        Text(text = "Lanjut ke Kuis", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = sageGreen)
+                        Text(text = "Lanjut ke Kuis", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(modifier = Modifier.height(40.dp))
                 }

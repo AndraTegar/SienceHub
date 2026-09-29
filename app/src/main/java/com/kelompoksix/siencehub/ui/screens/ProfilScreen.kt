@@ -27,20 +27,19 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun ProfilScreen(
     onNavigateToSettings: () -> Unit,
-    onNavigateToAchievement: () -> Unit, // Tambahan rute baru
+    onNavigateToAchievement: () -> Unit,
     onNavigateToLeaderboard: () -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
-    val lightBlue = Color(0xFFE3F0FF)
+    val headerColor = MaterialTheme.colorScheme.primary
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.45f).background(sageGreen))
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.45f).background(headerColor))
 
         Surface(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(0.65f).align(Alignment.BottomCenter),
             shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-            color = Color(0xFFFAFAFA)
+            color = MaterialTheme.colorScheme.surface
         ) {}
 
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -64,21 +63,19 @@ fun ProfilScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Barisan Tombol Melayang
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                MenuKotakFresh(icon = Icons.Default.BarChart, bgColor = lightBlue, onClick = onNavigateToLeaderboard)
+                MenuKotakFresh(icon = Icons.Default.BarChart, bgColor = MaterialTheme.colorScheme.surfaceVariant, onClick = onNavigateToLeaderboard)
                 Spacer(modifier = Modifier.width(20.dp))
-                MenuKotakFresh(icon = Icons.Default.GridView, bgColor = lightBlue, onClick = onNavigateToAchievement)
+                MenuKotakFresh(icon = Icons.Default.GridView, bgColor = MaterialTheme.colorScheme.surfaceVariant, onClick = onNavigateToAchievement)
                 Spacer(modifier = Modifier.width(20.dp))
-                MenuKotakFresh(icon = Icons.Default.Settings, bgColor = lightBlue, onClick = onNavigateToSettings)
+                MenuKotakFresh(icon = Icons.Default.Settings, bgColor = MaterialTheme.colorScheme.surfaceVariant, onClick = onNavigateToSettings)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Kartu Level & Streak
             Card(
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
             ) {
@@ -88,29 +85,28 @@ fun ProfilScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     StatusBadgeFresh(icon = Icons.Default.Star, value = "1", label = "Level", iconColor = Color(0xFF00B0FF), bgColor = Color(0xFFE1F5FE))
-                    Box(modifier = Modifier.height(45.dp).width(1.5.dp).background(Color.LightGray.copy(alpha = 0.5f)))
+                    Box(modifier = Modifier.height(45.dp).width(1.5.dp).background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)))
                     StatusBadgeFresh(icon = Icons.Default.LocalFireDepartment, value = "6", label = "Streak", iconColor = Color(0xFFFF6D00), bgColor = Color(0xFFFFF3E0))
                 }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Kartu Statistik
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
-                Text(text = "Pencapaian Kamu", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                Text(text = "Pencapaian Kamu", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     modifier = Modifier.fillMaxWidth().height(70.dp)
                 ) {
                     Row(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(40.dp).background(Color(0xFFE8ECE7), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Color(0xFF7A8B76))
+                        Box(modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         }
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text("3 Materi Diselesaikan", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                        Text("3 Materi Diselesaikan", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -125,7 +121,7 @@ fun MenuKotakFresh(icon: androidx.compose.ui.graphics.vector.ImageVector, bgColo
         modifier = Modifier.size(75.dp).clickable { onClick() }
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(imageVector = icon, contentDescription = null, tint = Color(0xFF556052), modifier = Modifier.size(32.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
         }
     }
 }
@@ -138,8 +134,8 @@ fun StatusBadgeFresh(icon: androidx.compose.ui.graphics.vector.ImageVector, valu
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text(text = value, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = Color.Black)
-            Text(text = label, fontSize = 13.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
+            Text(text = value, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
         }
     }
 }

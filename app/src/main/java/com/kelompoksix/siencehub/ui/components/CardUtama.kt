@@ -17,15 +17,15 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CardUtama(
     judulMateri: String,
-    progress: Float, // Nilai dari 0.0f (0%) sampai 1.0f (100%)
+    progress: Float,
     onClick: () -> Unit
 ) {
-    val warnaBeige = Color(0xFFE2D4C0)
-
     Card(
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = warnaBeige),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(170.dp)
@@ -37,12 +37,10 @@ fun CardUtama(
                 .padding(20.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // BAGIAN ATAS: Label kecil dan Judul Materi
             Column {
-                // Label kecil penanda bagian
                 Text(
                     text = "LANJUTKAN BELAJAR",
-                    color = Color.DarkGray.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.sp
@@ -52,13 +50,12 @@ fun CardUtama(
 
                 Text(
                     text = judulMateri,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            // BAGIAN BAWAH: Progress Bar
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -68,8 +65,8 @@ fun CardUtama(
                     modifier = Modifier
                         .weight(1f)
                         .height(8.dp),
-                    color = Color(0xFF869E83),
-                    trackColor = Color.White,
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surface,
                     strokeCap = StrokeCap.Round
                 )
 
@@ -77,7 +74,7 @@ fun CardUtama(
 
                 Text(
                     text = "${(progress * 100).toInt()}%",
-                    color = Color.DarkGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -86,7 +83,7 @@ fun CardUtama(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF869E83)
+@Preview(showBackground = true)
 @Composable
 fun CardUtamaPreview() {
     Box(modifier = Modifier.padding(16.dp)) {

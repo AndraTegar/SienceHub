@@ -28,24 +28,20 @@ import com.kelompoksix.siencehub.data.repositories.LeaderboardRepository
 fun LeaderboardScreen(
     onBackClick: () -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
+    val headerColor = MaterialTheme.colorScheme.primary
     val daftarUser = LeaderboardRepository.getDaftarLeaderboard()
 
-    // Memisahkan 3 besar untuk podium dan sisanya untuk list
     val topThree = daftarUser.take(3)
     val remainingUsers = if (daftarUser.size > 3) daftarUser.drop(3) else emptyList()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(headerColor)
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // ==========================================
-            // HEADER (Tombol Kembali & Judul)
-            // ==========================================
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -55,13 +51,13 @@ fun LeaderboardScreen(
                 IconButton(
                     onClick = onBackClick,
                     modifier = Modifier
-                        .background(Color.White, shape = RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.2f), shape = RoundedCornerShape(50))
                         .size(40.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBackIosNew,
                         contentDescription = "Kembali",
-                        tint = sageGreen,
+                        tint = Color.White,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -74,9 +70,6 @@ fun LeaderboardScreen(
                 )
             }
 
-            // ==========================================
-            // AREA PODIUM 3 BESAR (Lurus & Presisi)
-            // ==========================================
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,15 +77,12 @@ fun LeaderboardScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.Bottom
             ) {
-                // Peringkat 2 (Kiri - Posisi Sedang)
                 if (topThree.size > 1) {
                     PodiumItem(user = topThree[1])
                 }
-                // Peringkat 1 (Tengah - Posisi Paling Tinggi)
                 if (topThree.isNotEmpty()) {
                     PodiumItem(user = topThree[0])
                 }
-                // Peringkat 3 (Kanan - Posisi Paling Bawah)
                 if (topThree.size > 2) {
                     PodiumItem(user = topThree[2])
                 }
@@ -100,14 +90,11 @@ fun LeaderboardScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ==========================================
-            // DAFTAR PERINGKAT BAWAH (Background Putih)
-            // ==========================================
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                color = Color(0xFFFAFAFA),
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
             ) {
                 LazyColumn(
@@ -126,20 +113,18 @@ fun LeaderboardScreen(
     }
 }
 
-// Komponen Podium dengan Lebar Tetap dan Offset Presisi
 @Composable
 fun PodiumItem(user: UserRank) {
     val ringColor = when (user.rank) {
-        1 -> Color(0xFFFFD700) // Emas
-        2 -> Color(0xFFE0E0E0) // Perak
-        else -> Color(0xFFCD7F32) // Perunggu
+        1 -> Color(0xFFFFD700)
+        2 -> Color(0xFFE0E0E0)
+        else -> Color(0xFFCD7F32)
     }
 
-    // Mengatur ketinggian/posisi vertikal berdasarkan rank (1 Paling atas, 3 Paling bawah)
     val verticalOffset = when (user.rank) {
-        1 -> (-28.dp) // Juara 1 diangkat ke atas
-        2 -> (-10.dp) // Juara 2 di tengah
-        else -> 0.dp  // Juara 3 sebagai dasar
+        1 -> (-28.dp)
+        2 -> (-10.dp)
+        else -> 0.dp
     }
 
     val avatarSize = if (user.rank == 1) 76.dp else 64.dp
@@ -147,11 +132,10 @@ fun PodiumItem(user: UserRank) {
 
     Column(
         modifier = Modifier
-            .width(100.dp) // Lebar kolom disamakan agar tidak saling dorong
+            .width(100.dp)
             .offset(y = verticalOffset),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Kontainer Avatar & Mahkota
         Box(
             contentAlignment = Alignment.TopCenter,
             modifier = Modifier.height(avatarSize + 20.dp)
@@ -179,19 +163,18 @@ fun PodiumItem(user: UserRank) {
                     modifier = Modifier
                         .size(avatarSize - 8.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE8ECE7)),
+                        .background(Color.White.copy(alpha = 0.3f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Person,
                         contentDescription = null,
-                        tint = Color(0xFF7A8B76),
+                        tint = Color.White,
                         modifier = Modifier.size(iconSize)
                     )
                 }
             }
 
-            // Badge Nomor Rank di Bawah Foto
             Box(
                 modifier = Modifier
                     .size(26.dp)
@@ -232,12 +215,11 @@ fun PodiumItem(user: UserRank) {
     }
 }
 
-// Komponen Baris Daftar Peringkat Bawah
 @Composable
 fun LeaderboardItemCard(user: UserRank) {
-    val backgroundColor = if (user.isMe) Color(0xFFEAF1E8) else Color.White
-    val borderColor = if (user.isMe) Color(0xFF7A8B76) else Color.Transparent
-    val textColor = if (user.isMe) Color(0xFF2C352A) else Color.DarkGray
+    val backgroundColor = if (user.isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant
+    val borderColor = if (user.isMe) MaterialTheme.colorScheme.primary else Color.Transparent
+    val textColor = MaterialTheme.colorScheme.onSurface
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -265,13 +247,13 @@ fun LeaderboardItemCard(user: UserRank) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(if (user.isMe) Color(0xFF7A8B76).copy(alpha = 0.2f) else Color(0xFFF0F0F0)),
+                    .background(if (user.isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (user.isMe) Icons.Default.EmojiEvents else Icons.Default.Person,
                     contentDescription = null,
-                    tint = if (user.isMe) Color(0xFF7A8B76) else Color.Gray,
+                    tint = if (user.isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -290,7 +272,7 @@ fun LeaderboardItemCard(user: UserRank) {
                 text = "${user.poin} pts",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (user.isMe) Color(0xFF556052) else Color.DarkGray
+                color = textColor
             )
         }
     }

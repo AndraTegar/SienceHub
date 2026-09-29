@@ -21,18 +21,18 @@ fun CardAksi(
     judul: String,
     deskripsi: String,
     teksTombol: String,
-    ikon: ImageVector, // Ikon dinamis di sebelah kanan
-    warnaBackground: Color = Color(0xFFF3F4F6), // Default abu-abu terang
-    warnaTombol: Color = Color(0xFF869E83), // Default hijau sage
+    ikon: ImageVector,
+    warnaBackground: Color = MaterialTheme.colorScheme.surfaceVariant,
+    warnaTombol: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = warnaBackground),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // Tampilan flat modern
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp) // Jarak dengan card di bawahnya
+            .padding(bottom = 16.dp)
     ) {
         Row(
             modifier = Modifier
@@ -40,15 +40,12 @@ fun CardAksi(
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ==========================================
-            // BAGIAN KIRI: Teks dan Tombol
-            // ==========================================
             Column(
-                modifier = Modifier.weight(1f) // Memakan sisa ruang agar ikon terdorong ke kanan
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = judul,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -57,14 +54,13 @@ fun CardAksi(
 
                 Text(
                     text = deskripsi,
-                    color = Color.DarkGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Tombol Aksi
                 Button(
                     onClick = onClick,
                     colors = ButtonDefaults.buttonColors(containerColor = warnaTombol),
@@ -82,18 +78,15 @@ fun CardAksi(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // ==========================================
-            // BAGIAN KANAN: Ikon/Ilustrasi
-            // ==========================================
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = Color.White.copy(alpha = 0.5f), // Efek transparan
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                 modifier = Modifier.size(72.dp)
             ) {
                 Icon(
                     imageVector = ikon,
                     contentDescription = null,
-                    tint = warnaTombol, // Warna ikon menyesuaikan warna tombol
+                    tint = warnaTombol,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -105,25 +98,11 @@ fun CardAksi(
 @Composable
 fun CardAksiPreview() {
     Column(modifier = Modifier.padding(16.dp)) {
-        // Contoh Penggunaan 1: Misi Kuis
         CardAksi(
             judul = "Tantangan Harian \uD83D\uDD25",
-            deskripsi = "Selesaikan 5 soal kuis biologi berturut-turut tanpa salah untuk mendapat bonus +50 XP.",
+            deskripsi = "Selesaikan 5 soal kuis biologi berturut-turut.",
             teksTombol = "Mulai Kuis",
             ikon = Icons.Default.PlayArrow,
-            warnaBackground = Color(0xFFFFF3E0), // Oranye pastel
-            warnaTombol = Color(0xFFFF9800),
-            onClick = {}
-        )
-
-        // Contoh Penggunaan 2: Simulasi Lab
-        CardAksi(
-            judul = "Lab Virtual: Reaksi Kimia",
-            deskripsi = "Mari mencoba mencampurkan larutan asam dan basa secara virtual.",
-            teksTombol = "Masuk Lab",
-            ikon = Icons.Default.Science,
-            warnaBackground = Color(0xFFE0F2F1), // Hijau tosca pastel
-            warnaTombol = Color(0xFF009688),
             onClick = {}
         )
     }

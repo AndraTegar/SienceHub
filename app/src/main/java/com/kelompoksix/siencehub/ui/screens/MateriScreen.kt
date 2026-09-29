@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,18 +20,17 @@ import com.kelompoksix.siencehub.ui.components.KartuKategori
 fun MateriScreen(
     onMateriClick: (String) -> Unit = {}
 ) {
-    val warnaHijauSage = Color(0xFF7A8B76)
+    val headerColor = MaterialTheme.colorScheme.primary
     val daftarKategori = KategoriDataProvider.getDaftarKategori()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(warnaHijauSage)
+            .background(headerColor)
             .padding(horizontal = 20.dp)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sapaan Header
         Text(
             text = "Halo, Ridho",
             fontSize = 32.sp,
@@ -46,7 +46,6 @@ fun MateriScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Grid Asimetris (Panjang dan Pendek ala Figma)
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(2),
             contentPadding = PaddingValues(bottom = 120.dp),

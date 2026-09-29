@@ -19,51 +19,45 @@ fun CardStatus(
     level: Int,
     streak: Int
 ) {
-    // Warna card yang sedikit lebih abu-abu/gelap dari background utama
-    val warnaCard = Color(0xFFA1B09C)
+    val warnaCard = MaterialTheme.colorScheme.surfaceVariant
 
     Card(
-        shape = RoundedCornerShape(24.dp), // Sudut melengkung menyerupai kapsul
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = warnaCard),
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp) // Tinggi fix untuk kartu
+            .height(72.dp)
     ) {
-        // Row utama
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ==========================================
-            // BAGIAN KIRI: LEVEL
-            // ==========================================
             Row(
                 modifier = Modifier
-                    .weight(1f) // Mengambil 50% ruang horizontal
+                    .weight(1f)
                     .fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = "Level",
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Lingkaran untuk angka level dengan border putih tipis
                 Surface(
                     shape = CircleShape,
                     color = Color.Transparent,
-                    border = BorderStroke(2.dp, Color.White),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
                     modifier = Modifier.size(32.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             text = level.toString(),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
@@ -71,38 +65,31 @@ fun CardStatus(
                 }
             }
 
-            // ==========================================
-            // GARIS PEMISAH (DIVIDER)
-            // ==========================================
             VerticalDivider(
-                color = Color.DarkGray.copy(alpha = 0.3f), // Warna abu-abu transparan
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                 thickness = 1.dp,
-                modifier = Modifier.padding(vertical = 12.dp) // Memberi jarak dari atas & bawah kartu
+                modifier = Modifier.padding(vertical = 12.dp)
             )
 
-            // ==========================================
-            // BAGIAN KANAN: STREAK
-            // ==========================================
             Row(
                 modifier = Modifier
-                    .weight(1f) // Mengambil 50% ruang horizontal sisanya
+                    .weight(1f)
                     .fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = "Streak",
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Menampilkan angka streak (Bisa diganti ikon api nanti)
                 Text(
                     text = "$streak Hari",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
@@ -111,10 +98,9 @@ fun CardStatus(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF869E83)
+@Preview(showBackground = true)
 @Composable
 fun CardStatusPreview() {
-    // Dibungkus dengan padding agar tidak menempel di tepi layar saat preview
     Box(modifier = Modifier.padding(16.dp)) {
         CardStatus(level = 1, streak = 5)
     }

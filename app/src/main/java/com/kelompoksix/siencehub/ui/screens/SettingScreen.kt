@@ -21,15 +21,17 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(
+    isDarkMode: Boolean = false,
+    onDarkModeChanged: (Boolean) -> Unit = {},
     onBackClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
+    val headerBg = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(headerBg)
     ) {
         // Header Pengaturan
         Row(
@@ -41,13 +43,13 @@ fun SettingScreen(
             IconButton(
                 onClick = onBackClick,
                 modifier = Modifier
-                    .background(Color.White, shape = RoundedCornerShape(50))
+                    .background(Color.White.copy(alpha = 0.2f), shape = RoundedCornerShape(50))
                     .size(40.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBackIosNew,
                     contentDescription = "Kembali",
-                    tint = sageGreen,
+                    tint = Color.White,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -60,30 +62,30 @@ fun SettingScreen(
             )
         }
 
-        // Body Pengaturan (Card Putih Melengkung)
+        // Body Pengaturan (Card Putih/Gelap Melengkung)
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFFAFAFA),
+            color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
             LazyColumn(
                 modifier = Modifier.padding(24.dp)
             ) {
                 item {
-                    Text("Account Settings", color = Color.Gray, fontSize = 14.sp)
+                    Text("Account Settings", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
                 item { SettingItemAction("Edit Profile") }
                 item { SettingItemAction("Change password") }
                 item { SettingItemAction("Add a payment method", iconRight = Icons.Default.Add) }
-                item { SettingItemToggle("Push notifications", true) }
-                item { SettingItemToggle("Dark mode", false) }
+                item { SettingItemToggle("Push notifications", isChecked = true, onCheckedChange = {}) }
+                item { SettingItemToggle("Dark mode", isChecked = isDarkMode, onCheckedChange = onDarkModeChanged) }
 
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Divider(color = Color.LightGray.copy(alpha = 0.5f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("More", color = Color.Gray, fontSize = 14.sp)
+                    Text("More", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
@@ -93,7 +95,6 @@ fun SettingScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(40.dp))
-                    // Tombol Log Out
                     Text(
                         text = "Log Out",
                         color = Color.Red,
@@ -121,14 +122,13 @@ fun SettingItemAction(title: String, iconRight: androidx.compose.ui.graphics.vec
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, fontSize = 16.sp, color = Color.Black)
-        Icon(imageVector = iconRight, contentDescription = null, tint = Color.Gray)
+        Text(text = title, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+        Icon(imageVector = iconRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
-fun SettingItemToggle(title: String, defaultChecked: Boolean) {
-    var checked by remember { mutableStateOf(defaultChecked) }
+fun SettingItemToggle(title: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -136,13 +136,13 @@ fun SettingItemToggle(title: String, defaultChecked: Boolean) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, fontSize = 16.sp, color = Color.Black)
+        Text(text = title, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
         Switch(
-            checked = checked,
-            onCheckedChange = { checked = it },
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFF7A8B76)
+                checkedTrackColor = MaterialTheme.colorScheme.primary
             )
         )
     }

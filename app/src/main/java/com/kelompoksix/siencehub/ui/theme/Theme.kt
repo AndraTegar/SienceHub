@@ -12,11 +12,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GreenBackground,
+    primary = DarkHeaderSage,
     secondary = GreenLight,
     tertiary = Color.White,
-    background = Color(0xFF1E201E),
-    surface = Color(0xFF2B2D2A)
+    background = DarkBackground,
+    surface = DarkSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onBackground = DarkTextPrimary,
+    onSurface = DarkTextPrimary,
+    onSurfaceVariant = DarkTextSecondary
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -25,15 +31,18 @@ private val LightColorScheme = lightColorScheme(
     tertiary = GrayColor,
     background = SurfaceWhite,
     surface = Color.White,
+    surfaceVariant = Color(0xFFFAFAFA),
     onPrimary = Color.White,
+    onSecondary = Color.White,
     onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F)
+    onSurface = Color(0xFF1C1B1F),
+    onSurfaceVariant = Color(0xFF444746)
 )
 
 @Composable
 fun SienceHubTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Set false to preserve Figma brand theme
+    dynamicColor: Boolean = false, // Set false to preserve brand theme
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

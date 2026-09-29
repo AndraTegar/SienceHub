@@ -26,16 +26,13 @@ import androidx.compose.ui.unit.sp
 fun AchievementScreen(
     onBackClick: () -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
+    val headerColor = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(headerColor)
     ) {
-        // ==========================================
-        // HEADER PENCAPAIAN
-        // ==========================================
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -45,13 +42,13 @@ fun AchievementScreen(
             IconButton(
                 onClick = onBackClick,
                 modifier = Modifier
-                    .background(Color.White, shape = RoundedCornerShape(50))
+                    .background(Color.White.copy(alpha = 0.2f), shape = RoundedCornerShape(50))
                     .size(40.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBackIosNew,
                     contentDescription = "Kembali",
-                    tint = sageGreen,
+                    tint = Color.White,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -64,25 +61,21 @@ fun AchievementScreen(
             )
         }
 
-        // ==========================================
-        // KONTEN DAFTAR PENCAPAIAN (Background Putih)
-        // ==========================================
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFFAFAFA),
+            color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
             LazyColumn(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // --- BAGIAN TERSELESAIKAN ---
                 item {
                     Text(
                         text = "Terselesaikan \uD83C\uDF1F",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = sageGreen
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -92,7 +85,7 @@ fun AchievementScreen(
                         judul = "Langkah Pertama",
                         deskripsi = "Menyelesaikan 1 materi pertama di ScienceHub.",
                         ikon = Icons.Default.Star,
-                        warnaIkon = Color(0xFFFFD54F), // Emas
+                        warnaIkon = Color(0xFFFFD54F),
                         warnaBgIkon = Color(0xFFFFF8E1),
                         sudahSelesai = true
                     )
@@ -103,7 +96,7 @@ fun AchievementScreen(
                         judul = "Si Paling Rajin",
                         deskripsi = "Mencapai 5 hari streak belajar berturut-turut.",
                         ikon = Icons.Default.LocalFireDepartment,
-                        warnaIkon = Color(0xFFFF8A65), // Oranye
+                        warnaIkon = Color(0xFFFF8A65),
                         warnaBgIkon = Color(0xFFFBE9E7),
                         sudahSelesai = true
                     )
@@ -111,17 +104,16 @@ fun AchievementScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.LightGray.copy(alpha = 0.5f)))
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)))
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // --- BAGIAN BELUM TERBUKA ---
                 item {
                     Text(
                         text = "Belum Terbuka \uD83D\uDD12",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -149,7 +141,7 @@ fun AchievementScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(40.dp)) // Jarak bawah
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         }
@@ -167,7 +159,7 @@ fun KartuAchievement(
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = if (sudahSelesai) 4.dp else 1.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -200,13 +192,13 @@ fun KartuAchievement(
                     text = judul,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = deskripsi,
                     fontSize = 13.sp,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 18.sp
                 )
             }

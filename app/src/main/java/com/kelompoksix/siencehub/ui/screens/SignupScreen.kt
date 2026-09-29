@@ -42,14 +42,14 @@ fun SignupScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    val sageGreen = Color(0xFF7A8B76)
-    val darkText = Color(0xFF161823)
-    val fieldBgColor = Color(0xFFF1F2F4) // Warna abu-abu kartu modern
+    val sageGreen = MaterialTheme.colorScheme.primary
+    val darkText = MaterialTheme.colorScheme.onBackground
+    val fieldBgColor = MaterialTheme.colorScheme.surfaceVariant
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .imePadding()
     ) {
         Column(
@@ -58,9 +58,6 @@ fun SignupScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            // ==========================================
-            // TOP BAR (Tombol Close / Silang)
-            // ==========================================
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,9 +77,6 @@ fun SignupScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ==========================================
-            // HEADER (Judul "Sign up" di Tengah)
-            // ==========================================
             Text(
                 text = "Sign up",
                 fontSize = 28.sp,
@@ -94,58 +88,55 @@ fun SignupScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // ==========================================
-            // FORM INPUT (Model Kartu Modern)
-            // ==========================================
-
-            // Email
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = { Text("Email address", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
+                placeholder = { Text("Email address", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
+                leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp)) },
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = fieldBgColor,
                     unfocusedContainerColor = fieldBgColor,
                     disabledContainerColor = fieldBgColor,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = darkText,
+                    unfocusedTextColor = darkText
                 ),
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Phone no
             TextField(
                 value = phone,
                 onValueChange = { phone = it },
-                placeholder = { Text("Phone number", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
+                placeholder = { Text("Phone number", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
+                leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp)) },
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = fieldBgColor,
                     unfocusedContainerColor = fieldBgColor,
                     disabledContainerColor = fieldBgColor,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = darkText,
+                    unfocusedTextColor = darkText
                 ),
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Password
             TextField(
                 value = password,
                 onValueChange = { password = it },
-                placeholder = { Text("Password", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
+                placeholder = { Text("Password", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
+                leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp)) },
                 trailingIcon = {
                     val image = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(image, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+                        Icon(image, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                     }
                 },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -155,23 +146,24 @@ fun SignupScreen(
                     unfocusedContainerColor = fieldBgColor,
                     disabledContainerColor = fieldBgColor,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = darkText,
+                    unfocusedTextColor = darkText
                 ),
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Confirm Password
             TextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                placeholder = { Text("Confirm password", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
+                placeholder = { Text("Confirm password", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
+                leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp)) },
                 trailingIcon = {
                     val image = if (confirmPasswordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                        Icon(image, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+                        Icon(image, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                     }
                 },
                 visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -181,14 +173,15 @@ fun SignupScreen(
                     unfocusedContainerColor = fieldBgColor,
                     disabledContainerColor = fieldBgColor,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = darkText,
+                    unfocusedTextColor = darkText
                 ),
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tombol Create Account
             Button(
                 onClick = onCreateAccountSuccess,
                 modifier = Modifier
@@ -200,15 +193,11 @@ fun SignupScreen(
                 Text("Create Account", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
 
-            // Spacer pendorong agar teks berada di posisi paling bawah layar
             Spacer(modifier = Modifier.height(60.dp))
 
-            // ==========================================
-            // FOOTER (Sudah Punya Akun? Login di Bawah)
-            // ==========================================
             Text(
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = Color.Gray)) { append("Already have an account? ") }
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append("Already have an account? ") }
                     withStyle(style = SpanStyle(color = sageGreen, fontWeight = FontWeight.Bold)) { append("Login") }
                 },
                 fontSize = 14.sp,

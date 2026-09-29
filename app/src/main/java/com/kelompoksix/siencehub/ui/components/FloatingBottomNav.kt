@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
-// Data Class untuk menampung ikon vektor
 data class NavItem(
     val title: String,
     val icon: ImageVector
@@ -30,8 +30,8 @@ fun FloatingBottomNav(
     onItemSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val sageGreen = Color(0xFF7A8B76)
-    val lightSage = Color(0xFFE8ECE7) // Warna latar belakang lembut saat ikon aktif
+    val sageGreen = MaterialTheme.colorScheme.primary
+    val lightSage = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
 
     val items = listOf(
         NavItem("Beranda", Icons.Default.Home),
@@ -39,13 +39,12 @@ fun FloatingBottomNav(
         NavItem("Profil", Icons.Default.Person)
     )
 
-    // Desain Wadah Navbar Melayang yang lebih kompak tanpa teks
     Row(
         modifier = modifier
-            .width(250.dp) // Lebar disesuaikan agar pas dan elegan tanpa teks
+            .width(250.dp)
             .height(64.dp)
-            .shadow(elevation = 12.dp, shape = CircleShape) // Efek melayang
-            .background(Color.White, shape = CircleShape)
+            .shadow(elevation = 12.dp, shape = CircleShape)
+            .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
             .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
@@ -53,7 +52,6 @@ fun FloatingBottomNav(
         items.forEachIndexed { index, item ->
             val isSelected = selectedIndex == index
 
-            // Kotak pembungkus ikon dengan efek latar belakang saat dipilih
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -65,7 +63,7 @@ fun FloatingBottomNav(
                 Icon(
                     imageVector = item.icon,
                     contentDescription = item.title,
-                    tint = if (isSelected) sageGreen else Color.Gray,
+                    tint = if (isSelected) sageGreen else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(26.dp)
                 )
             }

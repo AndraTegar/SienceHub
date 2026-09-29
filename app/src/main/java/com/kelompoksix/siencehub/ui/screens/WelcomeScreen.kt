@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -48,10 +49,9 @@ class WavyShapeWelcome : Shape {
 fun WelcomeScreen(
     onContinueClick: () -> Unit = {}
 ) {
-    val sageGreen = Color(0xFF7A8B76)
-    val darkText = Color(0xFF333333)
+    val sageGreen = MaterialTheme.colorScheme.primary
+    val darkText = MaterialTheme.colorScheme.onBackground
 
-    // Daftar kalimat random seputar sains yang akan dipilih secara acak setiap halaman dibuka
     val scienceQuotes = remember {
         listOf(
             "Jelajahi keajaiban sains dan raih pengetahuan baru setiap hari.",
@@ -60,12 +60,10 @@ fun WelcomeScreen(
             "Mulailah petualangan ilmiahmu bersama komunitas ScienceHub."
         )
     }
-    // Mengambil satu kalimat secara acak
     val randomQuote = remember { scienceQuotes.random() }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
 
-        // Background lengkungan atas dengan tekstur
         Image(
             painter = painterResource(id = R.drawable.texture_bg),
             contentDescription = "Background Wavy",
@@ -83,8 +81,6 @@ fun WelcomeScreen(
                 .padding(horizontal = 32.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
-            // Teks "ayo ayo" sudah dihapus dan diganti ruang bersih
-
             Text(
                 text = "Welcome",
                 color = darkText,
@@ -93,10 +89,9 @@ fun WelcomeScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Menampilkan kalimat random yang dinamis
             Text(
                 text = randomQuote,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp,
                 lineHeight = 24.sp
             )
@@ -109,7 +104,7 @@ fun WelcomeScreen(
             ) {
                 Text(
                     text = "Continue",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     modifier = Modifier.padding(end = 16.dp)
