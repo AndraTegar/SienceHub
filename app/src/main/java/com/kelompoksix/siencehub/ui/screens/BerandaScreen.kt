@@ -3,17 +3,18 @@ package com.kelompoksix.siencehub.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,12 +27,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
 import com.kelompoksix.siencehub.ui.components.SearchBarMateri
+import com.kelompoksix.siencehub.ui.theme.GreenBackground
+import com.kelompoksix.siencehub.ui.theme.GreenLight
+import com.kelompoksix.siencehub.ui.theme.Cream90
+import com.kelompoksix.siencehub.ui.theme.CreamLight
+import com.kelompoksix.siencehub.ui.theme.GrayColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +43,7 @@ fun BerandaScreen(
     onNavigateToMateri: () -> Unit = {},
     onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> }
 ) {
-    val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
 
@@ -52,42 +56,47 @@ fun BerandaScreen(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = Color.White,
+        containerColor = GreenBackground, // Latar dasar disamakan dengan bagian atas
         topBar = {
-            // TOP BAR MODERN: Search Bar Full + Lonceng Notifikasi
             TopAppBar(
+                // PERBAIKAN 1: Tambahan padding atas agar tidak mentok ke status bar
+                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
                 title = {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(end = 12.dp),
+                            .padding(end = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        // Memanggil komponen SearchBarMateri
                         SearchBarMateri(
-                            modifier = Modifier.weight(1f),
+                            // PERBAIKAN 2: Memberikan height fix agar tidak meregang jadi 2 baris
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp),
                             onHasilClick = onHasilCari
                         )
 
-                        // Tombol Ikon Lonceng Notifikasi
+                        // Tombol Notifikasi
                         IconButton(
                             onClick = { /* Aksi notifikasi */ },
                             modifier = Modifier
-                                .size(45.dp)
-                                .background(Color.White.copy(alpha = 0.25f), CircleShape)
+                                .size(46.dp) // Ukuran selaras dengan tinggi search bar
+                                .background(CreamLight.copy(alpha = 0.2f), CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifikasi",
-                                tint = Color.White,
+                                tint = CreamLight,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = warnaHijauSage,
-                    scrolledContainerColor = warnaHijauSage
+                    containerColor = GreenBackground,
+                    scrolledContainerColor = GreenBackground
                 ),
                 scrollBehavior = scrollBehavior
             )
@@ -99,12 +108,12 @@ fun BerandaScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Background Hijau Sage Setengah Layar Atas
+            // Background Atas
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.55f)
-                    .background(warnaHijauSage)
+                    .background(GreenBackground)
             )
 
             Column(
@@ -112,154 +121,181 @@ fun BerandaScreen(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    // ==========================================
-                    // KARTU STATUS BARU (Level 1 & Streak 6)
-                    // ==========================================
-                    Card(
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 14.dp, horizontal = 20.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Level Badge
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .background(Color(0xFFE1F5FE), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF00B0FF), modifier = Modifier.size(20.dp))
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column {
-                                    Text(text = "Level 1", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                                    Text(text = "Pemula", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
-                                }
-                            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-                            // Garis Pemisah
-                            Box(modifier = Modifier.height(30.dp).width(1.dp).background(Color.White.copy(alpha = 0.3f)))
-
-                            // Streak Badge
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .background(Color(0xFFFFF3E0), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color(0xFFFF6D00), modifier = Modifier.size(20.dp))
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column {
-                                    Text(text = "6 Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                                    Text(text = "Streak Aktif", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "Lanjutkan Belajar",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxWidth(),
-                        pageSpacing = 16.dp
-                    ) { page ->
-                        val materi = daftarMateri[page]
-                        CardUtama(
-                            judulMateri = materi.first,
-                            progress = materi.second,
-                            onClick = { onNavigateToMateri() }
-                        )
-                    }
-
+                // ==========================================
+                // KARTU STATUS (Level & Streak)
+                // ==========================================
+                Card(
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = CreamLight.copy(alpha = 0.15f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.Center,
+                            .padding(vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        repeat(daftarMateri.size) { iteration ->
-                            val isSelected = pagerState.currentPage == iteration
+                        // Bagian Level (Kiri)
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .height(8.dp)
-                                    .width(if (isSelected) 24.dp else 8.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.4f))
-                            )
+                                    .size(40.dp)
+                                    .background(Cream90, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF00B0FF), modifier = Modifier.size(20.dp))
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(text = "Level 1", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CreamLight)
+                                Text(text = "Pemula", fontSize = 12.sp, color = CreamLight.copy(alpha = 0.8f))
+                            }
+                        }
+
+                        // Garis Pemisah (Tengah)
+                        Box(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .width(1.dp)
+                                .background(CreamLight.copy(alpha = 0.3f))
+                        )
+
+                        // Bagian Streak (Kanan)
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(Cream90, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color(0xFFFF6D00), modifier = Modifier.size(20.dp))
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(text = "6 Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CreamLight)
+                                Text(text = "Streak Aktif", fontSize = 12.sp, color = CreamLight.copy(alpha = 0.8f))
+                            }
                         }
                     }
-                    Spacer(modifier = Modifier.height(32.dp))
                 }
 
-                // Bagian Bawah: Konten Putih Melengkung (Aktivitas Seru)
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text(
+                    text = "Lanjutkan Belajar",
+                    color = CreamLight,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 24.dp),
+                    pageSpacing = 16.dp
+                ) { page ->
+                    val materi = daftarMateri[page]
+                    CardUtama(
+                        judulMateri = materi.first,
+                        progress = materi.second,
+                        onClick = { onNavigateToMateri() }
+                    )
+                }
+
+                // Indikator Titik (Dots) Pager
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp, bottom = 32.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(daftarMateri.size) { iteration ->
+                        val isSelected = pagerState.currentPage == iteration
+                        Box(
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .height(8.dp)
+                                .width(if (isSelected) 24.dp else 8.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) CreamLight else GreenLight.copy(alpha = 0.5f))
+                        )
+                    }
+                }
+
+                // ==========================================
+                // BAGIAN BAWAH (Latar Belakang CreamLight)
+                // ==========================================
                 Surface(
                     shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                    color = Color.White,
+                    color = CreamLight,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
+                    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp)) {
                         Text(
                             text = "Aktivitas Seru Hari Ini",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            color = GrayColor
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
+
                         CardAksi(
                             judul = "Tantangan Harian \uD83D\uDD25",
                             deskripsi = "Selesaikan 5 soal kuis sistem pencernaan.",
                             teksTombol = "Mulai Kuis",
                             ikon = Icons.Default.PlayArrow,
-                            warnaBackground = Color(0xFFE8ECE7),
-                            warnaTombol = warnaHijauSage,
+                            warnaBackground = Color.White,
+                            warnaTombol = GreenBackground,
                             onClick = { }
                         )
+                        Spacer(modifier = Modifier.height(12.dp))
                         CardAksi(
                             judul = "Eksperimen Virtual \uD83D\uDD2C",
                             deskripsi = "Simulasikan hukum gravitasi di berbagai planet.",
                             teksTombol = "Mainkan",
                             ikon = Icons.Default.Science,
-                            warnaBackground = Color(0xFFE8ECE7),
-                            warnaTombol = warnaHijauSage,
+                            warnaBackground = Color.White,
+                            warnaTombol = GreenBackground,
                             onClick = { }
                         )
+                        Spacer(modifier = Modifier.height(12.dp))
                         CardAksi(
                             judul = "Fakta Menarik \uD83D\uDCA1",
                             deskripsi = "Kenapa langit berwarna biru? Temukan jawabannya.",
                             teksTombol = "Baca Artikel",
                             ikon = Icons.Default.Person,
-                            warnaBackground = Color(0xFFE8ECE7),
-                            warnaTombol = warnaHijauSage,
+                            warnaBackground = Color.White,
+                            warnaTombol = GreenBackground,
                             onClick = { }
                         )
-                        Spacer(modifier = Modifier.height(120.dp))
+                        Spacer(modifier = Modifier.height(90.dp))
                     }
                 }
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BerandaScreenPreview() {
+    BerandaScreen()
 }
