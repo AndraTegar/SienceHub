@@ -37,7 +37,8 @@ import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 @Composable
 fun BerandaScreen(
     onNavigateToMateri: () -> Unit = {},
-    onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> }
+    onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> },
+    onNavigateToEksperimen: () -> Unit = {}   // baru
 ) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -245,7 +246,7 @@ fun BerandaScreen(
                             ikon = Icons.Default.Science,
                             warnaBackground = Color(0xFFE8ECE7),
                             warnaTombol = warnaHijauSage,
-                            onClick = { }
+                            onClick = onNavigateToEksperimen
                         )
                         CardAksi(
                             judul = "Fakta Menarik \uD83D\uDCA1",
@@ -262,4 +263,10 @@ fun BerandaScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BerandaScreenPreview() {
+    BerandaScreen()
 }
