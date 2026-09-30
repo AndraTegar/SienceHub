@@ -53,7 +53,7 @@ object MateriRepository {
             TopikMateri(
                 id = "matematika_aljabar",
                 judul = "Matematika: Persamaan Linear",
-                kategori = "Matematika",
+                kategori = "Math",
                 daftarBab = listOf(
                     BabMateri(1, "Konsep Variabel dan Persamaan Linear", "10 menit", true),
                     BabMateri(2, "Persamaan Linear Satu Variabel", "15 menit", false),
