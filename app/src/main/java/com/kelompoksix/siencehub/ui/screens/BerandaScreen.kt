@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
-/*import com.kelompoksix.siencehub.ui.components.SearchBarMateri*/
+import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
 
 @Composable
@@ -76,7 +76,7 @@ fun BerandaScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                /*SearchBarMateri(
+                SearchBarMateri(
                     query = searchQuery,
                     onQueryChange = { searchQuery = it },
                     hasilPencarian = hasilCari,
@@ -85,7 +85,7 @@ fun BerandaScreen(
                         searchQuery = ""
                     },
                     modifier = Modifier.weight(1f)
-                )*/
+                )
 
                 IconButton(
                     onClick = { /* Aksi notifikasi */ },
