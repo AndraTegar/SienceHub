@@ -28,20 +28,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
-import com.kelompoksix.siencehub.ui.theme.GreenBackground
-import com.kelompoksix.siencehub.ui.theme.GreenLight
-import com.kelompoksix.siencehub.ui.theme.Cream90
-import com.kelompoksix.siencehub.ui.theme.CreamLight
-import com.kelompoksix.siencehub.ui.theme.GrayColor
+import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
-
+fun BerandaScreen(
+    onNavigateToMateri: () -> Unit = {},
+    viewModel: BerandaViewModel = viewModel()
+) {
+    val headerColor = MaterialTheme.colorScheme.primary
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+
+    val faktaSains = viewModel.faktaSains
+    val isLoadingFakta = viewModel.isLoadingFakta
 
     val daftarMateri = listOf(
         Pair("Biologi: Struktur Sel", 0.1f),
@@ -52,7 +55,7 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = GreenBackground, // Latar dasar disamakan dengan bagian atas
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -63,14 +66,13 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Search Bar
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(46.dp)
-                                .clickable { /* Aksi klik search bar */ },
+                                .clickable { /* Search action */ },
                             shape = RoundedCornerShape(24.dp),
-                            color = CreamLight.copy(alpha = 0.2f) // Menggunakan cream dengan transparansi
+                            color = Color.White.copy(alpha = 0.2f)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -81,37 +83,36 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Cari",
-                                    tint = CreamLight,
+                                    tint = Color.White,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
                                     text = "Cari materi, kuis...",
-                                    color = CreamLight.copy(alpha = 0.8f),
+                                    color = Color.White.copy(alpha = 0.8f),
                                     fontSize = 14.sp
                                 )
                             }
                         }
 
-                        // Tombol Notifikasi
                         IconButton(
-                            onClick = { /* Aksi notifikasi */ },
+                            onClick = { /* Notification action */ },
                             modifier = Modifier
                                 .size(46.dp)
-                                .background(CreamLight.copy(alpha = 0.2f), CircleShape)
+                                .background(Color.White.copy(alpha = 0.2f), CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifikasi",
-                                tint = CreamLight,
+                                tint = Color.White,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GreenBackground,
-                    scrolledContainerColor = GreenBackground
+                    containerColor = headerColor,
+                    scrolledContainerColor = headerColor
                 ),
                 scrollBehavior = scrollBehavior
             )
@@ -123,12 +124,11 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Background Atas
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.55f)
-                    .background(GreenBackground)
+                    .background(headerColor)
             )
 
             Column(
@@ -139,12 +139,9 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // ==========================================
-                // KARTU STATUS (Level & Streak)
-                // ==========================================
                 Card(
                     shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = CreamLight.copy(alpha = 0.15f)),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -156,7 +153,6 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                             .padding(vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Bagian Level (Kiri)
                         Row(
                             modifier = Modifier.weight(1f),
                             horizontalArrangement = Arrangement.Center,
@@ -165,27 +161,25 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .background(Cream90, CircleShape), // Menggunakan Cream90
+                                    .background(Color.White.copy(alpha = 0.25f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Star, contentDescription = null, tint = GreenBackground, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
-                                Text(text = "Level 1", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CreamLight)
-                                Text(text = "Pemula", fontSize = 12.sp, color = CreamLight.copy(alpha = 0.8f))
+                                Text(text = "Level 1", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                                Text(text = "Pemula", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
                             }
                         }
 
-                        // Garis Pemisah (Tengah)
                         Box(
                             modifier = Modifier
                                 .height(36.dp)
                                 .width(1.dp)
-                                .background(CreamLight.copy(alpha = 0.3f))
+                                .background(Color.White.copy(alpha = 0.3f))
                         )
 
-                        // Bagian Streak (Kanan)
                         Row(
                             modifier = Modifier.weight(1f),
                             horizontalArrangement = Arrangement.Center,
@@ -194,15 +188,15 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .background(Cream90, CircleShape), // Menggunakan Cream90
+                                    .background(Color.White.copy(alpha = 0.25f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = GreenBackground, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
-                                Text(text = "6 Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = CreamLight)
-                                Text(text = "Streak Aktif", fontSize = 12.sp, color = CreamLight.copy(alpha = 0.8f))
+                                Text(text = "6 Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                                Text(text = "Streak Aktif", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
                             }
                         }
                     }
@@ -212,7 +206,7 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
 
                 Text(
                     text = "Lanjutkan Belajar",
-                    color = CreamLight,
+                    color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 24.dp)
@@ -234,7 +228,6 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                     )
                 }
 
-                // Indikator Titik (Dots) Pager
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -250,18 +243,14 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                                 .height(8.dp)
                                 .width(if (isSelected) 24.dp else 8.dp)
                                 .clip(CircleShape)
-                                // Titik aktif menggunakan CreamLight, tidak aktif GreenLight
-                                .background(if (isSelected) CreamLight else GreenLight.copy(alpha = 0.5f))
+                                .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.4f))
                         )
                     }
                 }
 
-                // ==========================================
-                // BAGIAN BAWAH (Latar Belakang CreamLight)
-                // ==========================================
                 Surface(
                     shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                    color = CreamLight, // Warna background bawah lebih hangat, tidak putih pucat
+                    color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp)) {
@@ -269,7 +258,7 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                             text = "Aktivitas Seru Hari Ini",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = GrayColor // Teks abu-abu gelap agar nyaman dibaca
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(20.dp))
 
@@ -278,8 +267,8 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                             deskripsi = "Selesaikan 5 soal kuis sistem pencernaan.",
                             teksTombol = "Mulai Kuis",
                             ikon = Icons.Default.PlayArrow,
-                            warnaBackground = Color.White, // Putih agar menonjol dari latar CreamLight
-                            warnaTombol = GreenBackground,
+                            warnaBackground = MaterialTheme.colorScheme.surfaceVariant,
+                            warnaTombol = headerColor,
                             onClick = { }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -288,19 +277,19 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                             deskripsi = "Simulasikan hukum gravitasi di berbagai planet.",
                             teksTombol = "Mainkan",
                             ikon = Icons.Default.Science,
-                            warnaBackground = Color.White,
-                            warnaTombol = GreenBackground,
+                            warnaBackground = MaterialTheme.colorScheme.surfaceVariant,
+                            warnaTombol = headerColor,
                             onClick = { }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         CardAksi(
                             judul = "Fakta Menarik \uD83D\uDCA1",
-                            deskripsi = "Kenapa langit berwarna biru? Temukan jawabannya.",
-                            teksTombol = "Baca Artikel",
+                            deskripsi = if (isLoadingFakta) "Memuat Fakta Menarik" else faktaSains,
+                            teksTombol = if (isLoadingFakta) "Memuat..." else "Fakta Baru \uD83D\uDCA1",
                             ikon = Icons.Default.Person,
-                            warnaBackground = Color.White,
-                            warnaTombol = GreenBackground,
-                            onClick = { }
+                            warnaBackground = MaterialTheme.colorScheme.surfaceVariant,
+                            warnaTombol = headerColor,
+                            onClick = { viewModel.muatFaktaBaru() }
                         )
                         Spacer(modifier = Modifier.height(90.dp))
                     }
