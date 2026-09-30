@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -27,31 +28,39 @@ import com.kelompoksix.siencehub.data.models.TopikMateri
 fun DetailMateriScreen(
     topikMateri: TopikMateri,
     onBackClick: () -> Unit,
-    onBabClick: (Int) -> Unit
+    onBabClick: (Int) -> Unit,
+    onKuisClick: (String) -> Unit // <-- 1. Tambahkan parameter callback ini
 ) {
     val darkChalkBg = Color(0xFF1E1E1E) // Warna dasar papan tulis gelap
     val cardBlueColor = Color(0xFFD6E4F0) // Warna biru muda lembut ala Canva
     val textBlueColor = Color(0xFF1E3A8A) // Warna teks "BAB X" biru tua
 
-    // Mengecek apakah topik yang dibuka adalah Fisika
-    val isFisika = topikMateri.judul.contains("Fisika", ignoreCase = true) ||
-            topikMateri.kategori.contains("Fisika", ignoreCase = true)
+    // Mengecek apakah topik yang dibuka adalah Fisika, Kimia, dll.
+    val backgroundRes: Int? = when (topikMateri.kategori.lowercase()) {
+        "fisika" -> R.drawable.texture_bg
+        "kimia" -> R.drawable.kimia_bg
+        "biologi" -> R.drawable.biologi_bg
+        "astronomi" -> R.drawable.astronomi_bg
+        "matematika" -> R.drawable.matematika_bg
+        "geografi" -> R.drawable.geografi_bg
+        else -> null
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(darkChalkBg)
     ) {
-        // Jika topik Fisika, tampilkan gambar latar belakang dari drawable yang Anda tambahkan
-        if (isFisika) {
+        // Gambar latar belakang dari drawable
+        backgroundRes?.let { res ->
             Image(
-                painter = painterResource(id = R.drawable.fisika_bg),
-                contentDescription = "Background Fisika",
+                painter = painterResource(id = res),
+                contentDescription = "Background ${topikMateri.kategori}",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp),
                 contentScale = ContentScale.Crop,
-                alpha = 0.45f // Transparansi agar menyatu elegan dengan tema gelap
+                alpha = 0.45f
             )
         }
 
@@ -96,7 +105,7 @@ fun DetailMateriScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ==========================================
-            // TEKS JUDUL BESAR "PHYSICS"
+            // TEKS JUDUL BESAR
             // ==========================================
             Text(
                 text = topikMateri.kategori.uppercase().ifEmpty { "PHYSICS" },
@@ -145,7 +154,6 @@ fun DetailMateriScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 20.dp, vertical = 16.dp)
                             ) {
-                                // Teks "BAB X" (Warna Biru Tua & Tebal)
                                 Text(
                                     text = "BAB ${bab.id}",
                                     fontSize = 13.sp,
@@ -156,13 +164,80 @@ fun DetailMateriScreen(
 
                                 Spacer(modifier = Modifier.height(2.dp))
 
-                                // Judul Bab di bawahnya
                                 Text(
                                     text = bab.judulBab,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = Color.DarkGray
                                 )
+                            }
+                        }
+                    }
+
+                    // Card Khusus Kuis Utama (Ujian)
+                    item {
+                        Card(
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E3A8A)),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // <-- 2. Pasang event klik di sini untuk mengirim kategori mapel
+                                    onKuisClick(topikMateri.kategori)
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = "KUIS UTAMA (UJIAN)",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFFFFD700), // Warna Emas/Kuning
+                                        letterSpacing = 1.sp
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = "Uji Pemahaman Materi",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+
+                                    Spacer(modifier = Modifier.height(2.dp))
+
+                                    Text(
+                                        text = "Selesaikan kuis evaluasi untuk menguji sejauh mana penguasaan materimu.",
+                                        fontSize = 12.sp,
+                                        color = Color.White.copy(alpha = 0.85f)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Surface(
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = Color.White.copy(alpha = 0.2f),
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.Assignment,
+                                            contentDescription = "Kuis Utama",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

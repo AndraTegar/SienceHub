@@ -3,17 +3,19 @@ package com.kelompoksix.siencehub.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,14 +28,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
+fun BerandaScreen(
+    onNavigateToMateri: () -> Unit = {},
+    onStartQuiz: (String) -> Unit = {} // <-- Parameter callback untuk Kuis
+) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
@@ -59,7 +62,7 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Kotak Search Bar yang lebih panjang & bersih
+                        // Kotak Search Bar
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
@@ -159,17 +162,36 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                                         .background(Color(0xFFE1F5FE), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF00B0FF), modifier = Modifier.size(20.dp))
+                                    Icon(
+                                        Icons.Default.Star,
+                                        contentDescription = null,
+                                        tint = Color(0xFF00B0FF),
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                 }
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
-                                    Text(text = "Level 1", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                                    Text(text = "Pemula", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+                                    Text(
+                                        text = "Level 1",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "Pemula",
+                                        fontSize = 11.sp,
+                                        color = Color.White.copy(alpha = 0.8f)
+                                    )
                                 }
                             }
 
                             // Garis Pemisah
-                            Box(modifier = Modifier.height(30.dp).width(1.dp).background(Color.White.copy(alpha = 0.3f)))
+                            Box(
+                                modifier = Modifier
+                                    .height(30.dp)
+                                    .width(1.dp)
+                                    .background(Color.White.copy(alpha = 0.3f))
+                            )
 
                             // Streak Badge
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -179,12 +201,26 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                                         .background(Color(0xFFFFF3E0), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color(0xFFFF6D00), modifier = Modifier.size(20.dp))
+                                    Icon(
+                                        Icons.Default.LocalFireDepartment,
+                                        contentDescription = null,
+                                        tint = Color(0xFFFF6D00),
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                 }
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
-                                    Text(text = "6 Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                                    Text(text = "Streak Aktif", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+                                    Text(
+                                        text = "6 Hari",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "Streak Aktif",
+                                        fontSize = 11.sp,
+                                        color = Color.White.copy(alpha = 0.8f)
+                                    )
                                 }
                             }
                         }
@@ -228,7 +264,11 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                                     .height(8.dp)
                                     .width(if (isSelected) 24.dp else 8.dp)
                                     .clip(CircleShape)
-                                    .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.4f))
+                                    .background(
+                                        if (isSelected) Color.White else Color.White.copy(
+                                            alpha = 0.4f
+                                        )
+                                    )
                             )
                         }
                     }
@@ -250,16 +290,19 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         CardAksi(
-                            judul = "Tantangan Harian \uD83D\uDD25",
+                            judul = "Tantangan Harian 🔥",
                             deskripsi = "Selesaikan 5 soal kuis sistem pencernaan.",
                             teksTombol = "Mulai Kuis",
                             ikon = Icons.Default.PlayArrow,
                             warnaBackground = Color(0xFFE8ECE7),
                             warnaTombol = warnaHijauSage,
-                            onClick = { }
+                            onClick = {
+                                // <-- Jalankan Kuis Biologi saat Tantangan Harian diklik
+                                onStartQuiz("biologi")
+                            }
                         )
                         CardAksi(
-                            judul = "Eksperimen Virtual \uD83D\uDD2C",
+                            judul = "Eksperimen Virtual 🔬",
                             deskripsi = "Simulasikan hukum gravitasi di berbagai planet.",
                             teksTombol = "Mainkan",
                             ikon = Icons.Default.Science,
@@ -268,7 +311,7 @@ fun BerandaScreen(onNavigateToMateri: () -> Unit = {}) {
                             onClick = { }
                         )
                         CardAksi(
-                            judul = "Fakta Menarik \uD83D\uDCA1",
+                            judul = "Fakta Menarik 💡",
                             deskripsi = "Kenapa langit berwarna biru? Temukan jawabannya.",
                             teksTombol = "Baca Artikel",
                             ikon = Icons.Default.Person,
