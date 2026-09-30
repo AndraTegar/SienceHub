@@ -1,215 +1,210 @@
-package com.kelompoksix.siencehub.ui.screens
+package com.kelompoksix.siencehub.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.filled.TableRestaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kelompoksix.siencehub.data.repositories.KomponenMateri
-import com.kelompoksix.siencehub.data.repositories.KontenBab
+import com.kelompoksix.siencehub.data.models.BlokKonten
+import com.kelompoksix.siencehub.data.models.IsiBab
 
 @Composable
 fun BacaMateriScreen(
-    konten: KontenBab,
+    judulBab: String,
+    isiBab: IsiBab,
     onBackClick: () -> Unit,
-    onMulaiKuisClick: (Int) -> Unit
+    onMulaiKuisClick: () -> Unit = {}
 ) {
-    val sageGreen = Color(0xFF7A8B76)
-    val cardColor = Color(0xFFE4E6E3)
-    val redLineColor = Color(0xFFFF7A7A)
+    val darkChalkBg = Color(0xFF1E1E1E)
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(darkChalkBg)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Spacer(modifier = Modifier.height(44.dp))
 
-            // ==========================================
-            // HEADER KAPSUL
-            // ==========================================
-            Spacer(modifier = Modifier.height(48.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(50.dp)
-                        .background(Color.Black.copy(alpha = 0.25f), RoundedCornerShape(50.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Kembali", tint = Color.White, modifier = Modifier.size(18.dp))
-                    }
-                }
-                Text(
-                    text = "Physics > Bab ${konten.idBab}",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+        // Top Bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Kembali",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
                 )
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = judulBab,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            // ==========================================
-            // MESIN RENDER KONTEN OTOMATIS
-            // ==========================================
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        // Konten Utama
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = Color.White,
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-                // Looping semua blok materi yang ada di Repository
-                items(konten.daftarKomponen) { blokMateri ->
-                    when (blokMateri) {
-
-                        // 1. Jika data berupa Pertanyaan Pemantik
-                        is KomponenMateri.PertanyaanPemantik -> {
-                            Card(
-                                shape = RoundedCornerShape(24.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardColor),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(20.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Ganti icon ini dengan Image() jika properti idGambarDrawable tidak null nanti
-                                    Box(
-                                        modifier = Modifier.size(70.dp).clip(RoundedCornerShape(12.dp)).background(Color.LightGray),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(Icons.Default.DirectionsBus, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
-                                    }
-                                    Spacer(modifier = Modifier.width(16.dp))
+                // Looping Blok Konten
+                isiBab.blok.forEach { blok ->
+                    when (blok) {
+                        is BlokKonten.Paragraf -> {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                if (!blok.judul.isNullOrEmpty()) {
                                     Text(
-                                        text = blokMateri.teks,
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = Color.Black,
-                                        lineHeight = 22.sp
-                                    )
-                                }
-                            }
-                        }
-
-                        // 2. Jika data berupa Cek Pemahaman
-                        is KomponenMateri.CekPemahaman -> {
-                            Card(
-                                shape = RoundedCornerShape(24.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardColor),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
-                                    Text(text = "Cek Pemahaman", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black)
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    repeat(blokMateri.jumlahGaris) {
-                                        Box(modifier = Modifier.fillMaxWidth(0.85f).height(12.dp).background(redLineColor, CircleShape))
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                    }
-                                }
-                            }
-                        }
-
-                        // 3. Jika data berupa Rumus
-                        is KomponenMateri.Rumus -> {
-                            Card(
-                                shape = RoundedCornerShape(24.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardColor),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(24.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = blokMateri.teksKiri,
+                                        text = blok.judul,
                                         fontSize = 18.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = Color.Black,
-                                        lineHeight = 26.sp
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1E3A8A)
                                     )
-                                    Box(
-                                        modifier = Modifier.size(100.dp).background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(Icons.Default.Calculate, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(40.dp))
-                                    }
+                                    Spacer(modifier = Modifier.height(6.dp))
                                 }
-                            }
-                        }
-
-                        // 4. Jika data berupa Ilustrasi Besar
-                        is KomponenMateri.Ilustrasi -> {
-                            Card(
-                                shape = RoundedCornerShape(24.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardColor),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth().height(200.dp).padding(24.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(Icons.Default.TableRestaurant, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(60.dp))
-                                        Text(text = blokMateri.keterangan, fontSize = 12.sp, color = Color.DarkGray, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp))
-                                    }
-                                }
-                            }
-                        }
-
-                        // 5. Jika data berupa Teks Biasa (Tambahan untuk materi panjang)
-                        is KomponenMateri.TeksBiasa -> {
-                            Card(
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
                                 Text(
-                                    text = blokMateri.teks,
+                                    text = blok.teks,
                                     fontSize = 15.sp,
                                     color = Color.DarkGray,
-                                    modifier = Modifier.padding(20.dp),
-                                    lineHeight = 24.sp
+                                    lineHeight = 22.sp
                                 )
                             }
                         }
+
+                        is BlokKonten.TeksGambar -> {
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (blok.gambar != null) {
+                                        Image(
+                                            painter = painterResource(id = blok.gambar),
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(70.dp)
+                                                .clip(RoundedCornerShape(12.dp)),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                    }
+                                    Text(
+                                        text = blok.teks,
+                                        fontSize = 14.sp,
+                                        color = Color.DarkGray,
+                                        lineHeight = 20.sp,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+
+                        is BlokKonten.Rumus -> {
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF3E8FF)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    if (blok.judul.isNotEmpty()) {
+                                        Text(
+                                            text = blok.judul,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            color = Color(0xFF6B21A8)
+                                        )
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                    }
+                                    Text(
+                                        text = blok.isi,
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF4C1D95),
+                                        lineHeight = 20.sp
+                                    )
+                                }
+                            }
+                        }
+
+                        is BlokKonten.Gambar -> {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(id = blok.gambar),
+                                    contentDescription = blok.keterangan,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .clip(RoundedCornerShape(16.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                if (!blok.keterangan.isNullOrEmpty()) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = blok.keterangan,
+                                        fontSize = 12.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
-                // TOMBOL LANJUT KUIS
-                item {
+                // Tombol Lanjut ke Kuis
+                if (isiBab.kuis.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
-                        onClick = { onMulaiKuisClick(konten.idBab) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(50.dp),
-                        modifier = Modifier.fillMaxWidth().height(56.dp)
+                        onClick = onMulaiKuisClick,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E3A8A)),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
                     ) {
-                        Text(text = "Lanjut ke Kuis", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = sageGreen)
+                        Text(
+                            text = "Lanjut ke Kuis",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     }
-                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         }

@@ -20,4 +20,7 @@ data class SoalMini(
     val pembahasan: String
 )
 
-data class IsiBab(val blok: List<BlokKonten>, val kuis: List<SoalMini>)
+data class IsiBab(
+    val blok: List<BlokKonten>,
+    val kuis: List<SoalMini>
+)
