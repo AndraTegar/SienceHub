@@ -1,6 +1,7 @@
 package com.kelompoksix.siencehub.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -35,7 +36,7 @@ import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BerandaScreen(
-    onNavigateToMateri: (String) -> Unit = {},
+    onNavigateToMateri: () -> Unit = {},
     onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> }
 ) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
@@ -188,7 +189,7 @@ fun BerandaScreen(
                         CardUtama(
                             judulMateri = materi.first,
                             progress = materi.second,
-                            onClick = { onNavigateToMateri(materi.first) }
+                            onClick = { onNavigateToMateri() }
                         )
                     }
 
