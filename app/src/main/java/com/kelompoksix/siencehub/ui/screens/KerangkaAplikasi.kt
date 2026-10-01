@@ -31,23 +31,31 @@ fun KerangkaAplikasi(
     // Status untuk menyimpan topik materi yang sedang dibuka
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
     var babAktif by remember { mutableStateOf<Int?>(null) }
-    // Tombol Back Android Handler (Menutup overlay atau detail materi terlebih dahulu)
+
+    // Tombol Back Android Handler (Menutup overlay atau detail materi secara bertahap)
     BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null) {
         when {
+            // Jika sedang membaca bab, kembali ke daftar bab (topikAktif jangan dinullkan)
             babAktif != null -> babAktif = null
+
+            // Jika berada di daftar bab, kembali ke layar kategori
             topikAktif != null -> topikAktif = null
+
             tampilkanPengaturan -> tampilkanPengaturan = false
             tampilkanAchievement -> tampilkanAchievement = false
             tampilkanLeaderboard -> tampilkanLeaderboard = false
             else -> indexAktif = 0
         }
     }
+
     // Menampilkan layar penuh (overlay / detail) jika salah satu menu dipilih
     if (topikAktif != null && babAktif != null) {
         BabScreen(
             topikMateri = topikAktif!!,
             babId = babAktif!!,
-            onBackClick = { topikAktif = null; babAktif = null },
+            // KOREKSI: Saat back dari baca bab, KITA HANYA MENGHAPUS babAktif,
+            // agar topikAktif tetap ada dan layar memunculkan DetailMateriScreen kembali.
+            onBackClick = { babAktif = null },
         )
     } else if (topikAktif != null) {
         DetailMateriScreen(

@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
 import com.kelompoksix.siencehub.ui.components.SearchBarMateri
@@ -33,7 +34,8 @@ import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
 
 @Composable
 fun BerandaScreen(
-    onNavigateToMateri: () -> Unit = {},
+    onNavigateToMateri: (String) -> Unit = {},
+    onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> },
     viewModel: BerandaViewModel = viewModel()
 ) {
     val warnaHijauSage = Color(0xFF7A8B76)
@@ -42,13 +44,6 @@ fun BerandaScreen(
     val faktaSains = viewModel.faktaSains
     val isLoadingFakta = viewModel.isLoadingFakta
 
-    // State untuk SearchBar Overlay
-    var searchQuery by remember { mutableStateOf("") }
-    val contohData = listOf("Biologi: Struktur Sel", "Fisika: Hukum Newton", "Kimia: Reaksi Asam Basa")
-    val hasilCari = if (searchQuery.isNotEmpty()) {
-        contohData.filter { it.contains(searchQuery, ignoreCase = true) }
-    } else emptyList()
-
     val daftarMateri = listOf(
         Pair("Biologi: Struktur Sel", 0.1f),
         Pair("Fisika: Hukum Newton", 0.5f),
@@ -56,19 +51,27 @@ fun BerandaScreen(
     )
     val pagerState = rememberPagerState(pageCount = { daftarMateri.size })
 
-    // Root Box dengan background hijau sage penuh satu layar
+    // 1. Root Box diubah background-nya jadi Putih agar area bawah aman dan menyatu
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(warnaHijauSage)
+            .background(Color.White)
     ) {
+        // 2. Tambahkan background Hijau statis di bagian atas layar saja (berada di belakang konten)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.65f) // Hijau menutupi 65% layar bagian atas
+                .background(warnaHijauSage)
+        )
+
+        // 3. Kolom Konten yang bisa di-scroll (berada di atas background hijau & putih)
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .systemBarsPadding() // Agar aman dari status bar perangkat
+                .systemBarsPadding()
         ) {
-            // Bagian Atas: Search Bar & Tombol Notifikasi
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,14 +80,12 @@ fun BerandaScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 SearchBarMateri(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    hasilPencarian = hasilCari,
-                    onItemClick = { hasil ->
-                        println("Memilih hasil: $hasil")
-                        searchQuery = ""
-                    },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(46.dp),
+                    onHasilClick = { topik, babId ->
+                        onHasilCari(topik, babId)
+                    }
                 )
 
                 IconButton(
@@ -104,7 +105,6 @@ fun BerandaScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Kartu Status (Level 1 & Streak 6)
             Card(
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),
@@ -190,7 +190,7 @@ fun BerandaScreen(
                 CardUtama(
                     judulMateri = materi.first,
                     progress = materi.second,
-                    onClick = { onNavigateToMateri() }
+                    onClick = { onNavigateToMateri(materi.first) }
                 )
             }
 
@@ -214,7 +214,7 @@ fun BerandaScreen(
                 }
             }
 
-            // Bagian Bawah: Konten Putih Melengkung
+            // 4. Modifier `.weight(1f)` DIHAPUS dari Surface agar kolom bisa mengukur tinggi dan di-scroll
             Surface(
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 color = Color.White,
@@ -258,7 +258,9 @@ fun BerandaScreen(
                         warnaTombol = warnaHijauSage,
                         onClick = { viewModel.muatFaktaBaru() }
                     )
-                    Spacer(modifier = Modifier.height(110.dp))
+
+                    // Spacer bawah ini akan menjaga agar konten tidak tertutup Floating Navbar
+                    Spacer(modifier = Modifier.height(140.dp))
                 }
             }
         }
