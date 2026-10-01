@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
@@ -23,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.WorkspacePremium
 
 @Composable
 fun ProfilScreen(
@@ -68,7 +68,7 @@ fun ProfilScreen(
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 MenuKotakFresh(icon = Icons.Default.BarChart, bgColor = lightBlue, onClick = onNavigateToLeaderboard)
                 Spacer(modifier = Modifier.width(20.dp))
-                MenuKotakFresh(icon = Icons.Default.GridView, bgColor = lightBlue, onClick = onNavigateToAchievement)
+                MenuKotakFresh(icon = Icons.Default.WorkspacePremium, bgColor = lightBlue, onClick = onNavigateToAchievement)
                 Spacer(modifier = Modifier.width(20.dp))
                 MenuKotakFresh(icon = Icons.Default.Settings, bgColor = lightBlue, onClick = onNavigateToSettings)
             }

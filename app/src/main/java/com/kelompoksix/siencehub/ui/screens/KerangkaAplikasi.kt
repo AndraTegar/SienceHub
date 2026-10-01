@@ -75,8 +75,18 @@ fun KerangkaAplikasi(
             // LAYER 1: KONTEN HALAMAN BERDASARKAN TAB AKTIF
             when (indexAktif) {
                 0 -> BerandaScreen(
-                    onNavigateToMateri = {
-                        topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
+                    onNavigateToMateri = { judulMateri ->
+                        val topikDitemukan = MateriRepository.getDaftarTopik().find {
+                            it.judul.equals(judulMateri, ignoreCase = true) ||
+                                    it.judul.contains(judulMateri, ignoreCase = true) ||
+                                    it.kategori.contains(judulMateri, ignoreCase = true)
+                        }
+
+                        if (topikDitemukan != null) {
+                            topikAktif = topikDitemukan
+                        } else {
+                            topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
+                        }
                     },
                     onHasilCari = { topik, babId ->
                         topikAktif = topik
