@@ -24,6 +24,10 @@ fun KerangkaAplikasi(
 ) {
     var indexAktif by remember { mutableIntStateOf(0) }
 
+    //experimen fisika
+    var tampilkanEksperimen by remember { mutableStateOf(false) }
+    var eksperimenAktif by remember { mutableStateOf<String?>(null) }
+
     // Status untuk halaman tambahan yang menutupi Navbar (Overlay Screen)
     var tampilkanPengaturan by remember { mutableStateOf(false) }
     var tampilkanAchievement by remember { mutableStateOf(false) }
@@ -33,10 +37,12 @@ fun KerangkaAplikasi(
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
     var babAktif by remember { mutableStateOf<Int?>(null) }
     // Tombol Back Android Handler (Menutup overlay atau detail materi terlebih dahulu)
-    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null) {
+    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null || tampilkanEksperimen) {
         when {
             babAktif != null -> babAktif = null
             topikAktif != null -> topikAktif = null
+            eksperimenAktif != null -> eksperimenAktif = null
+            tampilkanEksperimen -> tampilkanEksperimen = false
             tampilkanPengaturan -> tampilkanPengaturan = false
             tampilkanAchievement -> tampilkanAchievement = false
             tampilkanLeaderboard -> tampilkanLeaderboard = false
@@ -57,6 +63,22 @@ fun KerangkaAplikasi(
             onBackClick = { topikAktif = null },
             onBabClick = { idBab -> babAktif = idBab },
             onKuisClick = onStartQuiz // <-- Diteruskan langsung ke DetailMateriScreen
+
+
+        )
+    } else if (eksperimenAktif != null) {
+        val tutup = { eksperimenAktif = null }
+        when (eksperimenAktif) {
+            "fisika_newton2" -> SimulatorNewtonScreen(onBackClick = tutup)
+            "astronomi_gravitasi" -> GravitasiPlanetScreen(onBackClick = tutup)
+            "kimia_ph" -> UjiPhScreen(onBackClick = tutup)
+            "matematika_timbangan" -> TimbanganScreen(onBackClick = tutup)
+            else -> { eksperimenAktif = null }   // jangan biarkan layar kosong
+        }
+    } else if (tampilkanEksperimen) {
+        EksperimenScreen(
+            onBackClick = { tampilkanEksperimen = false },
+            onPilih = { eksperimenAktif = it }
         )
     } else if (tampilkanPengaturan) {
         SettingScreen(
@@ -93,8 +115,9 @@ fun KerangkaAplikasi(
                     },
                     onHasilCari = { topik, babId ->
                         topikAktif = topik
-                        babAktif = babId   // null = buka daftar bab, angka = langsung ke isi bab
-                    }
+                        babAktif = babId
+                    },
+                    onNavigateToEksperimen = { tampilkanEksperimen = true }   // baru
                 )
 
                 1 -> MateriScreen(

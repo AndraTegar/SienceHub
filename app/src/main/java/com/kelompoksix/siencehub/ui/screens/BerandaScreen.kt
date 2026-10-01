@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -38,10 +39,12 @@ import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BerandaScreen(
-    onNavigateToMateri: (String) -> Unit = {},
-    onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> }
+    onNavigateToMateri: () -> Unit = {},
+    onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> },
+    onNavigateToEksperimen: () -> Unit = {}   // baru
 ) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
 
     val daftarMateri = listOf(
@@ -52,6 +55,7 @@ fun BerandaScreen(
     val pagerState = rememberPagerState(pageCount = { daftarMateri.size })
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.White,
         topBar = {
             // TOP BAR MODERN: Search Bar Full + Lonceng Notifikasi
@@ -90,7 +94,8 @@ fun BerandaScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = warnaHijauSage,
                     scrolledContainerColor = warnaHijauSage
-                )
+                ),
+                scrollBehavior = scrollBehavior
             )
         }
     ) { paddingValues ->
@@ -246,7 +251,7 @@ fun BerandaScreen(
                             ikon = Icons.Default.Science,
                             warnaBackground = Color(0xFFE8ECE7),
                             warnaTombol = warnaHijauSage,
-                            onClick = { }
+                            onClick = onNavigateToEksperimen
                         )
                         CardAksi(
                             judul = "Fakta Menarik \uD83D\uDCA1",
