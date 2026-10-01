@@ -41,6 +41,7 @@ fun KerangkaAplikasi(
     var tampilkanPengaturan by remember { mutableStateOf(false) }
     var tampilkanAchievement by remember { mutableStateOf(false) }
     var tampilkanLeaderboard by remember { mutableStateOf(false) }
+    var tampilkanNotifikasi by remember { mutableStateOf(false) }
 
     // Status untuk menyimpan topik materi yang sedang dibuka
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
@@ -52,7 +53,7 @@ fun KerangkaAplikasi(
     var reviewAktif by remember { mutableStateOf<String?>(null) }
 
     // Tombol Back Android Handler (Menutup overlay, review, hasil, kuis, atau materi secara bertahap)
-    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null || tampilkanEksperimen || eksperimenAktif != null) {
+    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || tampilkanNotifikasi || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null || tampilkanEksperimen || eksperimenAktif != null) {
         when {
             babAktif != null -> babAktif = null
             topikAktif != null -> topikAktif = null
@@ -61,6 +62,7 @@ fun KerangkaAplikasi(
             tampilkanPengaturan -> tampilkanPengaturan = false
             tampilkanAchievement -> tampilkanAchievement = false
             tampilkanLeaderboard -> tampilkanLeaderboard = false
+            tampilkanNotifikasi -> tampilkanNotifikasi = false
             else -> indexAktif = 0
         }
     }
@@ -171,6 +173,13 @@ fun KerangkaAplikasi(
             )
         }
 
+        // Layar Notifikasi
+        tampilkanNotifikasi -> {
+            NotifikasiScreen(
+                onBackClick = { tampilkanNotifikasi = false }
+            )
+        }
+
         // 9. Layar Simulator Eksperimen Spesifik
         eksperimenAktif != null -> {
             when (eksperimenAktif) {
@@ -213,7 +222,8 @@ fun KerangkaAplikasi(
                         babAktif = babId
                     },
                     onNavigateToEksperimen = { tampilkanEksperimen = true },
-                    onMulaiKuis = { kategori -> kuisAktif = kategori }
+                    onMulaiKuis = { kategori -> kuisAktif = kategori },
+                    onNotificationClick = { tampilkanNotifikasi = true }
                 )
 
                 1 -> MateriScreen(

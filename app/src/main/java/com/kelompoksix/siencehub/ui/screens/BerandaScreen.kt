@@ -17,6 +17,9 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kelompoksix.siencehub.data.models.TopikMateri
+import com.kelompoksix.siencehub.data.repositories.NotifikasiRepository
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
 import com.kelompoksix.siencehub.ui.components.SearchBarMateri
@@ -39,11 +43,15 @@ fun BerandaScreen(
     onNavigateToMateri: (String) -> Unit = {},
     onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> },
     onNavigateToEksperimen: () -> Unit = {},
-    onMulaiKuis: (String) -> Unit = {}
+    onMulaiKuis: (String) -> Unit = {},
+    onNotificationClick: () -> Unit = {}
 ) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+
+    val notifikasiList by NotifikasiRepository.notifikasiList.collectAsState()
+    val unreadCount = remember(notifikasiList) { notifikasiList.count { !it.isDibaca } }
 
     val faktaSains = viewModel.faktaSains
     val isLoadingFakta = viewModel.isLoadingFakta
@@ -76,19 +84,32 @@ fun BerandaScreen(
                             onHasilClick = onHasilCari
                         )
 
-                        // Tombol Ikon Lonceng Notifikasi
-                        IconButton(
-                            onClick = { /* Aksi notifikasi */ },
-                            modifier = Modifier
-                                .size(45.dp)
-                                .background(Color.White.copy(alpha = 0.25f), CircleShape)
+                        // Tombol Ikon Lonceng Notifikasi dengan Indikator Badge
+                        Box(
+                            contentAlignment = Alignment.TopEnd
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifikasi",
-                                tint = Color.White,
-                                modifier = Modifier.size(22.dp)
-                            )
+                            IconButton(
+                                onClick = onNotificationClick,
+                                modifier = Modifier
+                                    .size(45.dp)
+                                    .background(Color.White.copy(alpha = 0.25f), CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifikasi",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            if (unreadCount > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFFF3B30))
+                                )
+                            }
                         }
                     }
                 },
