@@ -18,44 +18,11 @@ import com.kelompoksix.siencehub.ui.screens.QuizScreen
 import com.kelompoksix.siencehub.ui.screens.SignupScreen
 import com.kelompoksix.siencehub.ui.screens.SplashScreen
 import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
-import com.kelompoksix.siencehub.ui.screens.KerangkaAplikasi
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    NavHost(
-        navController = navController,
-        startDestination = Routes.SPLASH,
-        enterTransition = {
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(400) // 400 milidetik
-            ) + fadeIn(animationSpec = tween(400))
-        },
-        exitTransition = {
-            slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(400)
-            ) + fadeOut(animationSpec = tween(400))
-        },
-        popEnterTransition = {
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(400)
-            ) + fadeIn(animationSpec = tween(400))
-        },
-        popExitTransition = {
-            slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(400)
-            ) + fadeOut(animationSpec = tween(400))
-        }
-    ) {
     NavHost(
         navController = navController,
         startDestination = Routes.SPLASH,

@@ -56,7 +56,6 @@ fun KerangkaAplikasi(
             topikMateri = topikAktif!!,
             onBackClick = { topikAktif = null },
             onBabClick = { idBab -> babAktif = idBab },
-            onBabClick = { idBab -> babAktif = idBab },
             onKuisClick = onStartQuiz // <-- Diteruskan langsung ke DetailMateriScreen
         )
     } else if (tampilkanPengaturan) {
@@ -90,8 +89,7 @@ fun KerangkaAplikasi(
                             topikAktif = topikDitemukan
                         } else {
                             topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
-                        },
-                        onStartQuiz = onStartQuiz
+                        }
                     },
                     onHasilCari = { topik, babId ->
                         topikAktif = topik

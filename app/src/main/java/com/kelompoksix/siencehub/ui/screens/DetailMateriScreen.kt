@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -27,7 +28,8 @@ import com.kelompoksix.siencehub.data.models.TopikMateri
 fun DetailMateriScreen(
     topikMateri: TopikMateri,
     onBackClick: () -> Unit,
-    onBabClick: (Int) -> Unit
+    onBabClick: (Int) -> Unit,
+    onKuisClick: (String) -> Unit = {}
 ) {
     val darkChalkBg = Color(0xFF1E1E1E) // Warna dasar papan tulis gelap
     val cardBlueColor = Color(0xFFD6E4F0) // Warna biru muda lembut ala Canva
