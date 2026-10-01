@@ -1,7 +1,6 @@
 package com.kelompoksix.siencehub.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -15,7 +14,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -25,21 +23,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kelompoksix.siencehub.data.models.TopikMateri
-import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
-import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BerandaScreen(
+    viewModel: BerandaViewModel = viewModel(),
     onNavigateToMateri: (String) -> Unit = {},
     onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> },
     onNavigateToEksperimen: () -> Unit = {}   // baru
