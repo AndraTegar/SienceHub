@@ -38,7 +38,8 @@ fun BerandaScreen(
     viewModel: BerandaViewModel = viewModel(),
     onNavigateToMateri: (String) -> Unit = {},
     onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> },
-    onNavigateToEksperimen: () -> Unit = {}   // baru
+    onNavigateToEksperimen: () -> Unit = {},
+    onMulaiKuis: (String) -> Unit = {}
 ) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -235,15 +236,7 @@ fun BerandaScreen(
                             color = Color.Black
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        CardAksi(
-                            judul = "Tantangan Harian \uD83D\uDD25",
-                            deskripsi = "Selesaikan 5 soal kuis sistem pencernaan.",
-                            teksTombol = "Mulai Kuis",
-                            ikon = Icons.Default.PlayArrow,
-                            warnaBackground = Color(0xFFE8ECE7),
-                            warnaTombol = warnaHijauSage,
-                            onClick = { }
-                        )
+
                         CardAksi(
                             judul = "Eksperimen Virtual \uD83D\uDD2C",
                             deskripsi = "Simulasikan hukum gravitasi di berbagai planet.",

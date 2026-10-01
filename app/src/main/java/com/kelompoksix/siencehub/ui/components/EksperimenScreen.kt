@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.ui.theme.GreenBackground
 
 private data class MenuEksperimen(
     val id: String,
@@ -38,11 +39,11 @@ private val daftarEksperimen = listOf(
 @Composable
 fun EksperimenScreen(onBackClick: () -> Unit, onPilih: (String) -> Unit) {
     val context = LocalContext.current
-    val kuning = Color(0xFFFFC94D)
+    val Green =  Color(0xFF778873)
     val biruKartu = Color(0xFFC9DDF5)
     val biruTeks = Color(0xFF2F5FE3)
 
-    Column(Modifier.fillMaxSize().background(kuning)) {
+    Column(Modifier.fillMaxSize().background(GreenBackground)) {
         Spacer(Modifier.height(44.dp))
         Box(
             Modifier.fillMaxWidth().padding(horizontal = 20.dp),

@@ -52,7 +52,7 @@ fun KerangkaAplikasi(
     var reviewAktif by remember { mutableStateOf<String?>(null) }
 
     // Tombol Back Android Handler (Menutup overlay, review, hasil, kuis, atau materi secara bertahap)
-    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null) {
+    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null || tampilkanEksperimen || eksperimenAktif != null) {
         when {
             babAktif != null -> babAktif = null
             topikAktif != null -> topikAktif = null
@@ -65,7 +65,7 @@ fun KerangkaAplikasi(
         }
     }
 
-    // Menampilkan layar penuh (overlay / detail / kuis / hasil / review) berdasarkan prioritas
+    // Menampilkan layar penuh (overlay / detail / kuis / hasil / review / eksperimen) berdasarkan prioritas
     when {
         // 1. Jika Sedang Melihat Ulasan Soal (QuizReviewScreen)
         reviewAktif != null -> {
@@ -171,6 +171,27 @@ fun KerangkaAplikasi(
             )
         }
 
+        // 9. Layar Simulator Eksperimen Spesifik
+        eksperimenAktif != null -> {
+            when (eksperimenAktif) {
+                "fisika_newton2" -> SimulatorNewtonScreen(onBackClick = { eksperimenAktif = null })
+                "astronomi_gravitasi" -> GravitasiPlanetScreen(onBackClick = { eksperimenAktif = null })
+                "kimia_ph" -> UjiPhScreen(onBackClick = { eksperimenAktif = null })
+                "matematika_timbangan" -> TimbanganScreen(onBackClick = { eksperimenAktif = null })
+                else -> eksperimenAktif = null
+            }
+        }
+
+        // 10. Layar Daftar Eksperimen Virtual
+        tampilkanEksperimen -> {
+            EksperimenScreen(
+                onBackClick = { tampilkanEksperimen = false },
+                onPilih = { idEksperimen ->
+                    eksperimenAktif = idEksperimen
+                }
+            )
+        }
+
         // 9. LAYAR UTAMA DENGAN BOTTOM NAVIGATION
         else -> {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -185,17 +206,14 @@ fun KerangkaAplikasi(
                                     it.kategori.contains(judulMateri, ignoreCase = true)
                         }
 
-                        if (topikDitemukan != null) {
-                            topikAktif = topikDitemukan
-                        } else {
-                            topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
-                        }
+                        topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
                     },
                     onHasilCari = { topik, babId ->
                         topikAktif = topik
                         babAktif = babId
                     },
-                    onNavigateToEksperimen = { tampilkanEksperimen = true }   // baru
+                    onNavigateToEksperimen = { tampilkanEksperimen = true },
+                    onMulaiKuis = { kategori -> kuisAktif = kategori }
                 )
 
                 1 -> MateriScreen(
