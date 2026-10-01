@@ -7,8 +7,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +26,11 @@ fun MateriScreen(
     val warnaHijauSage = Color(0xFF7A8B76)
     val daftarKategori = KategoriDataProvider.getDaftarKategori()
 
+    val context = LocalContext.current
+    val userName = remember(context) {
+        UserSessionManager.getUserName(context).ifBlank { "Pengguna ScienceHub" }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -34,7 +41,7 @@ fun MateriScreen(
 
         // Sapaan Header
         Text(
-            text = "Halo," userName,
+            text = "Halo, $userName",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
