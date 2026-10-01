@@ -41,7 +41,7 @@ fun DetailMateriScreen(
         "kimia" -> R.drawable.kimia_bg
         "biologi" -> R.drawable.biologi_bg
         "astronomi" -> R.drawable.astronomi_bg
-        "matematika" -> R.drawable.matematika_bg
+        "math" -> R.drawable.matematika_bg
         "geografi" -> R.drawable.geografi_bg
         else -> null
     }

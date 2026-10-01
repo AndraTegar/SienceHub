@@ -1,6 +1,7 @@
 package com.kelompoksix.siencehub.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -27,10 +28,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
 import com.kelompoksix.siencehub.ui.components.SearchBarMateri
+import com.kelompoksix.siencehub.ui.components.SearchBarMateri
+import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +47,9 @@ fun BerandaScreen(
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+
+    val faktaSains = viewModel.faktaSains
+    val isLoadingFakta = viewModel.isLoadingFakta
 
     val daftarMateri = listOf(
         Pair("Biologi: Struktur Sel", 0.1f),
@@ -251,12 +259,12 @@ fun BerandaScreen(
                         )
                         CardAksi(
                             judul = "Fakta Menarik \uD83D\uDCA1",
-                            deskripsi = "Kenapa langit berwarna biru? Temukan jawabannya.",
-                            teksTombol = "Baca Artikel",
+                            deskripsi = if (isLoadingFakta) "Memuat Fakta Menarik" else faktaSains,
+                            teksTombol = if (isLoadingFakta) "Memuat..." else "Fakta Baru \uD83D\uDCA1",
                             ikon = Icons.Default.Person,
                             warnaBackground = Color(0xFFE8ECE7),
                             warnaTombol = warnaHijauSage,
-                            onClick = { }
+                            onClick = { viewModel.muatFaktaBaru() }
                         )
                         Spacer(modifier = Modifier.height(120.dp))
                     }
