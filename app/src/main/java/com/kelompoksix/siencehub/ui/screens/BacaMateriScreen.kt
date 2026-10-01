@@ -1,4 +1,4 @@
-package com.kelompoksix.siencehub.ui.components
+package com.kelompoksix.siencehub.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
