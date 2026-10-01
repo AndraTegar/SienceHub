@@ -50,14 +50,12 @@ fun QuizReviewScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
                             tint = Color.White
                         )
                     }
-                }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = sageGreen
