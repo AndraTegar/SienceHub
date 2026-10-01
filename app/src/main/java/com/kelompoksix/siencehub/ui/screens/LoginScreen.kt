@@ -17,7 +17,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import com.kelompoksix.siencehub.utils.UserSessionManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -42,6 +44,14 @@ fun LoginScreen(
     val primaryGreen = Color(0xFF7A8B76)
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
+    val handleLogin = {
+        if (isFormValid) {
+            UserSessionManager.saveSession(context, email)
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -136,9 +146,7 @@ fun LoginScreen(
                 keyboardActions = KeyboardActions(
                     onDone = {
                         focusManager.clearFocus()
-                        if (isFormValid) {
-                            onLoginSuccess()
-                        }
+                        handleLogin()
                     }
                 ),
                 colors = TextFieldDefaults.colors(
@@ -162,7 +170,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = onLoginSuccess,
+                onClick = handleLogin,
                 enabled = isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,6 +19,7 @@ import com.kelompoksix.siencehub.ui.screens.QuizScreen
 import com.kelompoksix.siencehub.ui.screens.SignupScreen
 import com.kelompoksix.siencehub.ui.screens.SplashScreen
 import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
+import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
 fun AppNavigation() {
@@ -99,8 +101,10 @@ fun AppNavigation() {
         // RUTE UTAMA: KERANGKA APLIKASI
         // ==========================================
         composable(Routes.HOME) {
+            val context = LocalContext.current
             KerangkaAplikasi(
                 onLogout = {
+                    UserSessionManager.clearSession(context)
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }

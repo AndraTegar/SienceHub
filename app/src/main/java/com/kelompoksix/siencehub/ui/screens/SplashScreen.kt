@@ -14,15 +14,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kelompoksix.siencehub.ui.navigation.Routes
+import com.kelompoksix.siencehub.utils.UserSessionManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun SplashScreen(navController: NavController) {
+    val context = LocalContext.current
     // Membuat nilai awal untuk animasi ukuran (scale) dan transparansi (alpha)
     val scale = remember { Animatable(0.5f) }
     val alpha = remember { Animatable(0f) }
@@ -42,10 +45,18 @@ fun SplashScreen(navController: NavController) {
             )
         }
 
-        // Jeda waktu total 2 detik sebelum berpindah ke halaman Welcome
+        // Jeda waktu total 2 detik sebelum berpindah
         delay(2000L)
-        navController.navigate(Routes.WELCOME) {
-            popUpTo(Routes.SPLASH) { inclusive = true }
+
+        // Cek jika pengguna sudah login
+        if (UserSessionManager.isLoggedIn(context)) {
+            navController.navigate(Routes.HOME) {
+                popUpTo(Routes.SPLASH) { inclusive = true }
+            }
+        } else {
+            navController.navigate(Routes.WELCOME) {
+                popUpTo(Routes.SPLASH) { inclusive = true }
+            }
         }
     }
 

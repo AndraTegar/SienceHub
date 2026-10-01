@@ -18,7 +18,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
+import com.kelompoksix.siencehub.utils.UserSessionManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +48,14 @@ fun SignupScreen(
     val sageGreen = Color(0xFF7A8B76)
     val darkText = Color(0xFF161823)
     val fieldBgColor = Color(0xFFF1F2F4) // Warna abu-abu kartu modern
+    val context = LocalContext.current
+
+    val handleSignup = {
+        if (email.isNotBlank()) {
+            UserSessionManager.saveSession(context, email)
+        }
+        onCreateAccountSuccess()
+    }
 
     Box(
         modifier = Modifier
@@ -195,7 +205,7 @@ fun SignupScreen(
 
             // Tombol Create Account
             Button(
-                onClick = onCreateAccountSuccess,
+                onClick = handleSignup,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),

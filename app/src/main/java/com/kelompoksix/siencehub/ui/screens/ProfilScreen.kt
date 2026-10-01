@@ -15,14 +15,17 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.filled.WorkspacePremium
+import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
 fun ProfilScreen(
@@ -32,6 +35,14 @@ fun ProfilScreen(
 ) {
     val sageGreen = Color(0xFF7A8B76)
     val lightBlue = Color(0xFFE3F0FF)
+
+    val context = LocalContext.current
+    val userName = remember(context) {
+        UserSessionManager.getUserName(context).ifBlank { "Pengguna ScienceHub" }
+    }
+    val userEmail = remember(context) {
+        UserSessionManager.getUserEmail(context).ifBlank { "user@sciencehub.com" }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -59,8 +70,8 @@ fun ProfilScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(text = "Ridho Surya Saputra", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-            Text(text = "ridho@gmail.com", fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
+            Text(text = userName, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+            Text(text = userEmail, fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
 
             Spacer(modifier = Modifier.height(32.dp))
 
