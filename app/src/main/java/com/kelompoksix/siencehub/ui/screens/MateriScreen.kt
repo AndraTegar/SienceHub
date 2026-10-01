@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.repositories.KategoriDataProvider
 import com.kelompoksix.siencehub.ui.components.KartuKategori
+import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
 fun MateriScreen(
@@ -33,7 +34,7 @@ fun MateriScreen(
 
         // Sapaan Header
         Text(
-            text = "Halo, Ridho",
+            text = "Halo," userName,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
