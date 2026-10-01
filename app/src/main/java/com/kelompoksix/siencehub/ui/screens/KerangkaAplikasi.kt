@@ -17,6 +17,15 @@ import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.ui.components.FloatingBottomNav
 
+// Data class penampung hasil kuis untuk dilempar ke Result & Review Screen
+data class HasilKuisData(
+    val subjectName: String,
+    val score: Int,
+    val total: Int,
+    val correct: Int,
+    val wrong: Int
+)
+
 @Composable
 fun KerangkaAplikasi(
     onLogout: () -> Unit
@@ -32,15 +41,19 @@ fun KerangkaAplikasi(
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
     var babAktif by remember { mutableStateOf<Int?>(null) }
 
-    // Tombol Back Android Handler (Menutup overlay atau detail materi secara bertahap)
-    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null) {
+    // VARIABEL KUIS, RESULT, DAN REVIEW
+    var kuisAktif by remember { mutableStateOf<String?>(null) }
+    var hasilKuisAktif by remember { mutableStateOf<HasilKuisData?>(null) }
+    var reviewAktif by remember { mutableStateOf<String?>(null) }
+
+    // Tombol Back Android Handler (Menutup overlay, review, hasil, kuis, atau materi secara bertahap)
+    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null) {
         when {
-            // Jika sedang membaca bab, kembali ke daftar bab (topikAktif jangan dinullkan)
-            babAktif != null -> babAktif = null
-
-            // Jika berada di daftar bab, kembali ke layar kategori
-            topikAktif != null -> topikAktif = null
-
+            reviewAktif != null -> reviewAktif = null             // Keluar dari review kembali ke halaman hasil
+            hasilKuisAktif != null -> hasilKuisAktif = null       // Keluar dari hasil kembali ke detail materi
+            kuisAktif != null -> kuisAktif = null                 // Keluar dari kuis kembali ke detail materi
+            babAktif != null -> babAktif = null                   // Keluar dari baca bab kembali ke daftar bab
+            topikAktif != null -> topikAktif = null               // Keluar dari detail materi kembali ke menu utama
             tampilkanPengaturan -> tampilkanPengaturan = false
             tampilkanAchievement -> tampilkanAchievement = false
             tampilkanLeaderboard -> tampilkanLeaderboard = false
@@ -48,85 +61,164 @@ fun KerangkaAplikasi(
         }
     }
 
-    // Menampilkan layar penuh (overlay / detail) jika salah satu menu dipilih
-    if (topikAktif != null && babAktif != null) {
-        BabScreen(
-            topikMateri = topikAktif!!,
-            babId = babAktif!!,
-            // KOREKSI: Saat back dari baca bab, KITA HANYA MENGHAPUS babAktif,
-            // agar topikAktif tetap ada dan layar memunculkan DetailMateriScreen kembali.
-            onBackClick = { babAktif = null },
-        )
-    } else if (topikAktif != null) {
-        DetailMateriScreen(
-            topikMateri = topikAktif!!,
-            onBackClick = { topikAktif = null },
-            onBabClick = { idBab -> babAktif = idBab }
-        )
-    } else if (tampilkanPengaturan) {
-        SettingScreen(
-            onBackClick = { tampilkanPengaturan = false },
-            onLogoutClick = { onLogout() }
-        )
-    } else if (tampilkanAchievement) {
-        AchievementScreen(
-            onBackClick = { tampilkanAchievement = false }
-        )
-    } else if (tampilkanLeaderboard) {
-        LeaderboardScreen(
-            onBackClick = { tampilkanLeaderboard = false }
-        )
-    } else {
-        // LAYAR UTAMA DENGAN BOTTOM NAVIGATION
-        Box(modifier = Modifier.fillMaxSize()) {
+    // Menampilkan layar penuh (overlay / detail / kuis / hasil / review) berdasarkan prioritas
+    when {
+        // 1. Jika Sedang Melihat Ulasan Soal (QuizReviewScreen)
+        reviewAktif != null -> {
+            QuizReviewScreen(
+                subjectName = reviewAktif!!,
+                onBackClick = { reviewAktif = null }
+            )
+        }
 
-            // LAYER 1: KONTEN HALAMAN BERDASARKAN TAB AKTIF
-            when (indexAktif) {
-                0 -> BerandaScreen(
-                    onNavigateToMateri = {
-                        // Contoh: Ketika tombol di beranda diklik, langsung buka topik Biologi
-                        topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
-                    }
-                )
+        // 2. Jika Kuis Selesai dan Menampilkan Hasil (QuizResultScreen)
+        hasilKuisAktif != null -> {
+            QuizResultScreen(
+                score = hasilKuisAktif!!.score,
+                totalQuestions = hasilKuisAktif!!.total / 20, // Sesuaikan jika per soal bernilai 20 poin
+                correctCount = hasilKuisAktif!!.correct,
+                wrongCount = hasilKuisAktif!!.wrong,
+                onBackClick = {
+                    hasilKuisAktif = null
+                    kuisAktif = null
+                },
+                onReviewClick = {
+                    reviewAktif = hasilKuisAktif!!.subjectName
+                },
+                onHomeClick = {
+                    // BERSIHKAN SEMUA STATE KUIS AGAR KEMBALI KE BERANDA/MATERI UTAMA
+                    hasilKuisAktif = null
+                    kuisAktif = null
+                    topikAktif = null
+                    babAktif = null
+                },
+                onLeaderboardClick = {
+                    // BERSIHKAN STATE KUIS DAN AKTIFKAN LEADERBOARD SECARA LANGSUNG
+                    hasilKuisAktif = null
+                    kuisAktif = null
+                    topikAktif = null
+                    babAktif = null
+                    tampilkanLeaderboard = true // Langsung buka leaderboard
+                }
+            )
+        }
+        // 3. Jika Kuis Sedang Berjalan (QuizScreen)
+        kuisAktif != null -> {
+            QuizScreen(
+                subjectName = kuisAktif!!,
+                onBackClick = { kuisAktif = null },
+                onQuizFinished = { score, total, correct, wrong ->
+                    val subjekSelesai = kuisAktif!!
+                    // Tutup kuis yang sedang berjalan
+                    kuisAktif = null
+                    // Buka layar hasil kuis dengan membawa data skor
+                    hasilKuisAktif = HasilKuisData(
+                        subjectName = subjekSelesai,
+                        score = score,
+                        total = total,
+                        correct = correct,
+                        wrong = wrong
+                    )
+                }
+            )
+        }
 
-                1 -> MateriScreen(
-                    onMateriClick = { judulKategori ->
-                        // Mencocokkan kartu materi yang diklik dengan data di repository
-                        val topikDitemukan = MateriRepository.getDaftarTopik().find {
-                            it.judul.contains(judulKategori, ignoreCase = true) ||
-                                    it.kategori.contains(judulKategori, ignoreCase = true)
+        // 4. Jika Sedang Membaca Bab Materi
+        topikAktif != null && babAktif != null -> {
+            BabScreen(
+                topikMateri = topikAktif!!,
+                babId = babAktif!!,
+                onBackClick = { babAktif = null },
+            )
+        }
+
+        // 5. Jika Sedang di Daftar Bab / Detail Materi
+        topikAktif != null -> {
+            DetailMateriScreen(
+                topikMateri = topikAktif!!,
+                onBackClick = { topikAktif = null },
+                onBabClick = { idBab -> babAktif = idBab },
+                onKuisClick = {
+                    // Membuka kuis berdasarkan kategori materi (contoh: "Fisika", "Biologi", dll)
+                    kuisAktif = topikAktif!!.kategori
+                }
+            )
+        }
+
+        // 6. Layar Pengaturan
+        tampilkanPengaturan -> {
+            SettingScreen(
+                onBackClick = { tampilkanPengaturan = false },
+                onLogoutClick = { onLogout() }
+            )
+        }
+
+        // 7. Layar Achievement
+        tampilkanAchievement -> {
+            AchievementScreen(
+                onBackClick = { tampilkanAchievement = false }
+            )
+        }
+
+        // 8. Layar Leaderboard
+        tampilkanLeaderboard -> {
+            LeaderboardScreen(
+                onBackClick = { tampilkanLeaderboard = false }
+            )
+        }
+
+        // 9. LAYAR UTAMA DENGAN BOTTOM NAVIGATION
+        else -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                // LAYER 1: KONTEN HALAMAN BERDASARKAN TAB AKTIF
+                when (indexAktif) {
+                    0 -> BerandaScreen(
+                        onNavigateToMateri = { judulMateri ->
+                            val topikDitemukan = MateriRepository.getDaftarTopik().find {
+                                it.judul.contains(judulMateri, ignoreCase = true) ||
+                                        it.kategori.contains(judulMateri, ignoreCase = true)
+                            }
+                            topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
+                        },
+                        onHasilCari = { topik, babId ->
+                            topikAktif = topik
+                            babAktif = babId
                         }
+                    )
 
-                        if (topikDitemukan != null) {
-                            topikAktif = topikDitemukan
-                        } else {
-                            // Fallback jika belum ada datanya, buka topik pertama
-                            topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
+                    1 -> MateriScreen(
+                        onMateriClick = { judulKategori ->
+                            val topikDitemukan = MateriRepository.getDaftarTopik().find {
+                                it.judul.contains(judulKategori, ignoreCase = true) ||
+                                        it.kategori.contains(judulKategori, ignoreCase = true)
+                            }
+                            topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
                         }
-                    }
-                )
+                    )
 
-                2 -> ProfilScreen(
-                    onNavigateToSettings = { tampilkanPengaturan = true },
-                    onNavigateToAchievement = { tampilkanAchievement = true },
-                    onNavigateToLeaderboard = { tampilkanLeaderboard = true }
+                    2 -> ProfilScreen(
+                        onNavigateToSettings = { tampilkanPengaturan = true },
+                        onNavigateToAchievement = { tampilkanAchievement = true },
+                        onNavigateToLeaderboard = { tampilkanLeaderboard = true }
+                    )
+                }
+
+                // LAYER 2: FLOATING BOTTOM NAVIGATION
+                FloatingBottomNav(
+                    selectedIndex = indexAktif,
+                    onItemSelected = { index ->
+                        indexAktif = index
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(
+                            start = 30.dp,
+                            end = 30.dp,
+                            bottom = 50.dp
+                        )
                 )
             }
-
-            // LAYER 2: FLOATING BOTTOM NAVIGATION
-            FloatingBottomNav(
-                selectedIndex = indexAktif,
-                onItemSelected = { index ->
-                    indexAktif = index
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(
-                        start = 30.dp,
-                        end = 30.dp,
-                        bottom = 50.dp
-                    )
-            )
         }
     }
 }
