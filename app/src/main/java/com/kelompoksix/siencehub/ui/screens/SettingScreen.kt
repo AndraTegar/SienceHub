@@ -77,7 +77,7 @@ fun SettingScreen(
                 item { SettingItemAction("Change password") }
                 item { SettingItemAction("Add a payment method", iconRight = Icons.Default.Add) }
                 item { SettingItemToggle("Push notifications", true) }
-                item { SettingItemToggle("Dark mode", false) }
+                // Baris Dark mode telah dihapus dari sini
 
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
