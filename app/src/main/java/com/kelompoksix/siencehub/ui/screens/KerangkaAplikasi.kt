@@ -17,6 +17,15 @@ import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.ui.components.FloatingBottomNav
 
+// Data class penampung hasil kuis untuk dilempar ke Result & Review Screen
+data class HasilKuisData(
+    val subjectName: String,
+    val score: Int,
+    val total: Int,
+    val correct: Int,
+    val wrong: Int
+)
+
 @Composable
 fun KerangkaAplikasi(
     onLogout: () -> Unit,
@@ -36,8 +45,14 @@ fun KerangkaAplikasi(
     // Status untuk menyimpan topik materi yang sedang dibuka
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
     var babAktif by remember { mutableStateOf<Int?>(null) }
-    // Tombol Back Android Handler (Menutup overlay atau detail materi terlebih dahulu)
-    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null || tampilkanEksperimen) {
+
+    // VARIABEL KUIS, RESULT, DAN REVIEW
+    var kuisAktif by remember { mutableStateOf<String?>(null) }
+    var hasilKuisAktif by remember { mutableStateOf<HasilKuisData?>(null) }
+    var reviewAktif by remember { mutableStateOf<String?>(null) }
+
+    // Tombol Back Android Handler (Menutup overlay, review, hasil, kuis, atau materi secara bertahap)
+    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null) {
         when {
             babAktif != null -> babAktif = null
             topikAktif != null -> topikAktif = null
@@ -49,53 +64,116 @@ fun KerangkaAplikasi(
             else -> indexAktif = 0
         }
     }
-    // Menampilkan layar penuh (overlay / detail) jika salah satu menu dipilih
-    if (topikAktif != null && babAktif != null) {
-        BabScreen(
-            topikMateri = topikAktif!!,
-            babId = babAktif!!,
-            onBackClick = { topikAktif = null; babAktif = null },
-        )
-    } else if (topikAktif != null) {
-        // TAMPILAN 2: Halaman Daftar Bab
-        DetailMateriScreen(
-            topikMateri = topikAktif!!,
-            onBackClick = { topikAktif = null },
-            onBabClick = { idBab -> babAktif = idBab },
-            onKuisClick = onStartQuiz // <-- Diteruskan langsung ke DetailMateriScreen
 
-
-        )
-    } else if (eksperimenAktif != null) {
-        val tutup = { eksperimenAktif = null }
-        when (eksperimenAktif) {
-            "fisika_newton2" -> SimulatorNewtonScreen(onBackClick = tutup)
-            "astronomi_gravitasi" -> GravitasiPlanetScreen(onBackClick = tutup)
-            "kimia_ph" -> UjiPhScreen(onBackClick = tutup)
-            "matematika_timbangan" -> TimbanganScreen(onBackClick = tutup)
-            else -> { eksperimenAktif = null }   // jangan biarkan layar kosong
+    // Menampilkan layar penuh (overlay / detail / kuis / hasil / review) berdasarkan prioritas
+    when {
+        // 1. Jika Sedang Melihat Ulasan Soal (QuizReviewScreen)
+        reviewAktif != null -> {
+            QuizReviewScreen(
+                subjectName = reviewAktif!!,
+                onBackClick = { reviewAktif = null }
+            )
         }
-    } else if (tampilkanEksperimen) {
-        EksperimenScreen(
-            onBackClick = { tampilkanEksperimen = false },
-            onPilih = { eksperimenAktif = it }
-        )
-    } else if (tampilkanPengaturan) {
-        SettingScreen(
-            onBackClick = { tampilkanPengaturan = false },
-            onLogoutClick = { onLogout() }
-        )
-    } else if (tampilkanAchievement) {
-        AchievementScreen(
-            onBackClick = { tampilkanAchievement = false }
-        )
-    } else if (tampilkanLeaderboard) {
-        LeaderboardScreen(
-            onBackClick = { tampilkanLeaderboard = false }
-        )
-    } else {
-        // LAYAR UTAMA DENGAN BOTTOM NAVIGATION
-        Box(modifier = Modifier.fillMaxSize()) {
+
+        // 2. Jika Kuis Selesai dan Menampilkan Hasil (QuizResultScreen)
+        hasilKuisAktif != null -> {
+            QuizResultScreen(
+                score = hasilKuisAktif!!.score,
+                totalQuestions = hasilKuisAktif!!.total / 20, // Sesuaikan jika per soal bernilai 20 poin
+                correctCount = hasilKuisAktif!!.correct,
+                wrongCount = hasilKuisAktif!!.wrong,
+                onBackClick = {
+                    hasilKuisAktif = null
+                    kuisAktif = null
+                },
+                onReviewClick = {
+                    reviewAktif = hasilKuisAktif!!.subjectName
+                },
+                onHomeClick = {
+                    // BERSIHKAN SEMUA STATE KUIS AGAR KEMBALI KE BERANDA/MATERI UTAMA
+                    hasilKuisAktif = null
+                    kuisAktif = null
+                    topikAktif = null
+                    babAktif = null
+                },
+                onLeaderboardClick = {
+                    // BERSIHKAN STATE KUIS DAN AKTIFKAN LEADERBOARD SECARA LANGSUNG
+                    hasilKuisAktif = null
+                    kuisAktif = null
+                    topikAktif = null
+                    babAktif = null
+                    tampilkanLeaderboard = true // Langsung buka leaderboard
+                }
+            )
+        }
+        // 3. Jika Kuis Sedang Berjalan (QuizScreen)
+        kuisAktif != null -> {
+            QuizScreen(
+                subjectName = kuisAktif!!,
+                onBackClick = { kuisAktif = null },
+                onQuizFinished = { score, total, correct, wrong ->
+                    val subjekSelesai = kuisAktif!!
+                    // Tutup kuis yang sedang berjalan
+                    kuisAktif = null
+                    // Buka layar hasil kuis dengan membawa data skor
+                    hasilKuisAktif = HasilKuisData(
+                        subjectName = subjekSelesai,
+                        score = score,
+                        total = total,
+                        correct = correct,
+                        wrong = wrong
+                    )
+                }
+            )
+        }
+
+        // 4. Jika Sedang Membaca Bab Materi
+        topikAktif != null && babAktif != null -> {
+            BabScreen(
+                topikMateri = topikAktif!!,
+                babId = babAktif!!,
+                onBackClick = { babAktif = null },
+            )
+        }
+
+        // 5. Jika Sedang di Daftar Bab / Detail Materi
+        topikAktif != null -> {
+            DetailMateriScreen(
+                topikMateri = topikAktif!!,
+                onBackClick = { topikAktif = null },
+                onBabClick = { idBab -> babAktif = idBab },
+                onKuisClick = {
+                    // Membuka kuis berdasarkan kategori materi (contoh: "Fisika", "Biologi", dll)
+                    kuisAktif = topikAktif!!.kategori
+                }
+            )
+        }
+
+        // 6. Layar Pengaturan
+        tampilkanPengaturan -> {
+            SettingScreen(
+                onBackClick = { tampilkanPengaturan = false },
+                onLogoutClick = { onLogout() }
+            )
+        }
+
+        // 7. Layar Achievement
+        tampilkanAchievement -> {
+            AchievementScreen(
+                onBackClick = { tampilkanAchievement = false }
+            )
+        }
+
+        // 8. Layar Leaderboard
+        tampilkanLeaderboard -> {
+            LeaderboardScreen(
+                onBackClick = { tampilkanLeaderboard = false }
+            )
+        }
+
+        // 9. LAYAR UTAMA DENGAN BOTTOM NAVIGATION
+        else -> {
+            Box(modifier = Modifier.fillMaxSize()) {
 
             // LAYER 1: KONTEN HALAMAN BERDASARKAN TAB AKTIF
             when (indexAktif) {

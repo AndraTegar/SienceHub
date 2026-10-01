@@ -29,13 +29,12 @@ fun DetailMateriScreen(
     topikMateri: TopikMateri,
     onBackClick: () -> Unit,
     onBabClick: (Int) -> Unit,
-    onKuisClick: (String) -> Unit = {}
+    onKuisClick: () -> Unit // <--- TAMBAHKAN PARAMETER INI AGAR BISA DIPANGGIL DARI KERANGKA APLIKASI
 ) {
-    val darkChalkBg = Color(0xFF1E1E1E) // Warna dasar papan tulis gelap
-    val cardBlueColor = Color(0xFFD6E4F0) // Warna biru muda lembut ala Canva
-    val textBlueColor = Color(0xFF1E3A8A) // Warna teks "BAB X" biru tua
+    val darkChalkBg = Color(0xFF1E1E1E)
+    val cardBlueColor = Color(0xFFD6E4F0)
+    val textBlueColor = Color(0xFF1E3A8A)
 
-    // Mengecek apakah topik yang dibuka adalah Fisika
     val backgroundRes: Int? = when (topikMateri.kategori.lowercase()) {
         "fisika" -> R.drawable.fisika_bg
         "kimia" -> R.drawable.kimia_bg
@@ -51,7 +50,6 @@ fun DetailMateriScreen(
             .fillMaxSize()
             .background(darkChalkBg)
     ) {
-        // Jika topik Fisika, tampilkan gambar latar belakang dari drawable yang Anda tambahkan
         backgroundRes?.let { res ->
             Image(
                 painter = painterResource(id = res),
@@ -67,9 +65,6 @@ fun DetailMateriScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // ==========================================
-            // TOP BAR BERBENTUK KAPSUL
-            // ==========================================
             Spacer(modifier = Modifier.height(44.dp))
             Box(
                 modifier = Modifier
@@ -104,9 +99,6 @@ fun DetailMateriScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ==========================================
-            // TEKS JUDUL BESAR "PHYSICS"
-            // ==========================================
             Text(
                 text = topikMateri.kategori.uppercase().ifEmpty { "PHYSICS" },
                 color = Color.White,
@@ -121,9 +113,6 @@ fun DetailMateriScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // ==========================================
-            // KONTEN UTAMA (Background Putih Melengkung)
-            // ==========================================
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -139,7 +128,6 @@ fun DetailMateriScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    // Perulangan Daftar Bab
                     items(topikMateri.daftarBab) { bab ->
                         Card(
                             shape = RoundedCornerShape(20.dp),
@@ -154,7 +142,6 @@ fun DetailMateriScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 20.dp, vertical = 16.dp)
                             ) {
-                                // Teks "BAB X" (Warna Biru Tua & Tebal)
                                 Text(
                                     text = "BAB ${bab.id}",
                                     fontSize = 13.sp,
@@ -165,7 +152,6 @@ fun DetailMateriScreen(
 
                                 Spacer(modifier = Modifier.height(2.dp))
 
-                                // Judul Bab di bawahnya
                                 Text(
                                     text = bab.judulBab,
                                     fontSize = 14.sp,
@@ -176,7 +162,9 @@ fun DetailMateriScreen(
                         }
                     }
 
-                    // Card Khusus Kuis Utama (Ujian)
+                    // ==========================================
+                    // CARD KUIS UTAMA (DITAMBAHKAN .clickable DI SINI)
+                    // ==========================================
                     item {
                         Card(
                             shape = RoundedCornerShape(20.dp),
@@ -184,10 +172,7 @@ fun DetailMateriScreen(
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
-                                    // <-- 2. Pasang event klik di sini untuk mengirim kategori mapel
-                                    onKuisClick(topikMateri.kategori)
-                                }
+                                .clickable { onKuisClick() } // <--- MENJALANKAN FUNGSI KUIS SAAT DIKLIK
                         ) {
                             Row(
                                 modifier = Modifier
@@ -202,7 +187,7 @@ fun DetailMateriScreen(
                                         text = "KUIS UTAMA (UJIAN)",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = Color(0xFFFFD700), // Warna Emas/Kuning
+                                        color = Color(0xFFFFD700),
                                         letterSpacing = 1.sp
                                     )
 
