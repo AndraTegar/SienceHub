@@ -36,11 +36,10 @@ import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BerandaScreen(
-    onNavigateToMateri: () -> Unit = {},
+    onNavigateToMateri: (String) -> Unit = {},
     onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> }
 ) {
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
 
     val daftarMateri = listOf(
@@ -51,7 +50,6 @@ fun BerandaScreen(
     val pagerState = rememberPagerState(pageCount = { daftarMateri.size })
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.White,
         topBar = {
             // TOP BAR MODERN: Search Bar Full + Lonceng Notifikasi
@@ -65,7 +63,9 @@ fun BerandaScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         SearchBarMateri(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp),
                             onHasilClick = onHasilCari
                         )
 
@@ -88,8 +88,7 @@ fun BerandaScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = warnaHijauSage,
                     scrolledContainerColor = warnaHijauSage
-                ),
-                scrollBehavior = scrollBehavior
+                )
             )
         }
     ) { paddingValues ->
@@ -189,7 +188,7 @@ fun BerandaScreen(
                         CardUtama(
                             judulMateri = materi.first,
                             progress = materi.second,
-                            onClick = { onNavigateToMateri() }
+                            onClick = { onNavigateToMateri(materi.first) }
                         )
                     }
 
