@@ -6,6 +6,9 @@ import com.kelompoksix.siencehub.data.models.TopikMateri
 object MateriRepository {
     fun getDaftarTopik(): List<TopikMateri> {
         return listOf(
+            // ==========================================
+            // MATA PELAJARAN LAMA
+            // ==========================================
             TopikMateri(
                 id = "biologi_sel",
                 judul = "Biologi: Struktur Sel",

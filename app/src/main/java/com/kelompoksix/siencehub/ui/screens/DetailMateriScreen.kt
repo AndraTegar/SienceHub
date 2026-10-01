@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -183,6 +182,10 @@ fun DetailMateriScreen(
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .clickable {
+                                    // <-- 2. Pasang event klik di sini untuk mengirim kategori mapel
+                                    onKuisClick(topikMateri.kategori)
+                                }
                         ) {
                             Row(
                                 modifier = Modifier

@@ -19,7 +19,8 @@ import com.kelompoksix.siencehub.ui.components.FloatingBottomNav
 
 @Composable
 fun KerangkaAplikasi(
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onStartQuiz: (String) -> Unit // <-- Menggunakan callback kuis
 ) {
     var indexAktif by remember { mutableIntStateOf(0) }
 
@@ -50,10 +51,13 @@ fun KerangkaAplikasi(
             onBackClick = { topikAktif = null; babAktif = null },
         )
     } else if (topikAktif != null) {
+        // TAMPILAN 2: Halaman Daftar Bab
         DetailMateriScreen(
             topikMateri = topikAktif!!,
             onBackClick = { topikAktif = null },
-            onBabClick = { idBab -> babAktif = idBab }
+            onBabClick = { idBab -> babAktif = idBab },
+            onBabClick = { idBab -> babAktif = idBab },
+            onKuisClick = onStartQuiz // <-- Diteruskan langsung ke DetailMateriScreen
         )
     } else if (tampilkanPengaturan) {
         SettingScreen(
@@ -86,7 +90,8 @@ fun KerangkaAplikasi(
                             topikAktif = topikDitemukan
                         } else {
                             topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
-                        }
+                        },
+                        onStartQuiz = onStartQuiz
                     },
                     onHasilCari = { topik, babId ->
                         topikAktif = topik
