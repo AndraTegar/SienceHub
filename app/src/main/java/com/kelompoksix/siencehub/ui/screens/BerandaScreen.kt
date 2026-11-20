@@ -33,6 +33,7 @@ import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.data.repositories.NotifikasiRepository
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
+import com.kelompoksix.siencehub.utils.UserSessionManager
 import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
 
@@ -49,6 +50,9 @@ fun BerandaScreen(
     val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val userName = remember(context) { UserSessionManager.getUserName(context).ifBlank { "Siswa" } }
 
     val notifikasiList by NotifikasiRepository.notifikasiList.collectAsState()
     val unreadCount = remember(notifikasiList) { notifikasiList.count { !it.isDibaca } }
@@ -141,6 +145,22 @@ fun BerandaScreen(
                     .verticalScroll(scrollState)
             ) {
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Salam Sapaan Personalisasi Nama Pengguna
+                    Text(
+                        text = "Halo, $userName! 👋",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Siap untuk belajar sains hari ini?",
+                        fontSize = 13.sp,
+                        color = Color.White.copy(alpha = 0.85f)
+                    )
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // ==========================================

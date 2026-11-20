@@ -22,7 +22,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SettingScreen(
     onBackClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onNavigateToEditProfile: () -> Unit = {}
 ) {
     val sageGreen = Color(0xFF7A8B76)
 
@@ -73,7 +74,7 @@ fun SettingScreen(
                     Text("Account Settings", color = Color.Gray, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-                item { SettingItemAction("Edit Profile") }
+                item { SettingItemAction("Edit Profile", onClick = onNavigateToEditProfile) }
                 item { SettingItemAction("Change password") }
                 item { SettingItemAction("Add a payment method", iconRight = Icons.Default.Add) }
                 item { SettingItemToggle("Push notifications", true) }
@@ -112,11 +113,15 @@ fun SettingScreen(
 }
 
 @Composable
-fun SettingItemAction(title: String, iconRight: androidx.compose.ui.graphics.vector.ImageVector = Icons.Default.ChevronRight) {
+fun SettingItemAction(
+    title: String,
+    iconRight: androidx.compose.ui.graphics.vector.ImageVector = Icons.Default.ChevronRight,
+    onClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Aksi */ }
+            .clickable { onClick() }
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

@@ -16,7 +16,7 @@ object LeaderboardRepository {
         UserRank(8, "Ricardo Veum", 32),
         UserRank(9, "Gary Sanford", 31),
         UserRank(10, "Becky Bartell", 30),
-        UserRank(11, "Amdra Tegar", 30),
+        UserRank(11, "Andra Tegar", 30),
         UserRank(12, "Siti Rahma", 28)
     )
 

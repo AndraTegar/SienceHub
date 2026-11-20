@@ -1,5 +1,9 @@
 package com.kelompoksix.siencehub.ui.screens
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,16 +23,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import com.kelompoksix.siencehub.utils.UserSessionManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,15 +50,86 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     val primaryGreen = Color(0xFF7A8B76)
-    val isFormValid = email.isNotEmpty() && password.isNotEmpty()
+    val isFormValid = email.isNotBlank() && password.isNotBlank() && !isLoading
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
 
+    val webClientId = remember(context) {
+        context.getString(com.kelompoksix.siencehub.R.string.default_web_client_id)
+    }
+
+    val gso = remember(context, webClientId) {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
+            .requestEmail()
+            .build()
+    }
+    val googleSignInClient = remember(context) { GoogleSignIn.getClient(context, gso) }
+
+    val googleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            if (account != null && account.idToken != null) {
+                val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+                isLoading = true
+                errorMessage = null
+                FirebaseAuth.getInstance().signInWithCredential(credential)
+                    .addOnSuccessListener { authResult ->
+                        isLoading = false
+                        val userEmail = authResult.user?.email ?: account.email ?: ""
+                        val userName = authResult.user?.displayName ?: account.displayName
+                        UserSessionManager.saveSession(context, userEmail, userName)
+                        Toast.makeText(context, "Login Google Berhasil! Selamat Datang.", Toast.LENGTH_SHORT).show()
+                        onLoginSuccess()
+                    }
+                    .addOnFailureListener { exception ->
+                        isLoading = false
+                        errorMessage = "Gagal login dengan Google: ${exception.localizedMessage}"
+                        Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                    }
+            }
+        } catch (e: ApiException) {
+            isLoading = false
+            if (e.statusCode != 12501) { // 12501 = Canceled by user
+                errorMessage = "Gagal login Google (Code: ${e.statusCode})"
+            }
+        }
+    }
+
     val handleLogin = {
         if (isFormValid) {
-            UserSessionManager.saveSession(context, email)
-            onLoginSuccess()
+            focusManager.clearFocus()
+            isLoading = true
+            errorMessage = null
+
+            val cleanEmail = email.trim()
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(cleanEmail, password)
+                .addOnSuccessListener { authResult ->
+                    isLoading = false
+                    val userEmail = authResult.user?.email ?: cleanEmail
+                    val userName = authResult.user?.displayName
+                    UserSessionManager.saveSession(context, userEmail, userName)
+                    Toast.makeText(context, "Login Berhasil! Selamat Datang.", Toast.LENGTH_SHORT).show()
+                    onLoginSuccess()
+                }
+                .addOnFailureListener { exception ->
+                    isLoading = false
+                    val msg = when {
+                        exception.message?.contains("no user record", ignoreCase = true) == true -> "Akun tidak ditemukan. Silakan daftar terlebih dahulu."
+                        exception.message?.contains("invalid", ignoreCase = true) == true -> "Email atau password salah."
+                        exception.message?.contains("network", ignoreCase = true) == true -> "Gagal terhubung ke jaringan internet."
+                        else -> exception.localizedMessage ?: "Gagal melakukan login. Periksa kembali email dan password Anda."
+                    }
+                    errorMessage = msg
+                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                }
         }
     }
 
@@ -85,7 +165,6 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tulisan Log in diposisikan di tengah secara penuh
             Text(
                 text = "Log in",
                 fontSize = 28.sp,
@@ -95,7 +174,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
             Text(
                 text = "Email or username",
@@ -108,7 +187,7 @@ fun LoginScreen(
                 value = email,
                 onValueChange = { email = it },
                 placeholder = { Text("Email", color = Color.LightGray) },
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), // <--- Teks ketikan menjadi hitam
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -129,7 +208,7 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { password = it },
                 placeholder = { Text("Password", color = Color.LightGray) },
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), // <--- Teks ketikan menjadi hitam
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
                 trailingIcon = {
                     val icon = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -159,6 +238,16 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            if (!errorMessage.isNullOrBlank()) {
+                Text(
+                    text = errorMessage!!,
+                    color = Color.Red,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+
             Text(
                 text = "Forgot password?",
                 fontSize = 12.sp,
@@ -167,7 +256,7 @@ fun LoginScreen(
                 modifier = Modifier.clickable(onClick = { /* TODO */ })
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             Button(
                 onClick = handleLogin,
@@ -181,9 +270,72 @@ fun LoginScreen(
                     contentColor = Color.White,
                     disabledContentColor = Color(0xFFB0B0B4)
                 ),
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Log in", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Log in", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==========================================
+            // TOMBOL LOGIN DENGAN GOOGLE
+            // ==========================================
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
+                Text(
+                    text = "  atau  ",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = {
+                    googleSignInClient.signOut().addOnCompleteListener {
+                        googleLauncher.launch(googleSignInClient.signInIntent)
+                    }
+                },
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color(0xFFDADCE0)),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "G",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 20.sp,
+                        color = Color(0xFF4285F4)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Lanjutkan dengan Google",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3C4043)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))

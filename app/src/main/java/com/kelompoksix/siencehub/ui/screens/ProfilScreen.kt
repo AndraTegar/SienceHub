@@ -8,14 +8,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,24 +25,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.filled.WorkspacePremium
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
 fun ProfilScreen(
-    onNavigateToSettings: () -> Unit,
-    onNavigateToAchievement: () -> Unit, // Tambahan rute baru
-    onNavigateToLeaderboard: () -> Unit
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToAchievement: () -> Unit = {},
+    onNavigateToLeaderboard: () -> Unit = {},
+    onNavigateToEditProfile: () -> Unit = {}
 ) {
     val sageGreen = Color(0xFF7A8B76)
     val lightBlue = Color(0xFFE3F0FF)
 
     val context = LocalContext.current
+
     val userName = remember(context) {
         UserSessionManager.getUserName(context).ifBlank { "Pengguna ScienceHub" }
     }
     val userEmail = remember(context) {
         UserSessionManager.getUserEmail(context).ifBlank { "user@sciencehub.com" }
+    }
+    val userPhone = remember(context) {
+        UserSessionManager.getUserPhone(context)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -57,23 +62,54 @@ fun ProfilScreen(
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(60.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .border(4.dp, Color.White, CircleShape)
-                    .clip(CircleShape)
-                    .background(Color.LightGray),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(imageVector = Icons.Default.Person, contentDescription = null, modifier = Modifier.size(60.dp), tint = Color.Gray)
+            Box(contentAlignment = Alignment.BottomEnd) {
+                Box(
+                    modifier = Modifier
+                        .size(110.dp)
+                        .border(4.dp, Color.White, CircleShape)
+                        .clip(CircleShape)
+                        .background(Color.LightGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = Icons.Default.Person, contentDescription = null, modifier = Modifier.size(55.dp), tint = Color.Gray)
+                }
+
+                // Tombol Pensil Edit Profil (Membuka Halaman Edit Profil)
+                IconButton(
+                    onClick = onNavigateToEditProfile,
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .border(1.dp, Color.LightGray, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Profil",
+                        tint = sageGreen,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            Text(text = userName, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-            Text(text = userEmail, fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onNavigateToEditProfile() }
+            ) {
+                Text(text = userName, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
+            }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Text(text = userEmail, fontSize = 14.sp, color = Color.White.copy(alpha = 0.85f))
+
+            if (userPhone.isNotBlank()) {
+                Text(text = "📱 $userPhone", fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f), modifier = Modifier.padding(top = 2.dp))
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
 
             // Barisan Tombol Melayang
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {

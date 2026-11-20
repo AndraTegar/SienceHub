@@ -11,7 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.kelompoksix.siencehub.ui.screens.KerangkaAplikasi
+import com.kelompoksix.siencehub.ui.navigation.KerangkaAplikasi
 import com.kelompoksix.siencehub.ui.screens.LoginScreen
 import com.kelompoksix.siencehub.ui.screens.QuizResultScreen
 import com.kelompoksix.siencehub.ui.screens.QuizReviewScreen
