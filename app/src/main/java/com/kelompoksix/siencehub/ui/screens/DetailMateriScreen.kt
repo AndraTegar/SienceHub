@@ -29,7 +29,8 @@ fun DetailMateriScreen(
     topikMateri: TopikMateri,
     onBackClick: () -> Unit,
     onBabClick: (Int) -> Unit,
-    onKuisClick: () -> Unit // <--- TAMBAHKAN PARAMETER INI AGAR BISA DIPANGGIL DARI KERANGKA APLIKASI
+    onKuisClick: () -> Unit,
+    completedChapterIds: Set<Int> = emptySet()
 ) {
     val darkChalkBg = Color(0xFF1E1E1E)
     val cardBlueColor = Color(0xFFD6E4F0)
@@ -157,6 +158,13 @@ fun DetailMateriScreen(
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = Color.DarkGray
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = if (bab.id in completedChapterIds) "Selesai" else "Belum selesai",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (bab.id in completedChapterIds) Color(0xFF2E7D32) else Color.Gray
                                 )
                             }
                         }

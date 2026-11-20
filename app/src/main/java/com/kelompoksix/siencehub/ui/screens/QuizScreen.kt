@@ -34,6 +34,7 @@ fun QuizScreen(
     val daftarSoal = remember { QuizRepository.getSoalBySubject(subjectName) }
     var indexSoalAktif by remember { mutableIntStateOf(0) }
     val jawabanUser = remember { mutableStateMapOf<Int, Int>() }
+    var quizFinished by remember { mutableStateOf(false) }
 
     // Total waktu per kuis/soal
     val totalWaktuDetik = 60
@@ -53,7 +54,8 @@ fun QuizScreen(
         if (sisaWaktuDetik > 0) {
             delay(1000L)
             sisaWaktuDetik--
-        } else {
+        } else if (!quizFinished) {
+            quizFinished = true
             val totalSkor = correctCount * 20
             LeaderboardRepository.tambahSkorUser(totalSkor)
             com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository.simpanHasilKuis(
@@ -279,7 +281,7 @@ fun QuizScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
-                            .clickable {
+                            .clickable(enabled = !quizFinished) {
                                 jawabanUser[indexSoalAktif] = indexOpsi
 
                                 if (indexSoalAktif < daftarSoal.size - 1) {
@@ -288,6 +290,7 @@ fun QuizScreen(
                                     val finalCorrect = jawabanUser.entries.count { (idx, ops) -> daftarSoal.getOrNull(idx)?.jawabanBenar == ops }
                                     val finalWrong = daftarSoal.size - finalCorrect
                                     val totalSkor = finalCorrect * 20
+                                    quizFinished = true
                                     LeaderboardRepository.tambahSkorUser(totalSkor)
                                     com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository.simpanHasilKuis(
                                         context = context,
