@@ -3,6 +3,7 @@ package com.kelompoksix.siencehub.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,12 +22,59 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.data.models.LearningStats
+
+private data class AchievementItem(
+    val title: String,
+    val description: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val iconColor: Color,
+    val iconBackground: Color,
+    val isComplete: Boolean
+)
 
 @Composable
 fun AchievementScreen(
+    learningStats: LearningStats = LearningStats.EMPTY,
     onBackClick: () -> Unit
 ) {
     val sageGreen = Color(0xFF7A8B76)
+    val achievements = listOf(
+        AchievementItem(
+            "Langkah Pertama",
+            "Menyelesaikan 1 bab materi.",
+            Icons.Default.Star,
+            Color(0xFFFFD54F),
+            Color(0xFFFFF8E1),
+            learningStats.completedChapterCount >= 1
+        ),
+        AchievementItem(
+            "Si Paling Rajin",
+            "Mencapai 5 hari streak belajar berturut-turut.",
+            Icons.Default.LocalFireDepartment,
+            Color(0xFFFF8A65),
+            Color(0xFFFBE9E7),
+            learningStats.streakDays >= 5
+        ),
+        AchievementItem(
+            "Ilmuwan Gila",
+            "Mendapatkan nilai sempurna untuk kuis Biologi dan Kimia.",
+            Icons.Default.Science,
+            Color(0xFF7A8B76),
+            Color(0xFFE8ECE7),
+            setOf("biologi", "kimia").all { it in learningStats.perfectQuizSubjects }
+        ),
+        AchievementItem(
+            "Raja Kuis",
+            "Menjawab total 50 soal kuis dengan benar.",
+            Icons.Default.EmojiEvents,
+            Color(0xFFFFB300),
+            Color(0xFFFFF8E1),
+            learningStats.correctQuizAnswers >= 50
+        )
+    )
+    val completedAchievements = achievements.filter { it.isComplete }
+    val lockedAchievements = achievements.filterNot { it.isComplete }
 
     Column(
         modifier = Modifier
@@ -76,7 +124,6 @@ fun AchievementScreen(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // --- BAGIAN TERSELESAIKAN ---
                 item {
                     Text(
                         text = "Terselesaikan \uD83C\uDF1F",
@@ -87,24 +134,18 @@ fun AchievementScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                item {
-                    KartuAchievement(
-                        judul = "Langkah Pertama",
-                        deskripsi = "Menyelesaikan 1 materi pertama di ScienceHub.",
-                        ikon = Icons.Default.Star,
-                        warnaIkon = Color(0xFFFFD54F), // Emas
-                        warnaBgIkon = Color(0xFFFFF8E1),
-                        sudahSelesai = true
-                    )
+                if (completedAchievements.isEmpty()) {
+                    item {
+                        Text("Belum ada pencapaian. Terus belajar untuk membukanya!", color = Color.Gray)
+                    }
                 }
-
-                item {
+                items(completedAchievements) { achievement ->
                     KartuAchievement(
-                        judul = "Si Paling Rajin",
-                        deskripsi = "Mencapai 5 hari streak belajar berturut-turut.",
-                        ikon = Icons.Default.LocalFireDepartment,
-                        warnaIkon = Color(0xFFFF8A65), // Oranye
-                        warnaBgIkon = Color(0xFFFBE9E7),
+                        judul = achievement.title,
+                        deskripsi = achievement.description,
+                        ikon = achievement.icon,
+                        warnaIkon = achievement.iconColor,
+                        warnaBgIkon = achievement.iconBackground,
                         sudahSelesai = true
                     )
                 }
@@ -115,7 +156,6 @@ fun AchievementScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // --- BAGIAN BELUM TERBUKA ---
                 item {
                     Text(
                         text = "Belum Terbuka \uD83D\uDD12",
@@ -126,22 +166,11 @@ fun AchievementScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                item {
+                items(lockedAchievements) { achievement ->
                     KartuAchievement(
-                        judul = "Ilmuwan Gila",
-                        deskripsi = "Menyelesaikan kuis Biologi dan Kimia dengan nilai 100.",
-                        ikon = Icons.Default.Science,
-                        warnaIkon = Color.Gray,
-                        warnaBgIkon = Color.LightGray,
-                        sudahSelesai = false
-                    )
-                }
-
-                item {
-                    KartuAchievement(
-                        judul = "Raja Kuis",
-                        deskripsi = "Menjawab 50 soal kuis tanpa ada kesalahan satupun.",
-                        ikon = Icons.Default.EmojiEvents,
+                        judul = achievement.title,
+                        deskripsi = achievement.description,
+                        ikon = achievement.icon,
                         warnaIkon = Color.Gray,
                         warnaBgIkon = Color.LightGray,
                         sudahSelesai = false

@@ -25,10 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.filled.WorkspacePremium
+import com.kelompoksix.siencehub.data.models.LearningStats
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
 fun ProfilScreen(
+    learningStats: LearningStats = LearningStats.EMPTY,
     onNavigateToSettings: () -> Unit,
     onNavigateToAchievement: () -> Unit, // Tambahan rute baru
     onNavigateToLeaderboard: () -> Unit
@@ -98,9 +100,9 @@ fun ProfilScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatusBadgeFresh(icon = Icons.Default.Star, value = "1", label = "Level", iconColor = Color(0xFF00B0FF), bgColor = Color(0xFFE1F5FE))
+                    StatusBadgeFresh(icon = Icons.Default.Star, value = learningStats.level.toString(), label = "Level", iconColor = Color(0xFF00B0FF), bgColor = Color(0xFFE1F5FE))
                     Box(modifier = Modifier.height(45.dp).width(1.5.dp).background(Color.LightGray.copy(alpha = 0.5f)))
-                    StatusBadgeFresh(icon = Icons.Default.LocalFireDepartment, value = "6", label = "Streak", iconColor = Color(0xFFFF6D00), bgColor = Color(0xFFFFF3E0))
+                    StatusBadgeFresh(icon = Icons.Default.LocalFireDepartment, value = learningStats.streakDays.toString(), label = "Streak", iconColor = Color(0xFFFF6D00), bgColor = Color(0xFFFFF3E0))
                 }
             }
 
@@ -121,7 +123,7 @@ fun ProfilScreen(
                             Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Color(0xFF7A8B76))
                         }
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text("3 Materi Diselesaikan", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                        Text("${learningStats.completedChapterCount} Bab Diselesaikan", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                     }
                 }
             }

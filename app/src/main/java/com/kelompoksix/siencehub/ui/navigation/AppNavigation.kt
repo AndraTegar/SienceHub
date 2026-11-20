@@ -19,6 +19,7 @@ import com.kelompoksix.siencehub.ui.screens.QuizScreen
 import com.kelompoksix.siencehub.ui.screens.SignupScreen
 import com.kelompoksix.siencehub.ui.screens.SplashScreen
 import com.kelompoksix.siencehub.ui.screens.WelcomeScreen
+import com.kelompoksix.siencehub.data.repositories.LocalLearningRepository
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
@@ -124,6 +125,8 @@ fun AppNavigation() {
                 navArgument("subjectName") { type = NavType.StringType }
             )
         ) { backStackEntry ->
+            val context = LocalContext.current
+            val userId = UserSessionManager.getUserEmail(context)
             val subjectName = backStackEntry.arguments?.getString("subjectName") ?: ""
 
             QuizScreen(
@@ -132,6 +135,14 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 onQuizFinished = { score, total, correct, wrong ->
+                    LocalLearningRepository.recordQuizResult(
+                        context = context,
+                        userId = userId,
+                        subjectName = subjectName,
+                        score = score,
+                        totalScore = total,
+                        correctAnswers = correct
+                    )
                     navController.navigate(Routes.createQuizResultRoute(score, total, correct, wrong, subjectName)) {
                         popUpTo(Routes.QUIZ) { inclusive = true }
                     }

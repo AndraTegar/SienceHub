@@ -12,10 +12,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.kelompoksix.siencehub.data.models.TopikMateri
+import com.kelompoksix.siencehub.data.repositories.IsiBabRepository
+import com.kelompoksix.siencehub.data.repositories.LocalLearningRepository
 import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.ui.components.FloatingBottomNav
+import com.kelompoksix.siencehub.utils.UserSessionManager
 
 // Data class penampung hasil kuis untuk dilempar ke Result & Review Screen
 data class HasilKuisData(
@@ -31,6 +35,11 @@ fun KerangkaAplikasi(
     onLogout: () -> Unit,
     onStartQuiz: (String) -> Unit // <-- Menggunakan callback kuis
 ) {
+    val context = LocalContext.current
+    val userId = remember(context) { UserSessionManager.getUserEmail(context) }
+    var learningStats by remember(userId) {
+        mutableStateOf(LocalLearningRepository.getStats(context, userId))
+    }
     var indexAktif by remember { mutableIntStateOf(0) }
 
     //experimen fisika
@@ -46,11 +55,31 @@ fun KerangkaAplikasi(
     // Status untuk menyimpan topik materi yang sedang dibuka
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
     var babAktif by remember { mutableStateOf<Int?>(null) }
+    var babSudahSelesai by remember { mutableStateOf(false) }
 
     // VARIABEL KUIS, RESULT, DAN REVIEW
     var kuisAktif by remember { mutableStateOf<String?>(null) }
     var hasilKuisAktif by remember { mutableStateOf<HasilKuisData?>(null) }
     var reviewAktif by remember { mutableStateOf<String?>(null) }
+
+    fun openTopic(topic: TopikMateri) {
+        LocalLearningRepository.recordTopicOpened(context, userId, topic.id)
+        topikAktif = topic
+        learningStats = LocalLearningRepository.getStats(context, userId)
+    }
+
+    fun openChapter(topic: TopikMateri, chapterId: Int) {
+        openTopic(topic)
+        if (IsiBabRepository.getIsiBab(topic.id, chapterId) != null) {
+            LocalLearningRepository.completeChapter(context, userId, topic.id, chapterId)
+            learningStats = LocalLearningRepository.getStats(context, userId)
+            babSudahSelesai = learningStats.completedChaptersByTopic[topic.id]
+                ?.contains(chapterId) == true
+        } else {
+            babSudahSelesai = false
+        }
+        babAktif = chapterId
+    }
 
     // Tombol Back Android Handler (Menutup overlay, review, hasil, kuis, atau materi secara bertahap)
     BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || tampilkanNotifikasi || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null || tampilkanEksperimen || eksperimenAktif != null) {
@@ -115,6 +144,15 @@ fun KerangkaAplikasi(
                 onBackClick = { kuisAktif = null },
                 onQuizFinished = { score, total, correct, wrong ->
                     val subjekSelesai = kuisAktif!!
+                    LocalLearningRepository.recordQuizResult(
+                        context = context,
+                        userId = userId,
+                        subjectName = subjekSelesai,
+                        score = score,
+                        totalScore = total,
+                        correctAnswers = correct
+                    )
+                    learningStats = LocalLearningRepository.getStats(context, userId)
                     // Tutup kuis yang sedang berjalan
                     kuisAktif = null
                     // Buka layar hasil kuis dengan membawa data skor
@@ -143,7 +181,8 @@ fun KerangkaAplikasi(
             DetailMateriScreen(
                 topikMateri = topikAktif!!,
                 onBackClick = { topikAktif = null },
-                onBabClick = { idBab -> babAktif = idBab },
+                completedChapterIds = learningStats.completedChaptersByTopic[topikAktif!!.id].orEmpty(),
+                onBabClick = { idBab -> openChapter(topikAktif!!, idBab) },
                 onKuisClick = {
                     // Membuka kuis berdasarkan kategori materi (contoh: "Fisika", "Biologi", dll)
                     kuisAktif = topikAktif!!.kategori
@@ -162,6 +201,7 @@ fun KerangkaAplikasi(
         // 7. Layar Achievement
         tampilkanAchievement -> {
             AchievementScreen(
+                learningStats = learningStats,
                 onBackClick = { tampilkanAchievement = false }
             )
         }
@@ -208,6 +248,7 @@ fun KerangkaAplikasi(
             // LAYER 1: KONTEN HALAMAN BERDASARKAN TAB AKTIF
             when (indexAktif) {
                 0 -> BerandaScreen(
+                    learningStats = learningStats,
                     onNavigateToMateri = { judulMateri ->
                         val topikDitemukan = MateriRepository.getDaftarTopik().find {
                             it.judul.equals(judulMateri, ignoreCase = true) ||
@@ -215,11 +256,11 @@ fun KerangkaAplikasi(
                                     it.kategori.contains(judulMateri, ignoreCase = true)
                         }
 
-                        topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
+                        val topic = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
+                        if (topic != null) openTopic(topic)
                     },
                     onHasilCari = { topik, babId ->
-                        topikAktif = topik
-                        babAktif = babId
+                        if (babId == null) openTopic(topik) else openChapter(topik, babId)
                     },
                     onNavigateToEksperimen = { tampilkanEksperimen = true },
                     onMulaiKuis = { kategori -> kuisAktif = kategori },
@@ -235,15 +276,16 @@ fun KerangkaAplikasi(
                         }
 
                         if (topikDitemukan != null) {
-                            topikAktif = topikDitemukan
+                            openTopic(topikDitemukan)
                         } else {
                             // Fallback jika belum ada datanya, buka topik pertama
-                            topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
+                            MateriRepository.getDaftarTopik().firstOrNull()?.let(::openTopic)
                         }
                     }
                 )
 
                 2 -> ProfilScreen(
+                    learningStats = learningStats,
                     onNavigateToSettings = { tampilkanPengaturan = true },
                     onNavigateToAchievement = { tampilkanAchievement = true },
                     onNavigateToLeaderboard = { tampilkanLeaderboard = true }

@@ -29,7 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kelompoksix.siencehub.data.models.LearningStats
 import com.kelompoksix.siencehub.data.models.TopikMateri
+import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.data.repositories.NotifikasiRepository
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
@@ -40,6 +42,7 @@ import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
 @Composable
 fun BerandaScreen(
     viewModel: BerandaViewModel = viewModel(),
+    learningStats: LearningStats = LearningStats.EMPTY,
     onNavigateToMateri: (String) -> Unit = {},
     onHasilCari: (TopikMateri, Int?) -> Unit = { _, _ -> },
     onNavigateToEksperimen: () -> Unit = {},
@@ -56,11 +59,10 @@ fun BerandaScreen(
     val faktaSains = viewModel.faktaSains
     val isLoadingFakta = viewModel.isLoadingFakta
 
-    val daftarMateri = listOf(
-        Pair("Biologi: Struktur Sel", 0.1f),
-        Pair("Fisika: Hukum Newton", 0.5f),
-        Pair("Kimia: Reaksi Asam Basa", 0.8f)
-    )
+    val daftarMateri = remember(learningStats.recentlyOpenedTopicIds) {
+        val topicsById = MateriRepository.getDaftarTopik().associateBy { it.id }
+        learningStats.recentlyOpenedTopicIds.mapNotNull(topicsById::get)
+    }
     val pagerState = rememberPagerState(pageCount = { daftarMateri.size })
 
     Scaffold(
@@ -171,8 +173,12 @@ fun BerandaScreen(
                                 }
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
-                                    Text(text = "Level 1", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                                    Text(text = "Pemula", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+                                    Text(text = "Level ${learningStats.level}", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                                    Text(
+                                        text = "${learningStats.experiencePoints % 100}/100 XP",
+                                        fontSize = 11.sp,
+                                        color = Color.White.copy(alpha = 0.8f)
+                                    )
                                 }
                             }
 
@@ -191,7 +197,7 @@ fun BerandaScreen(
                                 }
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
-                                    Text(text = "6 Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                                    Text(text = "${learningStats.streakDays} Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
                                     Text(text = "Streak Aktif", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
                                 }
                             }
@@ -208,36 +214,46 @@ fun BerandaScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxWidth(),
-                        pageSpacing = 16.dp
-                    ) { page ->
-                        val materi = daftarMateri[page]
-                        CardUtama(
-                            judulMateri = materi.first,
-                            progress = materi.second,
-                            onClick = { onNavigateToMateri(materi.first) }
+                    if (daftarMateri.isEmpty()) {
+                        Text(
+                            text = "Materi yang kamu buka akan muncul di sini.",
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 14.sp
                         )
+                    } else {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxWidth(),
+                            pageSpacing = 16.dp
+                        ) { page ->
+                            val materi = daftarMateri[page]
+                            CardUtama(
+                                judulMateri = materi.judul,
+                                progress = learningStats.progressFor(materi),
+                                onClick = { onNavigateToMateri(materi.judul) }
+                            )
+                        }
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(daftarMateri.size) { iteration ->
-                            val isSelected = pagerState.currentPage == iteration
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .height(8.dp)
-                                    .width(if (isSelected) 24.dp else 8.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.4f))
-                            )
+                    if (daftarMateri.size > 1) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            repeat(daftarMateri.size) { iteration ->
+                                val isSelected = pagerState.currentPage == iteration
+                                Box(
+                                    modifier = Modifier
+                                        .padding(horizontal = 4.dp)
+                                        .height(8.dp)
+                                        .width(if (isSelected) 24.dp else 8.dp)
+                                        .clip(CircleShape)
+                                        .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.4f))
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(32.dp))
