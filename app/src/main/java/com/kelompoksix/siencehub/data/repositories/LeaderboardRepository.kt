@@ -1,51 +1,113 @@
 package com.kelompoksix.siencehub.data.repositories
 
 import androidx.compose.runtime.mutableStateListOf
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.kelompoksix.siencehub.data.models.UserRank
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 object LeaderboardRepository {
-    // Menggunakan mutableStateListOf agar UI Compose otomatis terbarui saat skor berubah
-    private val daftarLeaderboard = mutableStateListOf(
-        UserRank(1, "Asep", 43),
-        UserRank(2, "Meghan Jessica", 40),
-        UserRank(3, "Bimo", 38),
-        UserRank(4, "Marsha Fisher", 36),
-        UserRank(5, "Juanita Cormier", 35),
-        UserRank(6, "You", 34, isMe = true), // Posisi Pengguna saat ini
-        UserRank(7, "Tamara Schmidt", 33),
-        UserRank(8, "Ricardo Veum", 32),
-        UserRank(9, "Gary Sanford", 31),
-        UserRank(10, "Becky Bartell", 30),
-        UserRank(11, "Andra Tegar", 30),
-        UserRank(12, "Siti Rahma", 28)
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    // Standby fallback mock data jika offline / Firestore belum terisi
+    private val mockLeaderboard = listOf(
+        UserRank(1, "Asep Saepulloh", 120),
+        UserRank(2, "Meghan Jessica", 100),
+        UserRank(3, "Bimo Setyo", 85),
+        UserRank(4, "Marsha Fisher", 70),
+        UserRank(5, "Juanita Cormier", 65),
+        UserRank(6, "You (Kamu)", 50, isMe = true),
+        UserRank(7, "Tamara Schmidt", 45),
+        UserRank(8, "Ricardo Veum", 40)
     )
 
-    // Tetap menggunakan nama fungsi milikmu
-    fun getDaftarLeaderboard(): List<UserRank> {
-        return daftarLeaderboard
+    private val _leaderboardFlow = MutableStateFlow<List<UserRank>>(mockLeaderboard)
+    val leaderboardFlow: StateFlow<List<UserRank>> = _leaderboardFlow.asStateFlow()
+
+    private var listenerRegistration: ListenerRegistration? = null
+
+    // Mengambil data Leaderboard Real-Time dari Cloud Firestore
+    fun listenRealtimeLeaderboard() {
+        // Matikan listener lama jika ada
+        listenerRegistration?.remove()
+
+        listenerRegistration = db.collection("users")
+            .orderBy("xp", Query.Direction.DESCENDING)
+            .limit(50)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null || snapshot.isEmpty) {
+                    // Fallback ke mock data jika terjadi error/kosong
+                    return@addSnapshotListener
+                }
+
+                val currentUid = auth.currentUser?.uid
+                val currentEmail = auth.currentUser?.email
+
+                val listRank = snapshot.documents.mapIndexedNotNull { index, doc ->
+                    val uid = doc.getString("uid") ?: doc.id
+                    val name = doc.getString("displayName")
+                        ?.ifBlank { null }
+                        ?: doc.getString("email")?.substringBefore("@")
+                        ?: "Siswa SienceHub"
+                    val xp = (doc.getLong("xp") ?: doc.getLong("poin") ?: 0L).toInt()
+                    val email = doc.getString("email") ?: ""
+
+                    val isMe = (currentUid != null && currentUid == uid) ||
+                            (currentEmail != null && currentEmail.equals(email, ignoreCase = true))
+
+                    UserRank(
+                        rank = index + 1,
+                        nama = if (isMe) "$name (Kamu)" else name,
+                        poin = xp,
+                        isMe = isMe
+                    )
+                }
+
+                if (listRank.isNotEmpty()) {
+                    _leaderboardFlow.value = listRank
+                }
+            }
     }
 
-    // Fungsi untuk menambah skor pengguna "You" setelah selesai kuis
-    fun tambahSkorUser(skorTambahan: Int) {
-        val indexMe = daftarLeaderboard.indexOfFirst { it.isMe }
+    // Menghentikan listener saat tidak digunakan lagi
+    fun stopListening() {
+        listenerRegistration?.remove()
+        listenerRegistration = null
+    }
 
-        if (indexMe != -1) {
-            val userMe = daftarLeaderboard[indexMe]
-            val skorBaru = userMe.poin + skorTambahan
+    // Menambah skor/XP pengguna saat menyelesaikan kuis
+    fun tambahSkorUser(skorTambahan: Int, onSuccess: () -> Unit = {}) {
+        val currentUser = auth.currentUser ?: return
 
-            // 1. Update skor pengguna
-            daftarLeaderboard[indexMe] = userMe.copy(poin = skorBaru)
+        val userRef = db.collection("users").document(currentUser.uid)
 
-            // 2. Urutkan ulang dari skor tertinggi ke terendah
-            val listDiurutkan = daftarLeaderboard.sortedByDescending { it.poin }
+        userRef.get().addOnSuccessListener { snapshot ->
+            val xpSekarang = (snapshot.getLong("xp") ?: 0L).toInt()
+            val xpBaru = xpSekarang + skorTambahan
+            val levelBaru = (xpBaru / 100) + 1
 
-            // 3. Perbarui daftar dan hitung ulang peringkat (rank 1, 2, 3, dst.)
-            daftarLeaderboard.clear()
-            listDiurutkan.forEachIndexed { index, user ->
-                daftarLeaderboard.add(
-                    user.copy(rank = index + 1)
-                )
-            }
+            val dataUpdate = hashMapOf<String, Any>(
+                "uid" to currentUser.uid,
+                "displayName" to (currentUser.displayName ?: snapshot.getString("displayName") ?: "Siswa"),
+                "email" to (currentUser.email ?: ""),
+                "xp" to xpBaru,
+                "level" to levelBaru,
+                "lastUpdated" to System.currentTimeMillis()
+            )
+
+            userRef.set(dataUpdate, com.google.firebase.firestore.SetOptions.merge())
+                .addOnSuccessListener {
+                    onSuccess()
+                }
         }
+    }
+
+    fun getDaftarLeaderboard(): List<UserRank> {
+        return _leaderboardFlow.value
     }
 }

@@ -42,16 +42,28 @@ fun EditProfilDialog(
         val newName = nama.trim()
         val newPhone = nomorTelepon.trim()
 
+        val isNameChanged = newName != currentName.trim()
+        val isPhoneChanged = newPhone != currentPhone.trim()
+
         if (newName.isBlank()) {
             Toast.makeText(context, "Nama tidak boleh kosong", Toast.LENGTH_SHORT).show()
+        } else if (!isNameChanged && !isPhoneChanged) {
+            Toast.makeText(context, "Tidak ada perubahan data", Toast.LENGTH_SHORT).show()
         } else {
             isLoading = true
-            val firebaseUser = FirebaseAuth.getInstance().currentUser
 
-            // 1. Simpan langsung ke Local Preferences
+            // Pesan spesifik berdasarkan perubahan
+            val toastMessage = when {
+                isNameChanged && isPhoneChanged -> "Nama & Nomor HP Berhasil Diperbarui!"
+                isNameChanged -> "Nama Berhasil Diubah menjadi \"$newName\"!"
+                else -> "Nomor HP Berhasil Diperbarui!"
+            }
+
+            // 1. Simpan ke Local Preferences (instan)
             UserSessionManager.updateProfile(context, newName, newPhone)
 
-            // 2. Simpan ke Firebase Auth & Cloud Firestore
+            // 2. Simpan ke Firebase Auth & Cloud Firestore di background
+            val firebaseUser = FirebaseAuth.getInstance().currentUser
             if (firebaseUser != null) {
                 val profileUpdates = UserProfileChangeRequest.Builder()
                     .setDisplayName(newName)
@@ -74,9 +86,8 @@ fun EditProfilDialog(
                 }
             }
 
-            // 3. Tampilkan Toast Notifikasi Pemberitahuan Sukses
             isLoading = false
-            Toast.makeText(context, "Profil & Nama Berhasil Diperbarui!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, toastMessage, Toast.LENGTH_LONG).show()
             onProfileUpdated()
             onDismissRequest()
         }

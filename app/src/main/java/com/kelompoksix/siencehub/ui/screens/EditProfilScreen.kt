@@ -11,7 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Person
@@ -49,21 +49,41 @@ fun EditProfilScreen(
     var nomorTelepon by remember { mutableStateOf(initialPhone) }
     var isLoading by remember { mutableStateOf(false) }
     var showSuccessDialog by remember { mutableStateOf(false) }
-    var updatedNameResult by remember { mutableStateOf("") }
-    var updatedPhoneResult by remember { mutableStateOf("") }
+
+    var dialogTitle by remember { mutableStateOf("") }
+    var dialogMessage by remember { mutableStateOf("") }
 
     val handleSave: () -> Unit = {
         val newName = nama.trim()
         val newPhone = nomorTelepon.trim()
 
+        val isNameChanged = newName != initialName.trim()
+        val isPhoneChanged = newPhone != initialPhone.trim()
+
         if (newName.isBlank()) {
             Toast.makeText(context, "Nama tidak boleh kosong", Toast.LENGTH_SHORT).show()
+        } else if (!isNameChanged && !isPhoneChanged) {
+            Toast.makeText(context, "Tidak ada perubahan data", Toast.LENGTH_SHORT).show()
         } else {
             isLoading = true
-            updatedNameResult = newName
-            updatedPhoneResult = newPhone
 
-            // 1. Simpan langsung ke Local Preferences (instan)
+            // Tentukan Judul & Pesan Pop-up secara spesifik
+            when {
+                isNameChanged && isPhoneChanged -> {
+                    dialogTitle = "Profil Berhasil Diperbarui"
+                    dialogMessage = "Nama Anda telah diubah menjadi \"$newName\" dan nomor HP diperbarui menjadi \"$newPhone\"."
+                }
+                isNameChanged -> {
+                    dialogTitle = "Nama Berhasil Diperbarui"
+                    dialogMessage = "Nama Anda telah berhasil diubah menjadi \"$newName\". Nama baru ini otomatis tampil di Beranda & Materi."
+                }
+                else -> {
+                    dialogTitle = "Nomor HP Berhasil Diperbarui"
+                    dialogMessage = "Nomor telepon Anda telah berhasil diperbarui menjadi \"$newPhone\"."
+                }
+            }
+
+            // 1. Simpan ke Local Preferences (instan)
             UserSessionManager.updateProfile(context, newName, newPhone)
 
             // 2. Simpan ke Firebase Auth & Cloud Firestore di background
@@ -90,42 +110,49 @@ fun EditProfilScreen(
                 }
             }
 
-            // 3. Tampilkan Toast & Pop-up Sukses Langsung
             isLoading = false
-            Toast.makeText(context, "Profil & Nama Berhasil Diperbarui!", Toast.LENGTH_LONG).show()
             showSuccessDialog = true
         }
     }
 
     // ==========================================
-    // POPUP DIALOG BERHASIL MENGUBAH PROFIL
+    // POPUP DIALOG MINIMALIS & CLEAN
     // ==========================================
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { },
             icon = {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Berhasil",
-                    tint = Color(0xFF4CAF50),
-                    modifier = Modifier.size(54.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE8ECE7)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = sageGreen,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             },
             title = {
                 Text(
-                    text = "Profil Berhasil Diperbarui! 🎉",
-                    fontSize = 20.sp,
+                    text = dialogTitle,
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1F2937),
                     textAlign = TextAlign.Center
                 )
             },
             text = {
-                val phoneText = if (updatedPhoneResult.isNotBlank()) "\nNomor HP: $updatedPhoneResult" else ""
                 Text(
-                    text = "Nama Anda telah diperbarui menjadi \"$updatedNameResult\"$phoneText.\n\nPerubahan ini otomatis tampil di halaman Beranda, Profil, dan Modul Materi.",
+                    text = dialogMessage,
                     fontSize = 14.sp,
-                    color = Color.DarkGray,
-                    textAlign = TextAlign.Center
+                    color = Color(0xFF4B5563),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp
                 )
             },
             confirmButton = {
@@ -135,13 +162,17 @@ fun EditProfilScreen(
                         onBackClick()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = sageGreen),
-                    modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
                 ) {
-                    Text("OK, Mengerti", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Selesai", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
             },
-            shape = RoundedCornerShape(20.dp),
-            containerColor = Color.White
+            shape = RoundedCornerShape(24.dp),
+            containerColor = Color.White,
+            tonalElevation = 6.dp
         )
     }
 

@@ -12,7 +12,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +29,16 @@ fun LeaderboardScreen(
     onBackClick: () -> Unit
 ) {
     val sageGreen = Color(0xFF7A8B76)
-    val daftarUser = LeaderboardRepository.getDaftarLeaderboard()
+
+    // Dengarkan perubahan data Leaderboard Real-Time dari Firebase Cloud
+    DisposableEffect(Unit) {
+        LeaderboardRepository.listenRealtimeLeaderboard()
+        onDispose {
+            LeaderboardRepository.stopListening()
+        }
+    }
+
+    val daftarUser by LeaderboardRepository.leaderboardFlow.collectAsState()
 
     // Memisahkan 3 besar untuk podium dan sisanya untuk list
     val topThree = daftarUser.take(3)
@@ -279,7 +288,7 @@ fun LeaderboardItemCard(user: UserRank) {
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = if (user.isMe) "You (Kamu)" else user.nama,
+                text = user.nama,
                 fontSize = 15.sp,
                 fontWeight = if (user.isMe) FontWeight.ExtraBold else FontWeight.Medium,
                 color = textColor,

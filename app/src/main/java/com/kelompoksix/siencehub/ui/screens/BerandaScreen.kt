@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -60,10 +61,20 @@ fun BerandaScreen(
     val faktaSains = viewModel.faktaSains
     val isLoadingFakta = viewModel.isLoadingFakta
 
+    LaunchedEffect(Unit) {
+        com.kelompoksix.siencehub.data.repositories.UserProgressRepository.loadProgress(context)
+    }
+
+    val progressMap by com.kelompoksix.siencehub.data.repositories.UserProgressRepository.subjectProgressFlow.collectAsState()
+
+    val fisikaProg = progressMap["Fisika"] ?: 0f
+    val biologiProg = progressMap["Biologi"] ?: 0.2f
+    val kimiaProg = progressMap["Kimia"] ?: 0.4f
+
     val daftarMateri = listOf(
-        Pair("Biologi: Struktur Sel", 0.1f),
-        Pair("Fisika: Hukum Newton", 0.5f),
-        Pair("Kimia: Reaksi Asam Basa", 0.8f)
+        Pair("Fisika: Hukum Newton", fisikaProg),
+        Pair("Biologi: Struktur Sel", biologiProg),
+        Pair("Kimia: Reaksi Asam Basa", kimiaProg)
     )
     val pagerState = rememberPagerState(pageCount = { daftarMateri.size })
 

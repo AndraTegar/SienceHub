@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,6 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.data.models.QuizHistoryItem
+import com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
@@ -39,6 +43,14 @@ fun ProfilScreen(
 
     val context = LocalContext.current
 
+    // Ambil data Riwayat Kuis Real-Time dari Cloud Firestore & SharedPreferences
+    DisposableEffect(context) {
+        QuizHistoryRepository.fetchUserQuizHistory(context)
+        onDispose { }
+    }
+
+    val quizHistory by QuizHistoryRepository.quizHistoryFlow.collectAsState()
+
     val userName = remember(context) {
         UserSessionManager.getUserName(context).ifBlank { "Pengguna ScienceHub" }
     }
@@ -51,115 +63,223 @@ fun ProfilScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.45f).background(sageGreen))
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.38f).background(sageGreen))
 
         Surface(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.65f).align(Alignment.BottomCenter),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.72f).align(Alignment.BottomCenter),
             shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
             color = Color(0xFFFAFAFA)
         ) {}
 
-        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier.height(60.dp))
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(48.dp))
 
-            Box(contentAlignment = Alignment.BottomEnd) {
-                Box(
-                    modifier = Modifier
-                        .size(110.dp)
-                        .border(4.dp, Color.White, CircleShape)
-                        .clip(CircleShape)
-                        .background(Color.LightGray),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(imageVector = Icons.Default.Person, contentDescription = null, modifier = Modifier.size(55.dp), tint = Color.Gray)
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    Box(
+                        modifier = Modifier
+                            .size(105.dp)
+                            .border(4.dp, Color.White, CircleShape)
+                            .clip(CircleShape)
+                            .background(Color.LightGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(imageVector = Icons.Default.Person, contentDescription = null, modifier = Modifier.size(52.dp), tint = Color.Gray)
+                    }
+
+                    // Tombol Pensil Edit Profil
+                    IconButton(
+                        onClick = onNavigateToEditProfile,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .border(1.dp, Color.LightGray, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Profil",
+                            tint = sageGreen,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
 
-                // Tombol Pensil Edit Profil (Membuka Halaman Edit Profil)
-                IconButton(
-                    onClick = onNavigateToEditProfile,
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onNavigateToEditProfile() }
+                ) {
+                    Text(text = userName, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
+                }
+
+                Text(text = userEmail, fontSize = 14.sp, color = Color.White.copy(alpha = 0.85f))
+
+                if (userPhone.isNotBlank()) {
+                    Text(text = "📱 $userPhone", fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f), modifier = Modifier.padding(top = 2.dp))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Barisan Tombol Melayang
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    MenuKotakFresh(icon = Icons.Default.BarChart, bgColor = lightBlue, onClick = onNavigateToLeaderboard)
+                    Spacer(modifier = Modifier.width(20.dp))
+                    MenuKotakFresh(icon = Icons.Default.WorkspacePremium, bgColor = lightBlue, onClick = onNavigateToAchievement)
+                    Spacer(modifier = Modifier.width(20.dp))
+                    MenuKotakFresh(icon = Icons.Default.Settings, bgColor = lightBlue, onClick = onNavigateToSettings)
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Kartu Level & Streak
+                Card(
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp, horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        StatusBadgeFresh(icon = Icons.Default.Star, value = "${(quizHistory.sumOf { it.score } / 100) + 1}", label = "Level", iconColor = Color(0xFF00B0FF), bgColor = Color(0xFFE1F5FE))
+                        Box(modifier = Modifier.height(45.dp).width(1.5.dp).background(Color.LightGray.copy(alpha = 0.5f)))
+                        StatusBadgeFresh(icon = Icons.Default.LocalFireDepartment, value = "6", label = "Streak", iconColor = Color(0xFFFF6D00), bgColor = Color(0xFFFFF3E0))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Header Riwayat Kuis
+                Row(
                     modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                        .border(1.dp, Color.LightGray, CircleShape)
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Riwayat & Hasil Kuis 📊", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                    Text(text = "${quizHistory.size} Selesai", fontSize = 12.sp, color = sageGreen, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            if (quizHistory.isEmpty()) {
+                item {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(18.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(Color(0xFFE8ECE7), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = sageGreen)
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Belum ada kuis yang diikuti", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                Text("Selesaikan kuis untuk melihat riwayat nilai di sini.", fontSize = 12.sp, color = Color.Gray)
+                            }
+                        }
+                    }
+                }
+            } else {
+                items(quizHistory) { item ->
+                    QuizHistoryCardItem(item = item)
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(100.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun QuizHistoryCardItem(item: QuizHistoryItem) {
+    val sageGreen = Color(0xFF7A8B76)
+
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 6.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .background(Color(0xFFE8ECE7), CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Profil",
+                        imageVector = Icons.Default.EmojiEvents,
+                        contentDescription = null,
                         tint = sageGreen,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column {
+                    Text(
+                        text = item.subjectName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = Color(0xFF1E293B)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "${item.correctCount} Benar • ${item.wrongCount} Salah • ${item.formattedDate}",
+                        fontSize = 11.sp,
+                        color = Color.Gray
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onNavigateToEditProfile() }
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = Color(0xFFF1F5F9)
             ) {
-                Text(text = userName, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                Spacer(modifier = Modifier.width(6.dp))
-                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
-            }
-
-            Text(text = userEmail, fontSize = 14.sp, color = Color.White.copy(alpha = 0.85f))
-
-            if (userPhone.isNotBlank()) {
-                Text(text = "📱 $userPhone", fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f), modifier = Modifier.padding(top = 2.dp))
-            }
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // Barisan Tombol Melayang
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                MenuKotakFresh(icon = Icons.Default.BarChart, bgColor = lightBlue, onClick = onNavigateToLeaderboard)
-                Spacer(modifier = Modifier.width(20.dp))
-                MenuKotakFresh(icon = Icons.Default.WorkspacePremium, bgColor = lightBlue, onClick = onNavigateToAchievement)
-                Spacer(modifier = Modifier.width(20.dp))
-                MenuKotakFresh(icon = Icons.Default.Settings, bgColor = lightBlue, onClick = onNavigateToSettings)
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Kartu Level & Streak
-            Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp, horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    StatusBadgeFresh(icon = Icons.Default.Star, value = "1", label = "Level", iconColor = Color(0xFF00B0FF), bgColor = Color(0xFFE1F5FE))
-                    Box(modifier = Modifier.height(45.dp).width(1.5.dp).background(Color.LightGray.copy(alpha = 0.5f)))
-                    StatusBadgeFresh(icon = Icons.Default.LocalFireDepartment, value = "6", label = "Streak", iconColor = Color(0xFFFF6D00), bgColor = Color(0xFFFFF3E0))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Kartu Statistik
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
-                Text(text = "Pencapaian Kamu", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    modifier = Modifier.fillMaxWidth().height(70.dp)
-                ) {
-                    Row(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(40.dp).background(Color(0xFFE8ECE7), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Color(0xFF7A8B76))
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text("3 Materi Diselesaikan", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                    }
-                }
+                Text(
+                    text = "${item.score} pt",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF8B4CFC),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                )
             }
         }
     }

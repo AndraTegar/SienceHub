@@ -30,6 +30,7 @@ fun QuizScreen(
     onBackClick: () -> Unit = {},
     onQuizFinished: (score: Int, total: Int, correct: Int, wrong: Int) -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val daftarSoal = remember { QuizRepository.getSoalBySubject(subjectName) }
     var indexSoalAktif by remember { mutableIntStateOf(0) }
     val jawabanUser = remember { mutableStateMapOf<Int, Int>() }
@@ -55,6 +56,19 @@ fun QuizScreen(
         } else {
             val totalSkor = correctCount * 20
             LeaderboardRepository.tambahSkorUser(totalSkor)
+            com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository.simpanHasilKuis(
+                context = context,
+                subjectName = subjectName,
+                score = totalSkor,
+                totalQuestions = daftarSoal.size,
+                correctCount = correctCount,
+                wrongCount = wrongCount
+            )
+            com.kelompoksix.siencehub.data.repositories.UserProgressRepository.updateSubjectProgress(
+                context = context,
+                subjectName = subjectName,
+                progress = 1.0f
+            )
             onQuizFinished(totalSkor, daftarSoal.size * 20, correctCount, wrongCount)
         }
     }
@@ -275,6 +289,19 @@ fun QuizScreen(
                                     val finalWrong = daftarSoal.size - finalCorrect
                                     val totalSkor = finalCorrect * 20
                                     LeaderboardRepository.tambahSkorUser(totalSkor)
+                                    com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository.simpanHasilKuis(
+                                        context = context,
+                                        subjectName = subjectName,
+                                        score = totalSkor,
+                                        totalQuestions = daftarSoal.size,
+                                        correctCount = finalCorrect,
+                                        wrongCount = finalWrong
+                                    )
+                                    com.kelompoksix.siencehub.data.repositories.UserProgressRepository.updateSubjectProgress(
+                                        context = context,
+                                        subjectName = subjectName,
+                                        progress = 1.0f
+                                    )
                                     onQuizFinished(totalSkor, daftarSoal.size * 20, finalCorrect, finalWrong)
                                 }
                             },
