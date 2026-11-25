@@ -24,9 +24,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.ui.theme.AccentAmber
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 
@@ -107,7 +109,7 @@ fun EksperimenScaffold(
 @Composable
 fun PilihanChip(teks: String, terpilih: Boolean, onClick: () -> Unit) {
     val bg by animateColorAsState(
-        targetValue = if (terpilih) SagePrimary else Color.White,
+        targetValue = if (terpilih) SagePrimary else SurfaceWhite,
         label = "chipBg"
     )
     val textColor by animateColorAsState(
@@ -120,7 +122,7 @@ fun PilihanChip(teks: String, terpilih: Boolean, onClick: () -> Unit) {
         color = bg,
         border = BorderStroke(
             width = 1.dp,
-            color = if (terpilih) SagePrimary else Color(0xFFD5DFEB)
+            color = if (terpilih) SagePrimary else BorderSubtle
         ),
         shadowElevation = if (terpilih) 2.dp else 0.dp,
         modifier = Modifier

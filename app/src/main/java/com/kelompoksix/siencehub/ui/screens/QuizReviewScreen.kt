@@ -26,6 +26,7 @@ import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
 import com.kelompoksix.siencehub.ui.theme.StatusSuccess
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -90,7 +91,7 @@ fun QuizReviewScreen(
                 itemsIndexed(daftarSoal) { index, soal ->
                     Card(
                         shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         border = BorderStroke(1.dp, BorderSubtle),
                         modifier = Modifier.fillMaxWidth()
@@ -139,7 +140,7 @@ fun QuizReviewScreen(
                             Spacer(modifier = Modifier.height(14.dp))
 
                             Surface(
-                                color = Color(0xFFDCFCE7),
+                                color = StatusSuccess.copy(alpha = 0.16f),
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -156,7 +157,7 @@ fun QuizReviewScreen(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = "Jawaban Benar: ${soal.opsi.getOrElse(soal.jawabanBenar) { "" }}",
-                                        color = Color(0xFF15803D),
+                                        color = StatusSuccess,
                                         fontSize = 13.5.sp,
                                         fontWeight = FontWeight.Bold
                                     )

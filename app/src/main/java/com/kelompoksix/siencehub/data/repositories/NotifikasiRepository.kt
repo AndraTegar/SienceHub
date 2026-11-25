@@ -46,6 +46,7 @@ object NotifikasiRepository {
         tipe: TipeNotifikasi = TipeNotifikasi.INFO,
         waktu: String = "Baru saja"
     ) {
+        if (!com.kelompoksix.siencehub.utils.AppSettingsManager.isNotificationsEnabled) return
         val existing = _notifikasiList.value
         if (existing.firstOrNull()?.let { it.judul == judul && it.pesan == pesan } == true) {
             return

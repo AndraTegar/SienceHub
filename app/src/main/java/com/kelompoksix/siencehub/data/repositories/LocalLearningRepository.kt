@@ -159,6 +159,26 @@ object LocalLearningRepository {
     }
 
     @Synchronized
+    fun clearUserLocalProgress(context: Context, userId: String = resolveUserId(context)) {
+        val normalizedUserId = normalizeUserId(userId)
+        val dbHelper = LearningDatabase(context)
+        val db = dbHelper.writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("chapter_completions", "user_id = ?", arrayOf(normalizedUserId))
+            db.delete("learning_days", "user_id = ?", arrayOf(normalizedUserId))
+            db.delete("quiz_attempts", "user_id = ?", arrayOf(normalizedUserId))
+            db.delete("topic_visits", "user_id = ?", arrayOf(normalizedUserId))
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+            dbHelper.close()
+        }
+        UserProgressRepository.resetLocalProgress(context)
+        _learningStatsFlow.value = LearningStats.EMPTY
+    }
+
+    @Synchronized
     fun recordTopicOpened(context: Context, userId: String = resolveUserId(context), topicId: String) {
         val normalizedUserId = normalizeUserId(userId)
         val dbHelper = LearningDatabase(context)

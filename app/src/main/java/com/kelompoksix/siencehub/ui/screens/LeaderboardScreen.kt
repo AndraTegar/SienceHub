@@ -31,6 +31,7 @@ import com.kelompoksix.siencehub.ui.theme.SageDark
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -262,7 +263,7 @@ fun PodiumItem(user: UserRank) {
 
 @Composable
 fun LeaderboardItemCard(user: UserRank) {
-    val backgroundColor = if (user.isMe) SageSoft else Color.White
+    val backgroundColor = if (user.isMe) SageSoft else SurfaceWhite
     val borderColor = if (user.isMe) SagePrimary else BorderSubtle
     val textColor = TextPrimary
 

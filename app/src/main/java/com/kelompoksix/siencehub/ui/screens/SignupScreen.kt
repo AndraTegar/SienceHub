@@ -46,6 +46,7 @@ import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.StatusDanger
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -153,7 +154,7 @@ fun SignupScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(SurfaceWhite)
             .systemBarsPadding()
             .imePadding()
     ) {
@@ -226,7 +227,10 @@ fun SignupScreen(
                         focusedBorderColor = SagePrimary,
                         unfocusedBorderColor = BorderSubtle,
                         focusedLabelColor = SagePrimary,
-                        focusedContainerColor = Color.White,
+                        unfocusedLabelColor = TextSecondary,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedContainerColor = SurfaceWhite,
                         unfocusedContainerColor = SurfaceOffWhite
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -246,7 +250,10 @@ fun SignupScreen(
                         focusedBorderColor = SagePrimary,
                         unfocusedBorderColor = BorderSubtle,
                         focusedLabelColor = SagePrimary,
-                        focusedContainerColor = Color.White,
+                        unfocusedLabelColor = TextSecondary,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedContainerColor = SurfaceWhite,
                         unfocusedContainerColor = SurfaceOffWhite
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -273,7 +280,10 @@ fun SignupScreen(
                         focusedBorderColor = SagePrimary,
                         unfocusedBorderColor = BorderSubtle,
                         focusedLabelColor = SagePrimary,
-                        focusedContainerColor = Color.White,
+                        unfocusedLabelColor = TextSecondary,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedContainerColor = SurfaceWhite,
                         unfocusedContainerColor = SurfaceOffWhite
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -300,7 +310,10 @@ fun SignupScreen(
                         focusedBorderColor = SagePrimary,
                         unfocusedBorderColor = BorderSubtle,
                         focusedLabelColor = SagePrimary,
-                        focusedContainerColor = Color.White,
+                        unfocusedLabelColor = TextSecondary,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedContainerColor = SurfaceWhite,
                         unfocusedContainerColor = SurfaceOffWhite
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -376,7 +389,7 @@ fun SignupScreen(
                         .height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     border = BorderStroke(1.dp, BorderSubtle),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = SurfaceWhite)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

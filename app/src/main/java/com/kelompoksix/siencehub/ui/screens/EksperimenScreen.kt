@@ -32,6 +32,7 @@ import com.kelompoksix.siencehub.ui.theme.AccentBlueSoft
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -133,7 +134,7 @@ fun EksperimenScreen(onBackClick: () -> Unit, onPilih: (String) -> Unit) {
                                 else Toast.makeText(context, "Segera hadir", Toast.LENGTH_SHORT).show()
                             },
                             shape = RoundedCornerShape(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                             border = BorderStroke(1.dp, AccentBlueSoft),
                             modifier = Modifier

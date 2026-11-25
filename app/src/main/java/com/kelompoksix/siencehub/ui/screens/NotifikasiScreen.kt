@@ -37,6 +37,7 @@ import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -163,7 +164,7 @@ fun NotifikasiScreen(
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = SagePrimary,
                                 selectedLabelColor = Color.White,
-                                containerColor = Color.White,
+                                containerColor = SurfaceWhite,
                                 labelColor = TextSecondary
                             ),
                             border = FilterChipDefaults.filterChipBorder(
@@ -182,7 +183,7 @@ fun NotifikasiScreen(
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = SagePrimary,
                                 selectedLabelColor = Color.White,
-                                containerColor = Color.White,
+                                containerColor = SurfaceWhite,
                                 labelColor = TextSecondary
                             ),
                             border = FilterChipDefaults.filterChipBorder(
@@ -268,7 +269,7 @@ fun ItemNotifikasiCard(
     onDelete: () -> Unit
 ) {
     val bgColor by animateColorAsState(
-        targetValue = if (notifikasi.isDibaca) Color.White else Color(0xFFF3F7F2),
+        targetValue = if (notifikasi.isDibaca) SurfaceWhite else SageSoft,
         label = "bgColor"
     )
 

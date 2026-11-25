@@ -34,8 +34,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 
 data class NavItem(
@@ -61,10 +63,10 @@ fun FloatingBottomNav(
             .widthIn(min = 248.dp, max = 310.dp)
             .height(62.dp),
         shape = CircleShape,
-        color = Color.White.copy(alpha = 0.97f),
+        color = SurfaceWhite.copy(alpha = 0.97f),
         shadowElevation = 10.dp,
         tonalElevation = 2.dp,
-        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.06f))
+        border = BorderStroke(1.dp, BorderSubtle)
     ) {
         Row(
             modifier = Modifier

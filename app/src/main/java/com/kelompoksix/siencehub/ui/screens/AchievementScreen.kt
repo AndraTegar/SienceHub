@@ -34,6 +34,7 @@ import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -214,7 +215,7 @@ fun AchievementScreen(
                         item {
                             Card(
                                 shape = RoundedCornerShape(18.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                                 border = BorderStroke(1.dp, BorderSubtle),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -261,7 +262,7 @@ fun AchievementScreen(
                                 deskripsi = achievement.description,
                                 ikon = achievement.icon,
                                 warnaIkon = TextSecondary,
-                                warnaBgIkon = Color(0xFFEAECEF),
+                                warnaBgIkon = BorderSubtle,
                                 sudahSelesai = false,
                                 progressFraction = achievement.progressFraction,
                                 progressLabel = "${achievement.currentValue}/${achievement.targetValue} ${achievement.unitLabel}"
@@ -291,7 +292,7 @@ fun KartuAchievement(
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = if (sudahSelesai) 2.dp else 0.dp),
         border = BorderStroke(1.dp, if (sudahSelesai) SagePrimary.copy(alpha = 0.3f) else BorderSubtle),
         modifier = Modifier
@@ -358,7 +359,7 @@ fun KartuAchievement(
                             .height(6.dp)
                             .clip(CircleShape),
                         color = SagePrimary,
-                        trackColor = Color(0xFFEAECEF),
+                        trackColor = BorderSubtle,
                         strokeCap = StrokeCap.Round
                     )
                 }

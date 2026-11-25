@@ -45,10 +45,12 @@ import com.kelompoksix.siencehub.ui.components.SearchBarMateri
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
+import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
+import com.kelompoksix.siencehub.utils.AppSettingsManager
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,7 +101,7 @@ fun BerandaScreen(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = Color.White,
+        containerColor = SurfaceOffWhite,
         topBar = {
             TopAppBar(
                 title = {
@@ -378,10 +380,10 @@ fun BerandaScreen(
                 }
             }
 
-            // Bagian Bawah: Sheet Putih Melengkung
+            // Bagian Bawah: Sheet Melengkung Adaptif (Light/Dark)
             Surface(
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                color = Color.White,
+                color = SurfaceOffWhite,
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 360.dp)
@@ -427,7 +429,7 @@ fun BerandaScreen(
                             deskripsi = if (isLoadingFakta) "Memuat fakta menarik hari ini..." else faktaSains,
                             teksTombol = if (isLoadingFakta) "Memuat..." else "Fakta Baru",
                             ikon = Icons.Default.Lightbulb,
-                            warnaBackground = Color(0xFFFFFBEB),
+                            warnaBackground = if (AppSettingsManager.isDarkMode) Color(0xFF2B2416) else Color(0xFFFFFBEB),
                             warnaTombol = Color(0xFFD97706),
                             onClick = { viewModel.muatFaktaBaru() }
                         )

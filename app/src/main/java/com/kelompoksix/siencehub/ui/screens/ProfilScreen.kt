@@ -41,9 +41,11 @@ import com.kelompoksix.siencehub.ui.theme.SageDark
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
+import com.kelompoksix.siencehub.utils.AppSettingsManager
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
@@ -53,7 +55,7 @@ fun ProfilScreen(
     onNavigateToLeaderboard: () -> Unit = {},
     onNavigateToEditProfile: () -> Unit = {}
 ) {
-    val lightBlue = Color(0xFFE5F0FF)
+    val lightBlue = if (AppSettingsManager.isDarkMode) Color(0xFF1E2B3A) else Color(0xFFE5F0FF)
     val context = LocalContext.current
     val metrics = rememberResponsiveMetrics()
 
@@ -228,7 +230,7 @@ fun ProfilScreen(
                     // Kartu Level, Streak & Bab Selesai Real-Time
                     Card(
                         shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         border = BorderStroke(1.dp, BorderSubtle),
                         modifier = Modifier.fillMaxWidth()
@@ -314,7 +316,7 @@ fun ProfilScreen(
                 ResponsiveContentContainer(maxWidth = 720.dp) {
                     Card(
                         shape = RoundedCornerShape(18.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                         border = BorderStroke(1.dp, BorderSubtle),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -376,7 +378,7 @@ fun QuizHistoryCardItem(
 ) {
     Card(
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         border = BorderStroke(1.dp, BorderSubtle),
         modifier = modifier.fillMaxWidth()
@@ -430,7 +432,7 @@ fun QuizHistoryCardItem(
 
             Surface(
                 shape = RoundedCornerShape(10.dp),
-                color = Color(0xFFF3E8FF)
+                color = AccentPurple.copy(alpha = 0.14f)
             ) {
                 Text(
                     text = "${item.score} pt",
@@ -457,7 +459,7 @@ fun MenuKotakFresh(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = bgColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, Color.White),
+        border = BorderStroke(1.dp, BorderSubtle),
         modifier = modifier.height(78.dp)
     ) {
         Column(

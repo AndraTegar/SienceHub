@@ -44,6 +44,7 @@ import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.StatusDanger
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -62,6 +63,8 @@ fun LoginScreen(
 
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showForgotDialog by remember { mutableStateOf(false) }
+    var resetEmailInput by remember { mutableStateOf("") }
 
     val isFormValid = email.isNotBlank() && password.isNotBlank() && !isLoading
     val focusManager = LocalFocusManager.current
@@ -143,10 +146,77 @@ fun LoginScreen(
         }
     }
 
+    if (showForgotDialog) {
+        AlertDialog(
+            onDismissRequest = { showForgotDialog = false },
+            containerColor = SurfaceWhite,
+            shape = RoundedCornerShape(24.dp),
+            title = {
+                Text("Reset Kata Sandi", fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 18.sp)
+            },
+            text = {
+                Column {
+                    Text(
+                        "Masukkan email akunmu untuk menerima tautan pengaturan ulang kata sandi.",
+                        color = TextSecondary,
+                        fontSize = 13.sp,
+                        lineHeight = 19.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = resetEmailInput,
+                        onValueChange = { resetEmailInput = it },
+                        label = { Text("Email") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val targetEmail = resetEmailInput.trim()
+                        if (targetEmail.isBlank() || !targetEmail.contains("@")) {
+                            Toast.makeText(context, "Masukkan alamat email yang valid.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            FirebaseAuth.getInstance().sendPasswordResetEmail(targetEmail)
+                                .addOnSuccessListener {
+                                    showForgotDialog = false
+                                    Toast.makeText(
+                                        context,
+                                        "Link reset kata sandi telah dikirim ke $targetEmail.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                .addOnFailureListener { err ->
+                                    Toast.makeText(
+                                        context,
+                                        err.localizedMessage ?: "Gagal mengirim email reset.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Kirim Link", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showForgotDialog = false }) {
+                    Text("Batal", color = TextSecondary)
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(SurfaceWhite)
             .systemBarsPadding()
             .imePadding()
     ) {
@@ -225,7 +295,10 @@ fun LoginScreen(
                         focusedBorderColor = SagePrimary,
                         unfocusedBorderColor = BorderSubtle,
                         focusedLabelColor = SagePrimary,
-                        focusedContainerColor = Color.White,
+                        unfocusedLabelColor = TextSecondary,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedContainerColor = SurfaceWhite,
                         unfocusedContainerColor = SurfaceOffWhite
                     )
                 )
@@ -264,7 +337,10 @@ fun LoginScreen(
                         focusedBorderColor = SagePrimary,
                         unfocusedBorderColor = BorderSubtle,
                         focusedLabelColor = SagePrimary,
-                        focusedContainerColor = Color.White,
+                        unfocusedLabelColor = TextSecondary,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedContainerColor = SurfaceWhite,
                         unfocusedContainerColor = SurfaceOffWhite
                     )
                 )
@@ -276,11 +352,14 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Text(
-                        text = "Forgot password?",
+                        text = "Lupa kata sandi?",
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextSecondary,
-                        modifier = Modifier.clickable(onClick = { /* TODO */ })
+                        color = SagePrimary,
+                        modifier = Modifier.clickable(onClick = {
+                            resetEmailInput = email.trim()
+                            showForgotDialog = true
+                        })
                     )
                 }
 
@@ -359,7 +438,7 @@ fun LoginScreen(
                         .height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     border = BorderStroke(1.dp, BorderSubtle),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = SurfaceWhite)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

@@ -26,6 +26,8 @@ import com.kelompoksix.siencehub.ui.theme.AccentBlueSoft
 import com.kelompoksix.siencehub.ui.theme.BorderSubtle
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.StatusDanger
+import com.kelompoksix.siencehub.ui.theme.SurfaceMuted
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import kotlin.math.abs
@@ -120,7 +122,7 @@ fun SimulatorNewtonScreen(onBackClick: () -> Unit) {
     EksperimenScaffold(judul = "HUKUM II NEWTON", onBackClick = onBackClick) {
         Card(
             shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
             border = BorderStroke(1.dp, BorderSubtle)
         ) {
             Row(
@@ -167,7 +169,7 @@ fun SimulatorNewtonScreen(onBackClick: () -> Unit) {
 
         Card(
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEFF4FB)),
+            colors = CardDefaults.cardColors(containerColor = SurfaceMuted),
             border = BorderStroke(1.dp, AccentBlueSoft)
         ) {
             Canvas(
@@ -222,7 +224,7 @@ fun SimulatorNewtonScreen(onBackClick: () -> Unit) {
 
         Card(
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
             border = BorderStroke(1.dp, BorderSubtle)
         ) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

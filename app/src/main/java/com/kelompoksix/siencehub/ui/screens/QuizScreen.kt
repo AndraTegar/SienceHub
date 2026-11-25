@@ -33,8 +33,10 @@ import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.StatusSuccess
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
+import com.kelompoksix.siencehub.utils.AppSettingsManager
 import kotlinx.coroutines.delay
 
 @Composable
@@ -53,8 +55,8 @@ fun QuizScreen(
     val totalWaktuDetik = 60
     var sisaWaktuDetik by remember { mutableIntStateOf(totalWaktuDetik) }
 
-    val purpleBorder = Color(0xFFD8B4FE)
-    val sheetBackground = Color(0xFFFAF9FF)
+    val purpleBorder = if (AppSettingsManager.isDarkMode) AccentPurple.copy(alpha = 0.45f) else Color(0xFFD8B4FE)
+    val sheetBackground = SurfaceOffWhite
 
     val correctCount = jawabanUser.entries.count { (idx, ops) -> daftarSoal.getOrNull(idx)?.jawabanBenar == ops }
     val wrongCount = jawabanUser.entries.count { (idx, ops) -> daftarSoal.getOrNull(idx)?.jawabanBenar != ops }
@@ -132,7 +134,7 @@ fun QuizScreen(
                     Surface(
                         onClick = onBackClick,
                         shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.92f),
+                        color = SurfaceWhite.copy(alpha = 0.92f),
                         modifier = Modifier.size(40.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -149,7 +151,7 @@ fun QuizScreen(
 
                     Surface(
                         shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.92f),
+                        color = SurfaceWhite.copy(alpha = 0.92f),
                         modifier = Modifier
                             .weight(1f)
                             .height(40.dp)
@@ -177,7 +179,7 @@ fun QuizScreen(
                 ) {
                     Card(
                         shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                         border = BorderStroke(1.dp, BorderSubtle),
                         modifier = Modifier
@@ -243,7 +245,7 @@ fun QuizScreen(
 
                     Surface(
                         shape = CircleShape,
-                        color = Color.White,
+                        color = SurfaceWhite,
                         shadowElevation = 6.dp,
                         modifier = Modifier.size(56.dp)
                     ) {
@@ -254,7 +256,7 @@ fun QuizScreen(
                             Canvas(modifier = Modifier.fillMaxSize().padding(5.dp)) {
                                 val strokeWidth = 3.5.dp.toPx()
                                 drawCircle(
-                                    color = Color(0xFFF3E8FF),
+                                    color = AccentPurple.copy(alpha = 0.18f),
                                     style = Stroke(width = strokeWidth)
                                 )
                                 val sweepAngle = 360f * (sisaWaktuDetik.toFloat() / totalWaktuDetik.toFloat())
@@ -326,7 +328,7 @@ fun QuizScreen(
                                 .fillMaxWidth()
                                 .heightIn(min = 56.dp),
                             shape = RoundedCornerShape(18.dp),
-                            color = if (isSelected) Color(0xFFF3E8FF) else Color.White,
+                            color = if (isSelected) AccentPurple.copy(alpha = 0.16f) else SurfaceWhite,
                             border = BorderStroke(
                                 width = 1.5.dp,
                                 color = if (isSelected) AccentPurple else purpleBorder

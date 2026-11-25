@@ -43,6 +43,7 @@ import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
 import com.kelompoksix.siencehub.ui.theme.StatusDanger
 import com.kelompoksix.siencehub.ui.theme.StatusSuccess
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -148,7 +149,7 @@ fun BabScreen(
                         item {
                             Card(
                                 shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                                 border = BorderStroke(1.dp, BorderSubtle),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -212,7 +213,7 @@ private fun ChapterCompletionCard(
     Card(
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCompleted) Color(0xFFF0FDF4) else Color.White
+            containerColor = if (isCompleted) StatusSuccess.copy(alpha = 0.12f) else SurfaceWhite
         ),
         border = BorderStroke(
             1.dp,
@@ -241,7 +242,7 @@ private fun ChapterCompletionCard(
                             text = "Bab $babId Telah Selesai Dipelajari!",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF166534)
+                            color = StatusSuccess
                         )
                         Text(
                             text = "Kamu mendapatkan +${LocalLearningRepository.CHAPTER_XP} XP dari bab ini.",
@@ -314,7 +315,7 @@ private fun ChapterCompletionCard(
 private fun BlokItem(blok: BlokKonten) {
     Card(
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         border = BorderStroke(1.dp, BorderSubtle),
         modifier = Modifier.fillMaxWidth()
@@ -432,7 +433,7 @@ private fun KuisMiniCard(
 
     Card(
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = BorderStroke(1.dp, SagePrimary.copy(alpha = 0.25f)),
         modifier = Modifier.fillMaxWidth()
@@ -496,8 +497,8 @@ private fun KuisMiniCard(
                 s.opsi.forEachIndexed { i, teks ->
                     val bgColor = when {
                         terpilih == null -> SurfaceOffWhite
-                        i == s.jawabanBenar -> Color(0xFFDCFCE7)
-                        i == terpilih -> Color(0xFFFEE2E2)
+                        i == s.jawabanBenar -> StatusSuccess.copy(alpha = 0.18f)
+                        i == terpilih -> StatusDanger.copy(alpha = 0.18f)
                         else -> SurfaceOffWhite.copy(alpha = 0.6f)
                     }
                     val borderColor = when {
@@ -508,8 +509,8 @@ private fun KuisMiniCard(
                     }
                     val textColor = when {
                         terpilih == null -> TextPrimary
-                        i == s.jawabanBenar -> Color(0xFF166534)
-                        i == terpilih -> Color(0xFF991B1B)
+                        i == s.jawabanBenar -> StatusSuccess
+                        i == terpilih -> StatusDanger
                         else -> TextSecondary
                     }
 

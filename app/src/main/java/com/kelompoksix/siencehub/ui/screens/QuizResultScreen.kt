@@ -29,6 +29,7 @@ import com.kelompoksix.siencehub.ui.theme.BorderSubtle
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -123,7 +124,7 @@ fun QuizResultScreen(
                 // Score Badge Lingkaran
                 Surface(
                     shape = CircleShape,
-                    color = Color.White,
+                    color = SurfaceWhite,
                     shadowElevation = 8.dp,
                     modifier = Modifier.size(if (metrics.isShortScreen) 146.dp else 162.dp)
                 ) {
@@ -132,7 +133,7 @@ fun QuizResultScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(6.dp)
-                            .border(3.dp, Color(0xFFF3E8FF), CircleShape)
+                            .border(3.dp, AccentPurple.copy(alpha = 0.2f), CircleShape)
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
@@ -167,7 +168,7 @@ fun QuizResultScreen(
                 // Kartu Statistik Grid 2x2
                 Card(
                     shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     border = BorderStroke(1.dp, BorderSubtle),
                     modifier = Modifier.fillMaxWidth()
@@ -233,7 +234,7 @@ fun QuizResultScreen(
                     BottomActionButton(
                         icon = Icons.Default.Visibility,
                         label = "Review",
-                        circleColor = Color(0xFFFFF7ED),
+                        circleColor = Color(0xFFD97706).copy(alpha = 0.14f),
                         iconTint = Color(0xFFD97706),
                         onClick = onReviewClick,
                         modifier = Modifier.weight(1f)
@@ -252,7 +253,7 @@ fun QuizResultScreen(
                     BottomActionButton(
                         icon = Icons.Default.BarChart,
                         label = "Leaderboard",
-                        circleColor = Color.White,
+                        circleColor = SurfaceWhite,
                         iconTint = TextPrimary,
                         onClick = onLeaderboardClick,
                         modifier = Modifier.weight(1f)

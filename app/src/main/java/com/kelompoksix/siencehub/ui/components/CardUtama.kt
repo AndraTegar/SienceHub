@@ -19,9 +19,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
 import com.kelompoksix.siencehub.ui.theme.CreamBeige
 import com.kelompoksix.siencehub.ui.theme.SageDark
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 
 @Composable
@@ -37,7 +39,7 @@ fun CardUtama(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = CreamBeige),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.55f)),
+        border = BorderStroke(1.dp, BorderSubtle.copy(alpha = 0.7f)),
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 158.dp)
@@ -56,7 +58,7 @@ fun CardUtama(
                 Column(modifier = Modifier.weight(1f)) {
                     Surface(
                         shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.65f)
+                        color = SurfaceWhite.copy(alpha = 0.72f)
                     ) {
                         Text(
                             text = "LANJUTKAN BELAJAR",
@@ -130,7 +132,7 @@ fun CardUtama(
                         .height(8.dp)
                         .clip(CircleShape),
                     color = SagePrimary,
-                    trackColor = Color.White.copy(alpha = 0.85f),
+                    trackColor = SurfaceWhite.copy(alpha = 0.65f),
                     strokeCap = StrokeCap.Round
                 )
             }

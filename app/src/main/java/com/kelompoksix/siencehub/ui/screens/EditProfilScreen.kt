@@ -36,6 +36,7 @@ import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -173,7 +174,7 @@ fun EditProfilScreen(
                 }
             },
             shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White,
+            containerColor = SurfaceWhite,
             tonalElevation = 6.dp
         )
     }
@@ -260,8 +261,11 @@ fun EditProfilScreen(
                             focusedBorderColor = SagePrimary,
                             unfocusedBorderColor = BorderSubtle,
                             focusedLabelColor = SagePrimary,
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
+                            unfocusedLabelColor = TextSecondary,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedContainerColor = SurfaceWhite,
+                            unfocusedContainerColor = SurfaceWhite
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -281,8 +285,11 @@ fun EditProfilScreen(
                             focusedBorderColor = SagePrimary,
                             unfocusedBorderColor = BorderSubtle,
                             focusedLabelColor = SagePrimary,
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
+                            unfocusedLabelColor = TextSecondary,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedContainerColor = SurfaceWhite,
+                            unfocusedContainerColor = SurfaceWhite
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )

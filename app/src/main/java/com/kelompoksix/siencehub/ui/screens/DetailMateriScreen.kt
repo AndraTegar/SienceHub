@@ -36,6 +36,7 @@ import com.kelompoksix.siencehub.ui.theme.AccentBlueSoft
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
 import com.kelompoksix.siencehub.ui.theme.StatusSuccess
 import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.SurfaceWhite
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
@@ -194,7 +195,7 @@ fun DetailMateriScreen(
                             Card(
                                 onClick = { onBabClick(bab.id) },
                                 shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                                 border = BorderStroke(
                                     1.dp,
@@ -210,7 +211,7 @@ fun DetailMateriScreen(
                                 ) {
                                     Surface(
                                         shape = RoundedCornerShape(14.dp),
-                                        color = if (isDone) Color(0xFFDCFCE7) else AccentBlueSoft,
+                                        color = if (isDone) StatusSuccess.copy(alpha = 0.16f) else AccentBlueSoft,
                                         modifier = Modifier.size(46.dp)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
@@ -287,7 +288,7 @@ fun DetailMateriScreen(
                             Card(
                                 onClick = onKuisClick,
                                 shape = RoundedCornerShape(22.dp),
-                                colors = CardDefaults.cardColors(containerColor = AccentBlue),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E3A8A)),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                                 modifier = Modifier.fillMaxWidth()
                             ) {

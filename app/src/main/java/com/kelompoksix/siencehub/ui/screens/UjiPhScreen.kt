@@ -22,6 +22,7 @@ import com.kelompoksix.siencehub.ui.components.PilihanChip
 import com.kelompoksix.siencehub.ui.theme.AccentBlue
 import com.kelompoksix.siencehub.ui.theme.AccentBlueSoft
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.SurfaceMuted
 import com.kelompoksix.siencehub.ui.theme.TextPrimary
 import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import kotlin.math.abs
@@ -84,7 +85,7 @@ fun UjiPhScreen(onBackClick: () -> Unit) {
 
         Card(
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEFF4FB)),
+            colors = CardDefaults.cardColors(containerColor = SurfaceMuted),
             border = BorderStroke(1.dp, AccentBlueSoft)
         ) {
             Canvas(Modifier.fillMaxWidth().height(175.dp)) {

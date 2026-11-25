@@ -108,4 +108,15 @@ object UserProgressRepository {
         val normalizedSubject = MateriRepository.normalizeSubjectName(subjectName)
         return _subjectProgressFlow.value[normalizedSubject] ?: 0f
     }
+
+    fun resetLocalProgress(context: Context) {
+        val prefs = getPreferences(context)
+        val prefix = userKeyPrefix()
+        prefs.edit {
+            MateriRepository.ALL_SUBJECTS.forEach { subject ->
+                remove("${prefix}_progress_$subject")
+            }
+        }
+        _subjectProgressFlow.value = defaultProgressMap
+    }
 }
