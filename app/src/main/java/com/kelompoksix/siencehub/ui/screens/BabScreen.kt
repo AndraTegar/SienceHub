@@ -1,5 +1,6 @@
 package com.kelompoksix.siencehub.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,7 +11,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,9 +32,11 @@ import com.kelompoksix.siencehub.data.models.BlokKonten
 import com.kelompoksix.siencehub.data.models.SoalMini
 import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.data.repositories.IsiBabRepository
+import com.kelompoksix.siencehub.data.repositories.LocalLearningRepository
 import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.ui.theme.BorderSubtle
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SageDark
 import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.ui.theme.SageSoft
 import com.kelompoksix.siencehub.ui.theme.SienceHubTheme
@@ -42,9 +48,17 @@ import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 
 @Composable
-fun BabScreen(topikMateri: TopikMateri, babId: Int, onBackClick: () -> Unit) {
+fun BabScreen(
+    topikMateri: TopikMateri,
+    babId: Int,
+    onBackClick: () -> Unit,
+    isCompleted: Boolean = false,
+    onCompleteChapter: () -> Unit = {},
+    onNextBab: (() -> Unit)? = null
+) {
     val isi = remember(topikMateri.id, babId) { IsiBabRepository.getIsiBab(topikMateri.id, babId) }
     val metrics = rememberResponsiveMetrics()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -64,7 +78,8 @@ fun BabScreen(topikMateri: TopikMateri, babId: Int, onBackClick: () -> Unit) {
                     .height(48.dp)
                     .background(Color.White.copy(alpha = 0.18f), CircleShape)
                     .padding(horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onBackClick) {
                     Icon(
@@ -74,14 +89,40 @@ fun BabScreen(topikMateri: TopikMateri, babId: Int, onBackClick: () -> Unit) {
                         modifier = Modifier.size(17.dp)
                     )
                 }
+                if (isCompleted) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFDCFCE7),
+                        modifier = Modifier.padding(end = 10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = StatusSuccess,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = "Selesai",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF166534)
+                            )
+                        }
+                    }
+                }
             }
             Text(
-                text = "${topikMateri.kategori} • Bab $babId",
+                text = "${MateriRepository.normalizeSubjectName(topikMateri.kategori)} • Bab $babId",
                 color = Color.White,
                 fontSize = 15.5.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 52.dp)
+                modifier = Modifier.padding(horizontal = if (isCompleted) 92.dp else 52.dp)
             )
         }
 
@@ -121,10 +162,148 @@ fun BabScreen(topikMateri: TopikMateri, babId: Int, onBackClick: () -> Unit) {
                     } else {
                         items(isi.blok) { BlokItem(it) }
                         if (isi.kuis.isNotEmpty()) {
-                            item { KuisMiniCard(isi.kuis) }
+                            item {
+                                KuisMiniCard(
+                                    key = "${topikMateri.id}_$babId",
+                                    soal = isi.kuis,
+                                    onLatihanSelesai = {
+                                        if (!isCompleted) {
+                                            onCompleteChapter()
+                                            Toast.makeText(
+                                                context,
+                                                "Bab $babId selesai! +${LocalLearningRepository.CHAPTER_XP} XP 🎉",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        item {
+                            ChapterCompletionCard(
+                                babId = babId,
+                                isCompleted = isCompleted,
+                                onCompleteClick = {
+                                    onCompleteChapter()
+                                    Toast.makeText(
+                                        context,
+                                        "Bab $babId ditandai selesai! +${LocalLearningRepository.CHAPTER_XP} XP 🎉",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                },
+                                onNextBab = onNextBab
+                            )
                         }
                     }
                     item { Spacer(Modifier.height(16.dp)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChapterCompletionCard(
+    babId: Int,
+    isCompleted: Boolean,
+    onCompleteClick: () -> Unit,
+    onNextBab: (() -> Unit)?
+) {
+    Card(
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isCompleted) Color(0xFFF0FDF4) else Color.White
+        ),
+        border = BorderStroke(
+            1.dp,
+            if (isCompleted) StatusSuccess.copy(alpha = 0.35f) else BorderSubtle
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (isCompleted) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = StatusSuccess,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "Bab $babId Telah Selesai Dipelajari!",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF166534)
+                        )
+                        Text(
+                            text = "Kamu mendapatkan +${LocalLearningRepository.CHAPTER_XP} XP dari bab ini.",
+                            fontSize = 12.5.sp,
+                            color = SageDark
+                        )
+                    }
+                }
+                if (onNextBab != null) {
+                    Button(
+                        onClick = onNextBab,
+                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                    ) {
+                        Text(
+                            text = "Lanjut ke Bab ${babId + 1}",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.5.sp
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = "Sudah paham materi Bab $babId?",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Text(
+                    text = "Tandai bab ini selesai untuk mencatat progres belajarmu, menjaga streak harian, dan meraih +${LocalLearningRepository.CHAPTER_XP} XP.",
+                    fontSize = 13.sp,
+                    color = TextSecondary,
+                    lineHeight = 19.sp
+                )
+                Button(
+                    onClick = onCompleteClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Tandai Bab Selesai (+${LocalLearningRepository.CHAPTER_XP} XP)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.5.sp
+                    )
                 }
             }
         }
@@ -242,10 +421,14 @@ private fun BlokItem(blok: BlokKonten) {
 }
 
 @Composable
-private fun KuisMiniCard(soal: List<SoalMini>) {
-    var index by remember { mutableIntStateOf(0) }
-    var terpilih by remember { mutableStateOf<Int?>(null) }
-    var skor by remember { mutableIntStateOf(0) }
+private fun KuisMiniCard(
+    key: String,
+    soal: List<SoalMini>,
+    onLatihanSelesai: () -> Unit = {}
+) {
+    var index by remember(key) { mutableIntStateOf(0) }
+    var terpilih by remember(key) { mutableStateOf<Int?>(null) }
+    var skor by remember(key) { mutableIntStateOf(0) }
 
     Card(
         shape = RoundedCornerShape(22.dp),
@@ -287,17 +470,18 @@ private fun KuisMiniCard(soal: List<SoalMini>) {
 
             if (index >= soal.size) {
                 Text(
-                    text = "Skor kamu: $skor dari ${soal.size} benar!",
+                    text = "Skor latihan kamu: $skor dari ${soal.size} benar!",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = TextPrimary
                 )
-                Button(
+                OutlinedButton(
                     onClick = { index = 0; skor = 0; terpilih = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
+                    border = BorderStroke(1.dp, SagePrimary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = SagePrimary),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Ulangi Latihan")
+                    Text("Ulangi Latihan", fontWeight = FontWeight.SemiBold)
                 }
             } else {
                 val s = soal[index]
@@ -366,12 +550,17 @@ private fun KuisMiniCard(soal: List<SoalMini>) {
                         )
                     }
                     Button(
-                        onClick = { index++; terpilih = null },
+                        onClick = {
+                            val isLast = index == soal.size - 1
+                            index++
+                            terpilih = null
+                            if (isLast) onLatihanSelesai()
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text(if (index == soal.size - 1) "Lihat Skor" else "Soal Berikutnya")
+                        Text(if (index == soal.size - 1) "Selesai & Lihat Skor" else "Soal Berikutnya")
                     }
                 }
             }
@@ -384,7 +573,7 @@ private fun KuisMiniCard(soal: List<SoalMini>) {
 fun BabScreenPreview() {
     SienceHubTheme {
         BabScreen(
-            topikMateri = MateriRepository.getDaftarTopik()[1],
+            topikMateri = MateriRepository.getDaftarTopik()[0],
             babId = 1,
             onBackClick = {}
         )

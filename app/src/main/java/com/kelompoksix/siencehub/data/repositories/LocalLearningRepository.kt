@@ -1,17 +1,34 @@
 package com.kelompoksix.siencehub.data.repositories
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.kelompoksix.siencehub.data.models.LearningStats
+import com.kelompoksix.siencehub.data.models.TipeNotifikasi
+import com.kelompoksix.siencehub.utils.UserSessionManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 object LocalLearningRepository {
     private const val DATABASE_NAME = "sciencehub_learning.db"
     private const val DATABASE_VERSION = 2
-    private const val CHAPTER_XP = 20
-    private const val CORRECT_ANSWER_XP = 10
+    const val CHAPTER_XP = 25
+    const val CORRECT_ANSWER_XP = 20
+
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _learningStatsFlow = MutableStateFlow(LearningStats.EMPTY)
+    val learningStatsFlow: StateFlow<LearningStats> = _learningStatsFlow.asStateFlow()
+
+    private var syncedCloudUid: String? = null
 
     private class LearningDatabase(context: Context) :
         SQLiteOpenHelper(context.applicationContext, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -73,15 +90,84 @@ object LocalLearningRepository {
         }
     }
 
+    fun resolveUserId(context: Context): String {
+        val uid = auth.currentUser?.uid?.takeIf { it.isNotBlank() }
+        if (uid != null) return uid.lowercase()
+        val email = UserSessionManager.getUserEmail(context)
+        return normalizeUserId(email)
+    }
+
     @Synchronized
-    fun recordTopicOpened(context: Context, userId: String, topicId: String) {
+    fun refreshStats(context: Context, userId: String = resolveUserId(context)): LearningStats {
+        val stats = getStats(context, userId)
+        _learningStatsFlow.value = stats
+        syncCloudDataIfNeeded(context, userId)
+        return stats
+    }
+
+    private fun syncCloudDataIfNeeded(context: Context, userId: String) {
+        val currentUser = auth.currentUser ?: return
+        if (syncedCloudUid == currentUser.uid) return
+        syncedCloudUid = currentUser.uid
+
+        val appContext = context.applicationContext
+        firestore.collection("users")
+            .document(currentUser.uid)
+            .collection("chapter_completions")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.isEmpty) {
+                    val normalizedUserId = normalizeUserId(userId)
+                    val dbHelper = LearningDatabase(appContext)
+                    val db = dbHelper.writableDatabase
+                    db.beginTransaction()
+                    try {
+                        snapshot.documents.forEach { doc ->
+                            val topicId = doc.getString("topicId") ?: return@forEach
+                            val chapterId = (doc.getLong("chapterId") ?: return@forEach).toInt()
+                            val completedAt = doc.getString("completedAt") ?: LocalDate.now().toString()
+                            val xp = (doc.getLong("xp") ?: CHAPTER_XP.toLong()).toInt()
+                            db.insertWithOnConflict(
+                                "chapter_completions",
+                                null,
+                                ContentValues().apply {
+                                    put("user_id", normalizedUserId)
+                                    put("topic_id", topicId)
+                                    put("chapter_id", chapterId)
+                                    put("completed_at", completedAt)
+                                    put("experience_points", xp)
+                                },
+                                SQLiteDatabase.CONFLICT_IGNORE
+                            )
+                            recordLearningDay(db, normalizedUserId, completedAt)
+                        }
+                        db.setTransactionSuccessful()
+                    } finally {
+                        db.endTransaction()
+                        dbHelper.close()
+                    }
+                    val updated = getStats(appContext, userId)
+                    _learningStatsFlow.value = updated
+                    updateAllSubjectProgressFromStats(appContext, updated)
+                }
+            }
+    }
+
+    fun resetCloudSyncCache() {
+        syncedCloudUid = null
+        _learningStatsFlow.value = LearningStats.EMPTY
+    }
+
+    @Synchronized
+    fun recordTopicOpened(context: Context, userId: String = resolveUserId(context), topicId: String) {
+        val normalizedUserId = normalizeUserId(userId)
         val dbHelper = LearningDatabase(context)
         try {
             dbHelper.writableDatabase.insertWithOnConflict(
                 "topic_visits",
                 null,
-                android.content.ContentValues().apply {
-                    put("user_id", normalizeUserId(userId))
+                ContentValues().apply {
+                    put("user_id", normalizedUserId)
                     put("topic_id", topicId)
                     put("last_opened_at", System.currentTimeMillis())
                 },
@@ -90,10 +176,17 @@ object LocalLearningRepository {
         } finally {
             dbHelper.close()
         }
+        _learningStatsFlow.value = getStats(context, normalizedUserId)
     }
 
     @Synchronized
-    fun completeChapter(context: Context, userId: String, topicId: String, chapterId: Int): Boolean {
+    fun completeChapter(
+        context: Context,
+        userId: String = resolveUserId(context),
+        topicId: String,
+        chapterId: Int
+    ): Boolean {
+        val previousStats = getStats(context, userId)
         val normalizedUserId = normalizeUserId(userId)
         val today = LocalDate.now().toString()
         val dbHelper = LearningDatabase(context)
@@ -105,7 +198,7 @@ object LocalLearningRepository {
             val insertedId = db.insertWithOnConflict(
                 "chapter_completions",
                 null,
-                android.content.ContentValues().apply {
+                ContentValues().apply {
                     put("user_id", normalizedUserId)
                     put("topic_id", topicId)
                     put("chapter_id", chapterId)
@@ -121,19 +214,54 @@ object LocalLearningRepository {
             db.endTransaction()
             dbHelper.close()
         }
+
+        val updatedStats = getStats(context, normalizedUserId)
+        _learningStatsFlow.value = updatedStats
+
+        val topic = MateriRepository.getDaftarTopik().find { it.id == topicId }
+        if (topic != null && topic.daftarBab.isNotEmpty()) {
+            val completedCount = updatedStats.completedChaptersByTopic[topicId]?.size ?: 0
+            val ratio = completedCount.toFloat() / topic.daftarBab.size
+            UserProgressRepository.updateSubjectProgress(context, topic.kategori, ratio)
+        }
+
+        if (wasNewlyCompleted) {
+            LeaderboardRepository.tambahSkorUser(CHAPTER_XP)
+            syncChapterCompletionToCloud(topicId, chapterId, today)
+        }
+
+        emitMilestoneNotifications(previousStats, updatedStats)
         return wasNewlyCompleted
+    }
+
+    private fun syncChapterCompletionToCloud(topicId: String, chapterId: Int, completedAt: String) {
+        val currentUser = auth.currentUser ?: return
+        val data = hashMapOf(
+            "topicId" to topicId,
+            "chapterId" to chapterId,
+            "completedAt" to completedAt,
+            "xp" to CHAPTER_XP,
+            "timestamp" to System.currentTimeMillis()
+        )
+        firestore.collection("users")
+            .document(currentUser.uid)
+            .collection("chapter_completions")
+            .document("${topicId}_$chapterId")
+            .set(data, SetOptions.merge())
     }
 
     @Synchronized
     fun recordQuizResult(
         context: Context,
-        userId: String,
+        userId: String = resolveUserId(context),
         subjectName: String,
         score: Int,
         totalScore: Int,
         correctAnswers: Int
     ) {
+        val previousStats = getStats(context, userId)
         val normalizedUserId = normalizeUserId(userId)
+        val normalizedSubject = MateriRepository.normalizeSubjectName(subjectName)
         val today = LocalDate.now().toString()
         val experiencePoints = correctAnswers.coerceAtLeast(0) * CORRECT_ANSWER_XP
         val dbHelper = LearningDatabase(context)
@@ -149,7 +277,7 @@ object LocalLearningRepository {
                 """.trimIndent(),
                 arrayOf<Any?>(
                     normalizedUserId,
-                    subjectName.trim(),
+                    normalizedSubject,
                     score.coerceAtLeast(0),
                     totalScore.coerceAtLeast(0),
                     correctAnswers.coerceAtLeast(0),
@@ -157,17 +285,14 @@ object LocalLearningRepository {
                     today
                 )
             )
-            val matchingTopic = MateriRepository.getDaftarTopik().find {
-                it.kategori.equals(subjectName.trim(), ignoreCase = true) ||
-                it.judul.contains(subjectName.trim(), ignoreCase = true) ||
-                subjectName.contains(it.kategori, ignoreCase = true)
-            }
-            if (matchingTopic != null) {
-                matchingTopic.daftarBab.forEach { bab ->
-                    db.insertWithOnConflict(
+            // Jika nilai sempurna (100%), seluruh bab di topik tersebut otomatis ditandai tuntas
+            if (totalScore > 0 && score >= totalScore) {
+                val matchingTopic = MateriRepository.findTopicBySubject(normalizedSubject)
+                matchingTopic?.daftarBab?.forEach { bab ->
+                    val inserted = db.insertWithOnConflict(
                         "chapter_completions",
                         null,
-                        android.content.ContentValues().apply {
+                        ContentValues().apply {
                             put("user_id", normalizedUserId)
                             put("topic_id", matchingTopic.id)
                             put("chapter_id", bab.id)
@@ -176,6 +301,9 @@ object LocalLearningRepository {
                         },
                         SQLiteDatabase.CONFLICT_IGNORE
                     )
+                    if (inserted != -1L) {
+                        syncChapterCompletionToCloud(matchingTopic.id, bab.id, today)
+                    }
                 }
             }
             recordLearningDay(db, normalizedUserId, today)
@@ -184,10 +312,90 @@ object LocalLearningRepository {
             db.endTransaction()
             dbHelper.close()
         }
+
+        val updatedStats = getStats(context, normalizedUserId)
+        _learningStatsFlow.value = updatedStats
+
+        val quizRatio = if (totalScore > 0) score.toFloat() / totalScore.toFloat() else 0f
+        val topic = MateriRepository.findTopicBySubject(normalizedSubject)
+        val chapterRatio = if (topic != null && topic.daftarBab.isNotEmpty()) {
+            (updatedStats.completedChaptersByTopic[topic.id]?.size ?: 0).toFloat() / topic.daftarBab.size
+        } else {
+            0f
+        }
+        UserProgressRepository.updateSubjectProgress(
+            context = context,
+            subjectName = normalizedSubject,
+            progress = maxOf(quizRatio, chapterRatio)
+        )
+
+        emitMilestoneNotifications(previousStats, updatedStats)
+    }
+
+    private fun updateAllSubjectProgressFromStats(context: Context, stats: LearningStats) {
+        MateriRepository.getDaftarTopik().forEach { topic ->
+            if (topic.daftarBab.isNotEmpty()) {
+                val ratio = (stats.completedChaptersByTopic[topic.id]?.size ?: 0).toFloat() / topic.daftarBab.size
+                if (ratio > 0f) {
+                    UserProgressRepository.updateSubjectProgress(context, topic.kategori, ratio)
+                }
+            }
+        }
+    }
+
+    private fun emitMilestoneNotifications(before: LearningStats, after: LearningStats) {
+        if (after.streakDays > before.streakDays) {
+            NotifikasiRepository.tambahNotifikasi(
+                judul = "Streak ${after.streakDays} Hari Aktif! 🔥",
+                pesan = "Mantap! Kamu konsisten belajar sains ${after.streakDays} hari berturut-turut.",
+                tipe = TipeNotifikasi.STREAK
+            )
+        }
+        if (after.level > before.level) {
+            NotifikasiRepository.tambahNotifikasi(
+                judul = "Naik ke Level ${after.level} (${after.levelTitle})! ⭐",
+                pesan = "Total XP kamu kini ${after.experiencePoints} XP. Terus tingkatkan pencapaianmu!",
+                tipe = TipeNotifikasi.INFO
+            )
+        }
+        if (before.completedChapterCount < 1 && after.completedChapterCount >= 1) {
+            NotifikasiRepository.tambahNotifikasi(
+                judul = "Pencapaian Terbuka: Langkah Pertama 🌟",
+                pesan = "Selamat! Kamu baru saja menuntaskan bab materi pertamamu.",
+                tipe = TipeNotifikasi.MATERI
+            )
+        }
+        if (before.completedTopicCount < 1 && after.completedTopicCount >= 1) {
+            NotifikasiRepository.tambahNotifikasi(
+                judul = "Pencapaian Terbuka: Penjelajah Sains 🚀",
+                pesan = "Luar biasa! Kamu berhasil menuntaskan 100% bab pada satu mata pelajaran.",
+                tipe = TipeNotifikasi.MATERI
+            )
+        }
+        val bioKimiaBefore = setOf("biologi", "kimia").all { req ->
+            before.perfectQuizSubjects.any { it.equals(req, ignoreCase = true) }
+        }
+        val bioKimiaAfter = setOf("biologi", "kimia").all { req ->
+            after.perfectQuizSubjects.any { it.equals(req, ignoreCase = true) }
+        }
+        if (!bioKimiaBefore && bioKimiaAfter) {
+            NotifikasiRepository.tambahNotifikasi(
+                judul = "Pencapaian Terbuka: Ilmuwan Gila 🧪",
+                pesan = "Kamu meraih nilai sempurna pada kuis Biologi dan Kimia!",
+                tipe = TipeNotifikasi.KUIS
+            )
+        }
+        if (before.correctQuizAnswers < 50 && after.correctQuizAnswers >= 50) {
+            NotifikasiRepository.tambahNotifikasi(
+                judul = "Pencapaian Terbuka: Raja Kuis 🏆",
+                pesan = "Hebat! Kamu telah menjawab 50 soal kuis dengan benar.",
+                tipe = TipeNotifikasi.KUIS
+            )
+        }
     }
 
     @Synchronized
-    fun getStats(context: Context, userId: String): LearningStats {
+    fun getStats(context: Context, userId: String = resolveUserId(context)): LearningStats {
         val normalizedUserId = normalizeUserId(userId)
         val dbHelper = LearningDatabase(context)
         val db = dbHelper.readableDatabase
@@ -234,14 +442,30 @@ object LocalLearningRepository {
                     correctAnswers = cursor.getInt(1)
                 }
             }
+
             db.rawQuery(
                 """
-                SELECT DISTINCT LOWER(subject_name) FROM quiz_attempts
-                WHERE user_id = ? AND score > 0
+                SELECT DISTINCT subject_name FROM quiz_attempts
+                WHERE user_id = ? AND total_score > 0 AND score >= total_score
                 """.trimIndent(),
                 arrayOf(normalizedUserId)
             ).use { cursor ->
-                while (cursor.moveToNext()) perfectSubjects += cursor.getString(0).trim()
+                while (cursor.moveToNext()) {
+                    val norm = MateriRepository.normalizeSubjectName(cursor.getString(0)).lowercase()
+                    perfectSubjects += norm
+                }
+            }
+
+            // Fallback: gabungkan juga dengan QuizHistoryRepository jika ada riwayat kuis sebelumnya dari Cloud
+            val cloudHistory = QuizHistoryRepository.quizHistoryFlow.value
+            if (quizXp == 0 && cloudHistory.isNotEmpty()) {
+                quizXp = cloudHistory.sumOf { it.score.coerceAtLeast(0) }
+                correctAnswers = cloudHistory.sumOf { it.correctCount.coerceAtLeast(0) }
+            }
+            cloudHistory.forEach { item ->
+                if (item.totalQuestions > 0 && item.correctCount >= item.totalQuestions) {
+                    perfectSubjects += MateriRepository.normalizeSubjectName(item.subjectName).lowercase()
+                }
             }
 
             val activityDates = mutableListOf<LocalDate>()
@@ -250,7 +474,9 @@ object LocalLearningRepository {
                 arrayOf(normalizedUserId)
             ).use { cursor ->
                 while (cursor.moveToNext()) {
-                    activityDates += LocalDate.parse(cursor.getString(0))
+                    runCatching { LocalDate.parse(cursor.getString(0)) }
+                        .getOrNull()
+                        ?.let { activityDates += it }
                 }
             }
 
@@ -277,13 +503,14 @@ object LocalLearningRepository {
 
     private fun calculateCurrentStreak(activityDates: List<LocalDate>): Int {
         if (activityDates.isEmpty()) return 0
+        val sortedDistinct = activityDates.distinct().sortedDescending()
         val today = LocalDate.now()
-        val mostRecent = activityDates.first()
+        val mostRecent = sortedDistinct.first()
         if (ChronoUnit.DAYS.between(mostRecent, today) > 1) return 0
 
         var streak = 1
-        for (index in 1 until activityDates.size) {
-            if (ChronoUnit.DAYS.between(activityDates[index], activityDates[index - 1]) != 1L) break
+        for (index in 1 until sortedDistinct.size) {
+            if (ChronoUnit.DAYS.between(sortedDistinct[index], sortedDistinct[index - 1]) != 1L) break
             streak++
         }
         return streak

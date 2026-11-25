@@ -5,47 +5,32 @@ import com.kelompoksix.siencehub.data.models.TipeNotifikasi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.UUID
 
 object NotifikasiRepository {
 
     private val _notifikasiList = MutableStateFlow<List<Notifikasi>>(
         listOf(
             Notifikasi(
-                id = "1",
-                judul = "Streak 6 Hari! 🔥",
-                pesan = "Luar biasa! Kamu sudah belajar 6 hari berturut-turut. Pertahankan semangatmu!",
-                waktu = "10 menit lalu",
-                isDibaca = false,
-                tipe = TipeNotifikasi.STREAK
-            ),
-            Notifikasi(
-                id = "2",
-                judul = "Materi Baru Tersedia 📚",
-                pesan = "Materi 'Hukum Gravitasi Newton' di modul Fisika telah diperbarui dengan simulasi interaktif.",
-                waktu = "1 jam lalu",
+                id = "welcome_materi",
+                judul = "Materi & Evaluasi Lengkap 📚",
+                pesan = "Seluruh 6 mata pelajaran kini dilengkapi 5 bab bertahap dan kuis evaluasi interaktif.",
+                waktu = "Hari ini",
                 isDibaca = false,
                 tipe = TipeNotifikasi.MATERI
             ),
             Notifikasi(
-                id = "3",
-                judul = "Tantangan Kuis Kimia 🧪",
-                pesan = "Kuis Reaksi Asam Basa siap diuji! Selesaikan kuis dan kumpulkan skor terbaikmu.",
-                waktu = "3 jam lalu",
-                isDibaca = false,
-                tipe = TipeNotifikasi.KUIS
-            ),
-            Notifikasi(
-                id = "4",
-                judul = "Eksperimen Virtual Newton 🔬",
-                pesan = "Cobalah simulator gaya dan percepatan di laboratorium virtual SienceHub.",
+                id = "welcome_eksperimen",
+                judul = "Eksperimen Virtual Sains 🔬",
+                pesan = "Uji langsung Hukum II Newton, gravitasi planet, indikator pH, dan timbangan aljabar.",
                 waktu = "Kemarin",
                 isDibaca = true,
                 tipe = TipeNotifikasi.EKSPERIMEN
             ),
             Notifikasi(
-                id = "5",
+                id = "welcome_fakta",
                 judul = "Fakta Sains Hari Ini 💡",
-                pesan = "Tahukah kamu? Cahaya matahari membutuhkan waktu sekitar 8 menit 20 detik untuk mencapai bumi.",
+                pesan = "Tahukah kamu? Cahaya matahari membutuhkan waktu sekitar 8 menit 20 detik untuk mencapai Bumi.",
                 waktu = "2 hari lalu",
                 isDibaca = true,
                 tipe = TipeNotifikasi.INFO
@@ -54,6 +39,27 @@ object NotifikasiRepository {
     )
 
     val notifikasiList: StateFlow<List<Notifikasi>> = _notifikasiList.asStateFlow()
+
+    fun tambahNotifikasi(
+        judul: String,
+        pesan: String,
+        tipe: TipeNotifikasi = TipeNotifikasi.INFO,
+        waktu: String = "Baru saja"
+    ) {
+        val existing = _notifikasiList.value
+        if (existing.firstOrNull()?.let { it.judul == judul && it.pesan == pesan } == true) {
+            return
+        }
+        val itemBaru = Notifikasi(
+            id = UUID.randomUUID().toString(),
+            judul = judul,
+            pesan = pesan,
+            waktu = waktu,
+            isDibaca = false,
+            tipe = tipe
+        )
+        _notifikasiList.value = listOf(itemBaru) + existing
+    }
 
     fun tandaiDibaca(id: String) {
         _notifikasiList.value = _notifikasiList.value.map { notif ->

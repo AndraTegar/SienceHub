@@ -5,83 +5,90 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 object UserProgressRepository {
-    private const val PREF_NAME = "sciencehub_user_progress"
+    private const val PREF_NAME = "sciencehub_user_progress_v2"
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private var progressListener: ListenerRegistration? = null
+    private var listeningUid: String? = null
 
-    // Key map progress per kategori (misal "Fisika" -> 1.0f)
-    private val _subjectProgressFlow = MutableStateFlow<Map<String, Float>>(
-        mapOf(
-            "Biologi" to 0.2f,
-            "Fisika" to 0.0f,
-            "Kimia" to 0.4f
-        )
-    )
+    private val defaultProgressMap: Map<String, Float> =
+        MateriRepository.ALL_SUBJECTS.associateWith { 0f }
+
+    private val _subjectProgressFlow = MutableStateFlow<Map<String, Float>>(defaultProgressMap)
     val subjectProgressFlow: StateFlow<Map<String, Float>> = _subjectProgressFlow.asStateFlow()
 
     private fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
-    // Memuat progress tersimpan
+    private fun userKeyPrefix(): String {
+        val uid = auth.currentUser?.uid?.takeIf { it.isNotBlank() }
+        val email = auth.currentUser?.email?.takeIf { it.isNotBlank() }
+        return (uid ?: email ?: "local").lowercase()
+    }
+
     fun loadProgress(context: Context) {
         val prefs = getPreferences(context)
-        val fisikaProgress = prefs.getFloat("progress_Fisika", 0.0f)
-        val biologiProgress = prefs.getFloat("progress_Biologi", 0.2f)
-        val kimiaProgress = prefs.getFloat("progress_Kimia", 0.4f)
+        val prefix = userKeyPrefix()
 
-        _subjectProgressFlow.value = mapOf(
-            "Biologi" to biologiProgress,
-            "Fisika" to fisikaProgress,
-            "Kimia" to kimiaProgress
-        )
+        val loadedMap = MateriRepository.ALL_SUBJECTS.associateWith { subject ->
+            prefs.getFloat("${prefix}_progress_$subject", 0f).coerceIn(0f, 1f)
+        }
+        _subjectProgressFlow.value = loadedMap
 
-        // Sinkronkan juga dari Cloud Firestore jika login
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            db.collection("users")
-                .document(currentUser.uid)
-                .collection("progress")
-                .addSnapshotListener { snapshot, error ->
-                    if (error == null && snapshot != null && !snapshot.isEmpty) {
-                        val currentMap = _subjectProgressFlow.value.toMutableMap()
-                        snapshot.documents.forEach { doc ->
-                            val subject = doc.id
-                            val progress = (doc.getDouble("progress") ?: 0.0).toFloat()
-                            currentMap[subject] = progress
-                            prefs.edit { putFloat("progress_$subject", progress) }
+            if (listeningUid != currentUser.uid) {
+                progressListener?.remove()
+                listeningUid = currentUser.uid
+                progressListener = db.collection("users")
+                    .document(currentUser.uid)
+                    .collection("progress")
+                    .addSnapshotListener { snapshot, error ->
+                        if (error == null && snapshot != null && !snapshot.isEmpty) {
+                            val currentMap = _subjectProgressFlow.value.toMutableMap()
+                            snapshot.documents.forEach { doc ->
+                                val normalizedSubject = MateriRepository.normalizeSubjectName(
+                                    doc.getString("subject") ?: doc.id
+                                )
+                                val cloudProg = (doc.getDouble("progress") ?: 0.0).toFloat().coerceIn(0f, 1f)
+                                val merged = maxOf(currentMap[normalizedSubject] ?: 0f, cloudProg)
+                                currentMap[normalizedSubject] = merged
+                                prefs.edit { putFloat("${prefix}_progress_$normalizedSubject", merged) }
+                            }
+                            _subjectProgressFlow.value = currentMap
                         }
-                        _subjectProgressFlow.value = currentMap
                     }
-                }
+            }
+        } else {
+            progressListener?.remove()
+            progressListener = null
+            listeningUid = null
         }
     }
 
-    // Memperbarui progress suatu mata pelajaran (misal 1.0f = 100%)
     fun updateSubjectProgress(context: Context, subjectName: String, progress: Float) {
         val prefs = getPreferences(context)
-        val normalizedSubject = when {
-            subjectName.contains("Fisika", ignoreCase = true) -> "Fisika"
-            subjectName.contains("Biologi", ignoreCase = true) -> "Biologi"
-            subjectName.contains("Kimia", ignoreCase = true) -> "Kimia"
-            else -> subjectName
-        }
+        val prefix = userKeyPrefix()
+        val normalizedSubject = MateriRepository.normalizeSubjectName(subjectName)
+        val clamped = progress.coerceIn(0f, 1f)
 
         val currentMap = _subjectProgressFlow.value.toMutableMap()
         val oldProgress = currentMap[normalizedSubject] ?: 0f
-        val newProgress = maxOf(oldProgress, progress.coerceIn(0f, 1f))
+        val newProgress = maxOf(oldProgress, clamped)
 
         currentMap[normalizedSubject] = newProgress
         _subjectProgressFlow.value = currentMap
 
-        prefs.edit { putFloat("progress_$normalizedSubject", newProgress) }
+        prefs.edit { putFloat("${prefix}_progress_$normalizedSubject", newProgress) }
 
-        // Simpan ke Cloud Firestore
         val currentUser = auth.currentUser
         if (currentUser != null) {
             val progressData = hashMapOf(
@@ -93,17 +100,12 @@ object UserProgressRepository {
                 .document(currentUser.uid)
                 .collection("progress")
                 .document(normalizedSubject)
-                .set(progressData, com.google.firebase.firestore.SetOptions.merge())
+                .set(progressData, SetOptions.merge())
         }
     }
 
     fun getProgressForSubject(subjectName: String): Float {
-        val normalizedSubject = when {
-            subjectName.contains("Fisika", ignoreCase = true) -> "Fisika"
-            subjectName.contains("Biologi", ignoreCase = true) -> "Biologi"
-            subjectName.contains("Kimia", ignoreCase = true) -> "Kimia"
-            else -> subjectName
-        }
+        val normalizedSubject = MateriRepository.normalizeSubjectName(subjectName)
         return _subjectProgressFlow.value[normalizedSubject] ?: 0f
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.models.QuizHistoryItem
+import com.kelompoksix.siencehub.data.repositories.LocalLearningRepository
 import com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository
 import com.kelompoksix.siencehub.ui.theme.AccentPurple
 import com.kelompoksix.siencehub.ui.theme.BorderSubtle
@@ -55,22 +57,17 @@ fun ProfilScreen(
     val context = LocalContext.current
     val metrics = rememberResponsiveMetrics()
 
-    DisposableEffect(context) {
+    LaunchedEffect(context) {
         QuizHistoryRepository.fetchUserQuizHistory(context)
-        onDispose { }
+        LocalLearningRepository.refreshStats(context)
     }
 
     val quizHistory by QuizHistoryRepository.quizHistoryFlow.collectAsState()
+    val learningStats by LocalLearningRepository.learningStatsFlow.collectAsState()
 
-    val userName = remember(context) {
-        UserSessionManager.getUserName(context).ifBlank { "Pengguna ScienceHub" }
-    }
-    val userEmail = remember(context) {
-        UserSessionManager.getUserEmail(context).ifBlank { "user@sciencehub.com" }
-    }
-    val userPhone = remember(context) {
-        UserSessionManager.getUserPhone(context)
-    }
+    val userName = UserSessionManager.getUserName(context).ifBlank { "Pengguna ScienceHub" }
+    val userEmail = UserSessionManager.getUserEmail(context).ifBlank { "user@sciencehub.com" }
+    val userPhone = UserSessionManager.getUserPhone(context)
 
     LazyColumn(
         modifier = Modifier
@@ -78,7 +75,6 @@ fun ProfilScreen(
             .background(SurfaceOffWhite),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header Hijau Sage yang menyatu rapi dengan konten saat di-scroll
         item {
             Box(
                 modifier = Modifier
@@ -156,9 +152,18 @@ fun ProfilScreen(
                         }
 
                         Text(
+                            text = "${learningStats.levelTitle} • ${learningStats.experiencePoints} XP",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.92f)
+                        )
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Text(
                             text = userEmail,
-                            fontSize = 13.5.sp,
-                            color = Color.White.copy(alpha = 0.86f)
+                            fontSize = 13.sp,
+                            color = Color.White.copy(alpha = 0.82f)
                         )
 
                         if (userPhone.isNotBlank()) {
@@ -172,7 +177,6 @@ fun ProfilScreen(
                     }
                 }
 
-                // Lengkungan transisi bawah header agar menyambung mulus ke SurfaceOffWhite
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,7 +188,7 @@ fun ProfilScreen(
             }
         }
 
-        // Menu Cepat + Statistik
+        // Menu Cepat + Statistik Real-Time
         item {
             ResponsiveContentContainer(maxWidth = 720.dp) {
                 Column(
@@ -221,7 +225,7 @@ fun ProfilScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Kartu Level & Streak
+                    // Kartu Level, Streak & Bab Selesai Real-Time
                     Card(
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -232,29 +236,42 @@ fun ProfilScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 18.dp, horizontal = 16.dp),
+                                .padding(vertical = 18.dp, horizontal = 12.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             StatusBadgeFresh(
                                 icon = Icons.Default.Star,
-                                value = "${(quizHistory.sumOf { it.score } / 100) + 1}",
+                                value = "${learningStats.level}",
                                 label = "Level",
                                 iconColor = Color(0xFF0288D1),
                                 bgColor = Color(0xFFE1F5FE)
                             )
                             Box(
                                 modifier = Modifier
-                                    .height(42.dp)
+                                    .height(40.dp)
                                     .width(1.dp)
                                     .background(BorderSubtle)
                             )
                             StatusBadgeFresh(
                                 icon = Icons.Default.LocalFireDepartment,
-                                value = "6",
+                                value = "${learningStats.streakDays}",
                                 label = "Streak",
                                 iconColor = Color(0xFFFF6D00),
                                 bgColor = Color(0xFFFFF3E0)
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .height(40.dp)
+                                    .width(1.dp)
+                                    .background(BorderSubtle)
+                            )
+                            StatusBadgeFresh(
+                                icon = Icons.AutoMirrored.Filled.MenuBook,
+                                value = "${learningStats.completedChapterCount}",
+                                label = "Bab",
+                                iconColor = SagePrimary,
+                                bgColor = SageSoft
                             )
                         }
                     }
@@ -481,7 +498,7 @@ fun StatusBadgeFresh(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .size(46.dp)
+                .size(42.dp)
                 .background(bgColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -489,20 +506,20 @@ fun StatusBadgeFresh(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconColor,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(21.dp)
             )
         }
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         Column {
             Text(
                 text = value,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = 21.sp,
+                fontSize = 19.sp,
                 color = TextPrimary
             )
             Text(
                 text = label,
-                fontSize = 12.5.sp,
+                fontSize = 12.sp,
                 color = TextSecondary,
                 fontWeight = FontWeight.Medium
             )

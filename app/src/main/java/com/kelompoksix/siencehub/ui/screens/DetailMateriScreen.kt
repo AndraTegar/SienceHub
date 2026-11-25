@@ -13,12 +13,15 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.R
 import com.kelompoksix.siencehub.data.models.TopikMateri
+import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.ui.theme.AccentBlue
 import com.kelompoksix.siencehub.ui.theme.AccentBlueSoft
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
@@ -46,13 +50,17 @@ fun DetailMateriScreen(
 ) {
     val darkChalkBg = Color(0xFF1A202C)
     val metrics = rememberResponsiveMetrics()
+    val displaySubject = MateriRepository.normalizeSubjectName(topikMateri.kategori)
+    val totalBab = topikMateri.daftarBab.size
+    val completedCount = topikMateri.daftarBab.count { it.id in completedChapterIds }
+    val progressRatio = if (totalBab > 0) completedCount.toFloat() / totalBab else 0f
 
     val backgroundRes: Int? = when (topikMateri.kategori.lowercase()) {
         "fisika" -> R.drawable.fisika_bg
         "kimia" -> R.drawable.kimia_bg
         "biologi" -> R.drawable.biologi_bg
         "astronomi" -> R.drawable.astronomi_bg
-        "math" -> R.drawable.matematika_bg
+        "math", "matematika" -> R.drawable.matematika_bg
         "geografi" -> R.drawable.geografi_bg
         else -> null
     }
@@ -65,22 +73,22 @@ fun DetailMateriScreen(
         backgroundRes?.let { res ->
             Image(
                 painter = painterResource(id = res),
-                contentDescription = "Background ${topikMateri.kategori}",
+                contentDescription = "Background $displaySubject",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(270.dp),
+                    .height(280.dp),
                 contentScale = ContentScale.Crop,
                 alpha = 0.45f
             )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(270.dp)
+                    .height(280.dp)
                     .background(
                         Brush.verticalGradient(
                             listOf(
                                 Color.Black.copy(alpha = 0.35f),
-                                darkChalkBg.copy(alpha = 0.85f)
+                                darkChalkBg.copy(alpha = 0.88f)
                             )
                         )
                     )
@@ -113,7 +121,7 @@ fun DetailMateriScreen(
                     }
                 }
                 Text(
-                    text = topikMateri.kategori.ifEmpty { "Materi" },
+                    text = displaySubject.ifEmpty { "Materi" },
                     color = Color.White,
                     fontSize = 15.5.sp,
                     fontWeight = FontWeight.Bold,
@@ -121,12 +129,12 @@ fun DetailMateriScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = topikMateri.kategori.uppercase().ifEmpty { "MATERI" },
+                text = displaySubject.uppercase().ifEmpty { "MATERI" },
                 color = Color.White,
-                fontSize = if (metrics.isShortScreen) 28.sp else 34.sp,
+                fontSize = if (metrics.isShortScreen) 26.sp else 32.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 2.sp,
                 modifier = Modifier
@@ -138,14 +146,30 @@ fun DetailMateriScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "${topikMateri.daftarBab.size} Bab Pembelajaran • Evaluasi Akhir",
-                color = Color.White.copy(alpha = 0.78f),
+                text = "$completedCount/$totalBab Bab Selesai • ${(progressRatio * 100).toInt()}% Tuntas",
+                color = Color.White.copy(alpha = 0.85f),
                 fontSize = 12.5.sp,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            LinearProgressIndicator(
+                progress = { progressRatio },
+                modifier = Modifier
+                    .widthIn(max = 240.dp)
+                    .fillMaxWidth(0.6f)
+                    .height(6.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally),
+                color = Color(0xFF4ADE80),
+                trackColor = Color.White.copy(alpha = 0.24f),
+                strokeCap = StrokeCap.Round
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
 
             Surface(
                 modifier = Modifier
@@ -172,7 +196,10 @@ fun DetailMateriScreen(
                                 shape = RoundedCornerShape(20.dp),
                                 colors = CardDefaults.cardColors(containerColor = Color.White),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                                border = BorderStroke(1.dp, AccentBlueSoft),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isDone) StatusSuccess.copy(alpha = 0.4f) else AccentBlueSoft
+                                ),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Row(
@@ -183,30 +210,54 @@ fun DetailMateriScreen(
                                 ) {
                                     Surface(
                                         shape = RoundedCornerShape(14.dp),
-                                        color = AccentBlueSoft,
+                                        color = if (isDone) Color(0xFFDCFCE7) else AccentBlueSoft,
                                         modifier = Modifier.size(46.dp)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
-                                            Text(
-                                                text = "${bab.id}",
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = AccentBlue
-                                            )
+                                            if (isDone) {
+                                                Icon(
+                                                    imageVector = Icons.Default.CheckCircle,
+                                                    contentDescription = null,
+                                                    tint = StatusSuccess,
+                                                    modifier = Modifier.size(22.dp)
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "${bab.id}",
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = AccentBlue
+                                                )
+                                            }
                                         }
                                     }
 
                                     Spacer(modifier = Modifier.width(14.dp))
 
                                     Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = "BAB ${bab.id}",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = AccentBlue,
-                                            letterSpacing = 0.8.sp
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = "BAB ${bab.id}",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isDone) StatusSuccess else AccentBlue,
+                                                letterSpacing = 0.8.sp
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Icon(
+                                                imageVector = Icons.Default.Schedule,
+                                                contentDescription = null,
+                                                tint = TextSecondary,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(3.dp))
+                                            Text(
+                                                text = bab.durasi,
+                                                fontSize = 11.sp,
+                                                color = TextSecondary
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(3.dp))
                                         Text(
                                             text = bab.judulBab,
                                             fontSize = 14.5.sp,
@@ -214,23 +265,12 @@ fun DetailMateriScreen(
                                             color = TextPrimary
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            if (isDone) {
-                                                Icon(
-                                                    imageVector = Icons.Default.CheckCircle,
-                                                    contentDescription = null,
-                                                    tint = StatusSuccess,
-                                                    modifier = Modifier.size(14.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(4.dp))
-                                            }
-                                            Text(
-                                                text = if (isDone) "Selesai dipelajari" else "Ketuk untuk mulai belajar",
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = if (isDone) StatusSuccess else TextSecondary
-                                            )
-                                        }
+                                        Text(
+                                            text = if (isDone) "Selesai dipelajari • +25 XP" else "Ketuk untuk mulai belajar",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = if (isDone) StatusSuccess else TextSecondary
+                                        )
                                     }
 
                                     Icon(
@@ -267,14 +307,14 @@ fun DetailMateriScreen(
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
                                         Text(
-                                            text = "Uji Pemahaman Materi",
+                                            text = "Uji Pemahaman $displaySubject",
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
                                         Text(
-                                            text = "Selesaikan kuis evaluasi untuk menguji penguasaan materimu.",
+                                            text = "Raih 20 XP per jawaban benar & menangkan lencana pencapaian.",
                                             fontSize = 12.5.sp,
                                             lineHeight = 18.sp,
                                             color = Color.White.copy(alpha = 0.85f)

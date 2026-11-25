@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -15,9 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.kelompoksix.siencehub.data.models.TopikMateri
+import com.kelompoksix.siencehub.data.repositories.LocalLearningRepository
 import com.kelompoksix.siencehub.data.repositories.MateriRepository
+import com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository
+import com.kelompoksix.siencehub.data.repositories.UserProgressRepository
 import com.kelompoksix.siencehub.ui.components.FloatingBottomNav
 import com.kelompoksix.siencehub.ui.screens.AchievementScreen
 import com.kelompoksix.siencehub.ui.screens.BabScreen
@@ -51,6 +57,15 @@ fun KerangkaAplikasi(
     onLogout: () -> Unit,
     onStartQuiz: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val learningStats by LocalLearningRepository.learningStatsFlow.collectAsState()
+
+    LaunchedEffect(context) {
+        UserProgressRepository.loadProgress(context)
+        QuizHistoryRepository.fetchUserQuizHistory(context)
+        LocalLearningRepository.refreshStats(context)
+    }
+
     var indexAktif by remember { mutableIntStateOf(0) }
 
     var tampilkanEksperimen by remember { mutableStateOf(false) }
@@ -69,19 +84,25 @@ fun KerangkaAplikasi(
     var hasilKuisAktif by remember { mutableStateOf<HasilKuisData?>(null) }
     var reviewAktif by remember { mutableStateOf<String?>(null) }
 
+    val bukaTopik: (TopikMateri, Int?) -> Unit = { topik, idBab ->
+        LocalLearningRepository.recordTopicOpened(context = context, topicId = topik.id)
+        topikAktif = topik
+        babAktif = idBab
+    }
+
     BackHandler(
         enabled = indexAktif != 0 ||
-                tampilkanPengaturan ||
-                tampilkanAchievement ||
-                tampilkanLeaderboard ||
-                tampilkanNotifikasi ||
-                tampilkanEditProfil ||
-                topikAktif != null ||
-                kuisAktif != null ||
-                hasilKuisAktif != null ||
-                reviewAktif != null ||
-                tampilkanEksperimen ||
-                eksperimenAktif != null
+            tampilkanPengaturan ||
+            tampilkanAchievement ||
+            tampilkanLeaderboard ||
+            tampilkanNotifikasi ||
+            tampilkanEditProfil ||
+            topikAktif != null ||
+            kuisAktif != null ||
+            hasilKuisAktif != null ||
+            reviewAktif != null ||
+            tampilkanEksperimen ||
+            eksperimenAktif != null
     ) {
         when {
             reviewAktif != null -> reviewAktif = null
@@ -159,21 +180,42 @@ fun KerangkaAplikasi(
         }
 
         topikAktif != null && babAktif != null -> {
+            val currentTopic = topikAktif!!
+            val currentBabId = babAktif!!
+            val completedIds = learningStats.completedChaptersByTopic[currentTopic.id].orEmpty()
+            val nextBab = currentTopic.daftarBab.firstOrNull { it.id == currentBabId + 1 }
+
             BabScreen(
-                topikMateri = topikAktif!!,
-                babId = babAktif!!,
-                onBackClick = { babAktif = null }
+                topikMateri = currentTopic,
+                babId = currentBabId,
+                onBackClick = { babAktif = null },
+                isCompleted = currentBabId in completedIds,
+                onCompleteChapter = {
+                    LocalLearningRepository.completeChapter(
+                        context = context,
+                        topicId = currentTopic.id,
+                        chapterId = currentBabId
+                    )
+                },
+                onNextBab = if (nextBab != null) {
+                    { babAktif = nextBab.id }
+                } else {
+                    null
+                }
             )
         }
 
         topikAktif != null -> {
+            val currentTopic = topikAktif!!
+            val completedIds = learningStats.completedChaptersByTopic[currentTopic.id].orEmpty()
             DetailMateriScreen(
-                topikMateri = topikAktif!!,
+                topikMateri = currentTopic,
                 onBackClick = { topikAktif = null },
                 onBabClick = { idBab -> babAktif = idBab },
                 onKuisClick = {
-                    kuisAktif = topikAktif!!.kategori
-                }
+                    kuisAktif = MateriRepository.normalizeSubjectName(currentTopic.kategori)
+                },
+                completedChapterIds = completedIds
             )
         }
 
@@ -193,6 +235,7 @@ fun KerangkaAplikasi(
 
         tampilkanAchievement -> {
             AchievementScreen(
+                learningStats = learningStats,
                 onBackClick = { tampilkanAchievement = false }
             )
         }
@@ -236,16 +279,14 @@ fun KerangkaAplikasi(
                     when (tab) {
                         0 -> BerandaScreen(
                             onNavigateToMateri = { judulMateri ->
-                                val topikDitemukan = MateriRepository.getDaftarTopik().find {
-                                    it.judul.equals(judulMateri, ignoreCase = true) ||
-                                            it.judul.contains(judulMateri, ignoreCase = true) ||
-                                            it.kategori.contains(judulMateri, ignoreCase = true)
+                                val topikDitemukan = MateriRepository.findTopicBySubject(judulMateri)
+                                    ?: MateriRepository.getDaftarTopik().firstOrNull()
+                                if (topikDitemukan != null) {
+                                    bukaTopik(topikDitemukan, null)
                                 }
-                                topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
                             },
                             onHasilCari = { topik, babId ->
-                                topikAktif = topik
-                                babAktif = babId
+                                bukaTopik(topik, babId)
                             },
                             onNavigateToEksperimen = { tampilkanEksperimen = true },
                             onMulaiKuis = { kategori -> kuisAktif = kategori },
@@ -254,11 +295,11 @@ fun KerangkaAplikasi(
 
                         1 -> MateriScreen(
                             onMateriClick = { judulKategori ->
-                                val topikDitemukan = MateriRepository.getDaftarTopik().find {
-                                    it.judul.contains(judulKategori, ignoreCase = true) ||
-                                            it.kategori.contains(judulKategori, ignoreCase = true)
+                                val topikDitemukan = MateriRepository.findTopicBySubject(judulKategori)
+                                    ?: MateriRepository.getDaftarTopik().firstOrNull()
+                                if (topikDitemukan != null) {
+                                    bukaTopik(topikDitemukan, null)
                                 }
-                                topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
                             }
                         )
 

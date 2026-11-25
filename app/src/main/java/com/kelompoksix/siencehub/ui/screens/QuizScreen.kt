@@ -24,9 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.repositories.LeaderboardRepository
+import com.kelompoksix.siencehub.data.repositories.LocalLearningRepository
 import com.kelompoksix.siencehub.data.repositories.QuizHistoryRepository
 import com.kelompoksix.siencehub.data.repositories.QuizRepository
-import com.kelompoksix.siencehub.data.repositories.UserProgressRepository
 import com.kelompoksix.siencehub.ui.theme.AccentPurple
 import com.kelompoksix.siencehub.ui.theme.BorderSubtle
 import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
@@ -75,10 +75,12 @@ fun QuizScreen(
                 correctCount = correctCount,
                 wrongCount = wrongCount
             )
-            UserProgressRepository.updateSubjectProgress(
+            LocalLearningRepository.recordQuizResult(
                 context = context,
                 subjectName = subjectName,
-                progress = 1.0f
+                score = totalSkor,
+                totalScore = daftarSoal.size * 20,
+                correctAnswers = correctCount
             )
             onQuizFinished(totalSkor, daftarSoal.size * 20, correctCount, wrongCount)
         }
@@ -308,10 +310,12 @@ fun QuizScreen(
                                             correctCount = finalCorrect,
                                             wrongCount = finalWrong
                                         )
-                                        UserProgressRepository.updateSubjectProgress(
+                                        LocalLearningRepository.recordQuizResult(
                                             context = context,
                                             subjectName = subjectName,
-                                            progress = 1.0f
+                                            score = totalSkor,
+                                            totalScore = daftarSoal.size * 20,
+                                            correctAnswers = finalCorrect
                                         )
                                         onQuizFinished(totalSkor, daftarSoal.size * 20, finalCorrect, finalWrong)
                                     }

@@ -105,6 +105,7 @@ fun AppNavigation() {
             val context = LocalContext.current
             KerangkaAplikasi(
                 onLogout = {
+                    LocalLearningRepository.resetCloudSyncCache()
                     UserSessionManager.clearSession(context)
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
@@ -135,14 +136,6 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 onQuizFinished = { score, total, correct, wrong ->
-                    LocalLearningRepository.recordQuizResult(
-                        context = context,
-                        userId = userId,
-                        subjectName = subjectName,
-                        score = score,
-                        totalScore = total,
-                        correctAnswers = correct
-                    )
                     navController.navigate(Routes.createQuizResultRoute(score, total, correct, wrong, subjectName)) {
                         popUpTo(Routes.QUIZ) { inclusive = true }
                     }

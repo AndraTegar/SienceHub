@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kelompoksix.siencehub.data.models.TopikMateri
+import com.kelompoksix.siencehub.data.repositories.LocalLearningRepository
+import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.data.repositories.NotifikasiRepository
 import com.kelompoksix.siencehub.data.repositories.UserProgressRepository
 import com.kelompoksix.siencehub.ui.components.CardAksi
@@ -63,7 +66,7 @@ fun BerandaScreen(
     val metrics = rememberResponsiveMetrics()
 
     val context = LocalContext.current
-    val userName = remember(context) { UserSessionManager.getUserName(context).ifBlank { "Siswa" } }
+    val userName = UserSessionManager.getUserName(context).ifBlank { "Siswa" }
 
     val notifikasiList by NotifikasiRepository.notifikasiList.collectAsState()
     val unreadCount = remember(notifikasiList) { notifikasiList.count { !it.isDibaca } }
@@ -71,21 +74,27 @@ fun BerandaScreen(
     val faktaSains = viewModel.faktaSains
     val isLoadingFakta = viewModel.isLoadingFakta
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(context) {
         UserProgressRepository.loadProgress(context)
+        LocalLearningRepository.refreshStats(context)
     }
 
     val progressMap by UserProgressRepository.subjectProgressFlow.collectAsState()
+    val learningStats by LocalLearningRepository.learningStatsFlow.collectAsState()
 
-    val fisikaProg = progressMap["Fisika"] ?: 0f
-    val biologiProg = progressMap["Biologi"] ?: 0.2f
-    val kimiaProg = progressMap["Kimia"] ?: 0.4f
+    val daftarMateri = remember(learningStats, progressMap) {
+        val semuaTopik = MateriRepository.getDaftarTopik()
+        val urutanTerakhir = learningStats.recentlyOpenedTopicIds
+        semuaTopik.sortedWith(
+            compareBy { topik ->
+                val idx = urutanTerakhir.indexOf(topik.id)
+                if (idx >= 0) idx else Int.MAX_VALUE
+            }
+        ).map { topik ->
+            Pair(topik, learningStats.progressFor(topik))
+        }
+    }
 
-    val daftarMateri = listOf(
-        Pair("Fisika: Hukum Newton", fisikaProg),
-        Pair("Biologi: Struktur Sel", biologiProg),
-        Pair("Kimia: Reaksi Asam Basa", kimiaProg)
-    )
     val pagerState = rememberPagerState(pageCount = { daftarMateri.size })
 
     Scaffold(
@@ -154,7 +163,6 @@ fun BerandaScreen(
                 .padding(paddingValues)
                 .verticalScroll(scrollState)
         ) {
-            // Bagian Atas (Hijau Sage) yang menyatu mulus saat di-scroll di semua tinggi layar
             ResponsiveContentContainer(maxWidth = 760.dp) {
                 Column(
                     modifier = Modifier
@@ -178,7 +186,7 @@ fun BerandaScreen(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    // Kartu Status Level & Streak Glassmorphic Clean
+                    // Kartu Status Level, XP & Streak Real-Time
                     Card(
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.16f)),
@@ -186,86 +194,123 @@ fun BerandaScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 14.dp, horizontal = 18.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(vertical = 14.dp, horizontal = 18.dp)
                         ) {
                             Row(
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(Color(0xFFE1F5FE), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Star,
+                                            contentDescription = null,
+                                            tint = Color(0xFF0288D1),
+                                            modifier = Modifier.size(21.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = "Level ${learningStats.level}",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            text = "${learningStats.levelTitle} • ${learningStats.experiencePoints} XP",
+                                            fontSize = 11.5.sp,
+                                            color = Color.White.copy(alpha = 0.85f)
+                                        )
+                                    }
+                                }
+
                                 Box(
                                     modifier = Modifier
-                                        .size(40.dp)
-                                        .background(Color(0xFFE1F5FE), CircleShape),
-                                    contentAlignment = Alignment.Center
+                                        .height(32.dp)
+                                        .width(1.dp)
+                                        .background(Color.White.copy(alpha = 0.28f))
+                                )
+
+                                Row(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        Icons.Default.Star,
-                                        contentDescription = null,
-                                        tint = Color(0xFF0288D1),
-                                        modifier = Modifier.size(21.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = "Level 1",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp,
-                                        color = Color.White
-                                    )
-                                    Text(
-                                        text = "Pemula",
-                                        fontSize = 11.5.sp,
-                                        color = Color.White.copy(alpha = 0.82f)
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(Color(0xFFFFF3E0), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            Icons.Default.LocalFireDepartment,
+                                            contentDescription = null,
+                                            tint = Color(0xFFFF6D00),
+                                            modifier = Modifier.size(21.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = "${learningStats.streakDays} Hari",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            text = if (learningStats.streakDays > 0) "Streak Aktif" else "Mulai Streak!",
+                                            fontSize = 11.5.sp,
+                                            color = Color.White.copy(alpha = 0.85f)
+                                        )
+                                    }
                                 }
                             }
 
-                            Box(
-                                modifier = Modifier
-                                    .height(32.dp)
-                                    .width(1.dp)
-                                    .background(Color.White.copy(alpha = 0.28f))
-                            )
+                            Spacer(modifier = Modifier.height(10.dp))
 
                             Row(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 16.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .background(Color(0xFFFFF3E0), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        Icons.Default.LocalFireDepartment,
-                                        contentDescription = null,
-                                        tint = Color(0xFFFF6D00),
-                                        modifier = Modifier.size(21.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = "6 Hari",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp,
-                                        color = Color.White
-                                    )
-                                    Text(
-                                        text = "Streak Aktif",
-                                        fontSize = 11.5.sp,
-                                        color = Color.White.copy(alpha = 0.82f)
-                                    )
-                                }
+                                Text(
+                                    text = "Menuju Level ${learningStats.level + 1}",
+                                    fontSize = 11.sp,
+                                    color = Color.White.copy(alpha = 0.82f)
+                                )
+                                Text(
+                                    text = "${learningStats.xpInCurrentLevel}/${learningStats.xpForNextLevel} XP",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
                             }
+                            Spacer(modifier = Modifier.height(5.dp))
+                            LinearProgressIndicator(
+                                progress = {
+                                    learningStats.xpInCurrentLevel.toFloat() / learningStats.xpForNextLevel.toFloat()
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(5.dp)
+                                    .clip(CircleShape),
+                                color = Color(0xFFFDE047),
+                                trackColor = Color.White.copy(alpha = 0.24f),
+                                strokeCap = StrokeCap.Round
+                            )
                         }
                     }
 
@@ -297,11 +342,11 @@ fun BerandaScreen(
                         modifier = Modifier.fillMaxWidth(),
                         pageSpacing = 14.dp
                     ) { page ->
-                        val materi = daftarMateri[page]
+                        val (topik, prog) = daftarMateri[page]
                         CardUtama(
-                            judulMateri = materi.first,
-                            progress = materi.second,
-                            onClick = { onNavigateToMateri(materi.first) }
+                            judulMateri = topik.judul,
+                            progress = prog,
+                            onClick = { onNavigateToMateri(topik.judul) }
                         )
                     }
 
