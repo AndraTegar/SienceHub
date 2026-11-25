@@ -31,6 +31,7 @@ import com.kelompoksix.siencehub.ui.screens.BerandaScreen
 import com.kelompoksix.siencehub.ui.screens.DetailMateriScreen
 import com.kelompoksix.siencehub.ui.screens.EditProfilScreen
 import com.kelompoksix.siencehub.ui.screens.EksperimenScreen
+import com.kelompoksix.siencehub.ui.screens.FotosintesisScreen
 import com.kelompoksix.siencehub.ui.screens.GravitasiPlanetScreen
 import com.kelompoksix.siencehub.ui.screens.LeaderboardScreen
 import com.kelompoksix.siencehub.ui.screens.MateriScreen
@@ -254,6 +255,7 @@ fun KerangkaAplikasi(
 
         eksperimenAktif != null -> {
             when (eksperimenAktif) {
+                "biologi_fotosintesis" -> FotosintesisScreen(onBackClick = { eksperimenAktif = null })
                 "fisika_newton2" -> SimulatorNewtonScreen(onBackClick = { eksperimenAktif = null })
                 "astronomi_gravitasi" -> GravitasiPlanetScreen(onBackClick = { eksperimenAktif = null })
                 "kimia_ph" -> UjiPhScreen(onBackClick = { eksperimenAktif = null })

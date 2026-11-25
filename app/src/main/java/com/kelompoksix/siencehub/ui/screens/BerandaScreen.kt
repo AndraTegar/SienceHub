@@ -416,7 +416,7 @@ fun BerandaScreen(
 
                         CardAksi(
                             judul = "Eksperimen Virtual \uD83D\uDD2C",
-                            deskripsi = "Simulasikan hukum gravitasi, gaya Newton, hingga indikator pH secara langsung.",
+                            deskripsi = "Uji laju fotosintesis dengan Sensor Cahaya, Hukum Newton (Accelerometer), gravitasi planet, & pH.",
                             teksTombol = "Mainkan",
                             ikon = Icons.Default.Science,
                             warnaBackground = SageSoft,
