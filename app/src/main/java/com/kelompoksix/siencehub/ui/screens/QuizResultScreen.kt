@@ -46,7 +46,7 @@ fun QuizResultScreen(
     onBackClick: () -> Unit = {}
 ) {
     val metrics = rememberResponsiveMetrics()
-    val completionPercent = if (totalQuestions > 0) ((correctCount + wrongCount) * 100 / totalQuestions) else 100
+    val accuracyPercent = if (totalQuestions > 0) (correctCount * 100 / totalQuestions) else 0
 
     Box(
         modifier = Modifier
@@ -184,15 +184,15 @@ fun QuizResultScreen(
                             Box(modifier = Modifier.weight(1f)) {
                                 StatItem(
                                     dotColor = AccentPurple,
-                                    value = "$completionPercent%",
-                                    label = "Completion"
+                                    value = "$accuracyPercent%",
+                                    label = "Akurasi"
                                 )
                             }
                             Box(modifier = Modifier.weight(1f)) {
                                 StatItem(
                                     dotColor = AccentPurple,
                                     value = "$totalQuestions",
-                                    label = "Total Question"
+                                    label = "Total Soal"
                                 )
                             }
                         }
@@ -207,14 +207,14 @@ fun QuizResultScreen(
                                 StatItem(
                                     dotColor = Color(0xFF22C55E),
                                     value = String.format("%02d", correctCount),
-                                    label = "Correct"
+                                    label = "Benar"
                                 )
                             }
                             Box(modifier = Modifier.weight(1f)) {
                                 StatItem(
                                     dotColor = Color(0xFFEF4444),
                                     value = String.format("%02d", wrongCount),
-                                    label = "Wrong"
+                                    label = "Salah / Kosong"
                                 )
                             }
                         }

@@ -2,7 +2,47 @@ package com.kelompoksix.siencehub.data.repositories
 
 import com.kelompoksix.siencehub.data.models.Soal
 
+data class QuizSessionResult(
+    val subjectName: String,
+    val questions: List<Soal>,
+    val userAnswers: Map<Int, Int>,
+    val score: Int,
+    val correctCount: Int,
+    val wrongAnsweredCount: Int,
+    val unansweredCount: Int
+)
+
 object QuizRepository {
+
+    private val sessionResultsBySubject = mutableMapOf<String, QuizSessionResult>()
+    private var latestSessionResult: QuizSessionResult? = null
+
+    fun prepareShuffledQuiz(subjectName: String): List<Soal> {
+        val baseQuestions = getSoalBySubject(subjectName).shuffled()
+        return baseQuestions.mapIndexed { idx, soal ->
+            val indexedOptions = soal.opsi.mapIndexed { optIdx, text -> optIdx to text }.shuffled()
+            val newCorrectIndex = indexedOptions.indexOfFirst { it.first == soal.jawabanBenar }
+                .coerceAtLeast(0)
+            soal.copy(
+                id = idx + 1,
+                opsi = indexedOptions.map { it.second },
+                jawabanBenar = newCorrectIndex
+            )
+        }
+    }
+
+    fun saveSessionResult(result: QuizSessionResult) {
+        val key = MateriRepository.normalizeSubjectName(result.subjectName).lowercase()
+        sessionResultsBySubject[key] = result
+        latestSessionResult = result
+    }
+
+    fun getSessionResult(subjectName: String): QuizSessionResult? {
+        val key = MateriRepository.normalizeSubjectName(subjectName).lowercase()
+        return sessionResultsBySubject[key] ?: latestSessionResult?.takeIf {
+            MateriRepository.normalizeSubjectName(it.subjectName).equals(key, ignoreCase = true)
+        }
+    }
 
     fun getSoalBySubject(subjectName: String): List<Soal> {
         return when (subjectName.lowercase().trim()) {
