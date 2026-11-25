@@ -8,7 +8,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -24,9 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +41,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.StatusDanger
+import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,10 +68,8 @@ fun SignupScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val sageGreen = Color(0xFF7A8B76)
-    val darkText = Color(0xFF161823)
-    val fieldBgColor = Color(0xFFF1F2F4) // Warna abu-abu kartu modern
     val context = LocalContext.current
+    val metrics = rememberResponsiveMetrics()
 
     val webClientId = remember(context) {
         context.getString(com.kelompoksix.siencehub.R.string.default_web_client_id)
@@ -101,7 +110,7 @@ fun SignupScreen(
             }
         } catch (e: ApiException) {
             isLoading = false
-            if (e.statusCode != 12501) { // 12501 = Canceled
+            if (e.statusCode != 12501) {
                 errorMessage = "Gagal login Google (Code: ${e.statusCode})"
             }
         }
@@ -121,7 +130,10 @@ fun SignupScreen(
                     .addOnSuccessListener {
                         isLoading = false
                         UserSessionManager.saveSession(context, cleanEmail)
-                        Toast.makeText(context, "Akun berhasil dibuat! Selamat datang di SienceHub.", Toast.LENGTH_SHORT).show()
+                        if (phone.isNotBlank()) {
+                            UserSessionManager.updateProfile(context, UserSessionManager.getUserName(context), phone.trim())
+                        }
+                        Toast.makeText(context, "Akun berhasil dibuat! Selamat datang di ScienceHub.", Toast.LENGTH_SHORT).show()
                         onCreateAccountSuccess()
                     }
                     .addOnFailureListener { exception ->
@@ -138,257 +150,273 @@ fun SignupScreen(
         }
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .systemBarsPadding()
             .imePadding()
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // ==========================================
-            // TOP BAR (Tombol Close / Silang)
-            // ==========================================
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+            Surface(
+                onClick = onNavigateToLogin,
+                shape = CircleShape,
+                color = SurfaceOffWhite,
+                modifier = Modifier.size(40.dp)
             ) {
-                IconButton(onClick = onNavigateToLogin) {
+                Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = darkText,
-                        modifier = Modifier.size(24.dp)
+                        tint = TextPrimary,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ==========================================
-            // HEADER (Judul "Sign up" di Tengah)
-            // ==========================================
-            Text(
-                text = "Sign up",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = darkText,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // ==========================================
-            // FORM INPUT (Model Kartu Modern)
-            // ==========================================
-
-            // Email
-            TextField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = { Text("Email address", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
-                shape = RoundedCornerShape(12.dp),
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = fieldBgColor,
-                    unfocusedContainerColor = fieldBgColor,
-                    disabledContainerColor = fieldBgColor,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth().height(56.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Phone no
-            TextField(
-                value = phone,
-                onValueChange = { phone = it },
-                placeholder = { Text("Phone number", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
-                shape = RoundedCornerShape(12.dp),
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = fieldBgColor,
-                    unfocusedContainerColor = fieldBgColor,
-                    disabledContainerColor = fieldBgColor,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth().height(56.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Password
-            TextField(
-                value = password,
-                onValueChange = { password = it },
-                placeholder = { Text("Password", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
-                trailingIcon = {
-                    val image = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(image, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
-                    }
-                },
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                shape = RoundedCornerShape(12.dp),
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = fieldBgColor,
-                    unfocusedContainerColor = fieldBgColor,
-                    disabledContainerColor = fieldBgColor,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth().height(56.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Confirm Password
-            TextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                placeholder = { Text("Confirm password", color = Color.Gray, fontSize = 14.sp) },
-                leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp)) },
-                trailingIcon = {
-                    val image = if (confirmPasswordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
-                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                        Icon(image, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
-                    }
-                },
-                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                shape = RoundedCornerShape(12.dp),
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = fieldBgColor,
-                    unfocusedContainerColor = fieldBgColor,
-                    disabledContainerColor = fieldBgColor,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth().height(56.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (!errorMessage.isNullOrBlank()) {
-                Text(
-                    text = errorMessage!!,
-                    color = Color.Red,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Tombol Create Account
-            Button(
-                onClick = handleSignup,
-                enabled = !isLoading,
+        ResponsiveContentContainer(
+            maxWidth = metrics.formMaxWidth,
+            modifier = Modifier.weight(1f)
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = sageGreen),
-                shape = RoundedCornerShape(12.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp)
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Create Account", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Sign up",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = TextPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "Buat akun baru untuk mulai menjelajahi sains",
+                    fontSize = 13.5.sp,
+                    color = TextSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email address") },
+                    leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp)) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SagePrimary,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedLabelColor = SagePrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = SurfaceOffWhite
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("Phone number") },
+                    leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp)) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SagePrimary,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedLabelColor = SagePrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = SurfaceOffWhite
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp)) },
+                    trailingIcon = {
+                        val image = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(image, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SagePrimary,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedLabelColor = SagePrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = SurfaceOffWhite
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = { Text("Confirm password") },
+                    leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp)) },
+                    trailingIcon = {
+                        val image = if (confirmPasswordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
+                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            Icon(image, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
+                        }
+                    },
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SagePrimary,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedLabelColor = SagePrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = SurfaceOffWhite
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (!errorMessage.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Surface(
+                        color = Color(0xFFFEF2F2),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = errorMessage!!,
+                            color = StatusDanger,
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                        )
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // ==========================================
-            // TOMBOL SIGN UP DENGAN GOOGLE
-            // ==========================================
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
-                Text(
-                    text = "  atau  ",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Medium
-                )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedButton(
-                onClick = {
-                    googleSignInClient.signOut().addOnCompleteListener {
-                        googleLauncher.launch(googleSignInClient.signInIntent)
-                    }
-                },
-                enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFFDADCE0)),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Button(
+                    onClick = handleSignup,
+                    enabled = !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
+                    shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text(
-                        text = "G",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 20.sp,
-                        color = Color(0xFF4285F4)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Daftar dengan Google",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3C4043)
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Create Account", color = Color.White, fontSize = 15.5.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = BorderSubtle)
+                    Text(
+                        text = "  atau  ",
+                        fontSize = 12.sp,
+                        color = TextSecondary,
+                        fontWeight = FontWeight.Medium
+                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = BorderSubtle)
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        googleSignInClient.signOut().addOnCompleteListener {
+                            googleLauncher.launch(googleSignInClient.signInIntent)
+                        }
+                    },
+                    enabled = !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "G",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 19.sp,
+                            color = Color(0xFF4285F4)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Daftar dengan Google",
+                            fontSize = 14.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
+        }
 
-            // Spacer pendorong agar teks berada di posisi paling bawah layar
-            Spacer(modifier = Modifier.height(60.dp))
-
-            // ==========================================
-            // FOOTER (Sudah Punya Akun? Login di Bawah)
-            // ==========================================
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SurfaceOffWhite)
+                .padding(vertical = 20.dp),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = Color.Gray)) { append("Already have an account? ") }
-                    withStyle(style = SpanStyle(color = sageGreen, fontWeight = FontWeight.Bold)) { append("Login") }
+                    withStyle(style = SpanStyle(color = TextSecondary)) { append("Already have an account? ") }
+                    withStyle(style = SpanStyle(color = SagePrimary, fontWeight = FontWeight.Bold)) { append("Login") }
                 },
-                fontSize = 14.sp,
+                fontSize = 13.5.sp,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp)
-                    .clickable { onNavigateToLogin() }
+                modifier = Modifier.clickable { onNavigateToLogin() }
             )
         }
     }

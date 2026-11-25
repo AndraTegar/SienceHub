@@ -1,66 +1,138 @@
 package com.kelompoksix.siencehub.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.ui.theme.AccentAmber
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 
 @Composable
 fun EksperimenScaffold(
     judul: String,
     onBackClick: () -> Unit,
+    headerColor: Color = AccentAmber,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(Modifier.fillMaxSize().background(Color(0xFFFFC94D))) {
-        Spacer(Modifier.height(44.dp))
-        Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp), contentAlignment = Alignment.Center) {
+    val metrics = rememberResponsiveMetrics()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(headerColor)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = metrics.horizontalPadding, vertical = 14.dp),
+            contentAlignment = Alignment.Center
+        ) {
             Row(
-                Modifier.fillMaxWidth().height(48.dp)
-                    .background(Color.White.copy(alpha = 0.25f), RoundedCornerShape(50.dp)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .background(Color.White.copy(alpha = 0.25f), CircleShape)
+                    .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBackIosNew, "Kembali", tint = Color.White, modifier = Modifier.size(16.dp))
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = "Kembali",
+                        tint = Color.White,
+                        modifier = Modifier.size(17.dp)
+                    )
                 }
             }
-            Text(judul, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+            Text(
+                text = judul,
+                color = Color.White,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 52.dp)
+            )
         }
-        Spacer(Modifier.height(28.dp))
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         Surface(
-            Modifier.fillMaxWidth().weight(1f),
-            color = Color(0xFFF9F7FF),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = SurfaceOffWhite,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
-            Column(
-                Modifier.verticalScroll(rememberScrollState()).padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                content = content
-            )
+            ResponsiveContentContainer(maxWidth = 680.dp) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .navigationBarsPadding()
+                        .padding(horizontal = metrics.horizontalPadding, vertical = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    content = content
+                )
+            }
         }
     }
 }
 
 @Composable
 fun PilihanChip(teks: String, terpilih: Boolean, onClick: () -> Unit) {
-    Box(
-        Modifier.clip(RoundedCornerShape(50.dp))
-            .background(if (terpilih) Color(0xFF7D9078) else Color(0xFFC9DDF5))
+    val bg by animateColorAsState(
+        targetValue = if (terpilih) SagePrimary else Color.White,
+        label = "chipBg"
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (terpilih) Color.White else TextPrimary,
+        label = "chipText"
+    )
+
+    Surface(
+        shape = CircleShape,
+        color = bg,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (terpilih) SagePrimary else Color(0xFFD5DFEB)
+        ),
+        shadowElevation = if (terpilih) 2.dp else 0.dp,
+        modifier = Modifier
+            .clip(CircleShape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text(teks, color = if (terpilih) Color.White else Color.Black, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Text(
+            text = teks,
+            color = textColor,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
     }
 }

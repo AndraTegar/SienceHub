@@ -1,6 +1,9 @@
 package com.kelompoksix.siencehub.ui.screens
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -9,10 +12,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -26,17 +28,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.data.repositories.NotifikasiRepository
+import com.kelompoksix.siencehub.data.repositories.UserProgressRepository
 import com.kelompoksix.siencehub.ui.components.CardAksi
 import com.kelompoksix.siencehub.ui.components.CardUtama
-import com.kelompoksix.siencehub.utils.UserSessionManager
 import com.kelompoksix.siencehub.ui.components.SearchBarMateri
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.SageSoft
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 import com.kelompoksix.siencehub.ui.viewmodels.BerandaViewModel
+import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,11 +58,11 @@ fun BerandaScreen(
     onMulaiKuis: (String) -> Unit = {},
     onNotificationClick: () -> Unit = {}
 ) {
-    val warnaHijauSage = Color(0xFF7A8B76) // Dibuat selaras dengan halaman profil
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+    val metrics = rememberResponsiveMetrics()
 
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val userName = remember(context) { UserSessionManager.getUserName(context).ifBlank { "Siswa" } }
 
     val notifikasiList by NotifikasiRepository.notifikasiList.collectAsState()
@@ -62,10 +72,10 @@ fun BerandaScreen(
     val isLoadingFakta = viewModel.isLoadingFakta
 
     LaunchedEffect(Unit) {
-        com.kelompoksix.siencehub.data.repositories.UserProgressRepository.loadProgress(context)
+        UserProgressRepository.loadProgress(context)
     }
 
-    val progressMap by com.kelompoksix.siencehub.data.repositories.UserProgressRepository.subjectProgressFlow.collectAsState()
+    val progressMap by UserProgressRepository.subjectProgressFlow.collectAsState()
 
     val fisikaProg = progressMap["Fisika"] ?: 0f
     val biologiProg = progressMap["Biologi"] ?: 0.2f
@@ -82,167 +92,210 @@ fun BerandaScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.White,
         topBar = {
-            // TOP BAR MODERN: Search Bar Full + Lonceng Notifikasi
             TopAppBar(
                 title = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        SearchBarMateri(
+                    ResponsiveContentContainer(maxWidth = 760.dp) {
+                        Row(
                             modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp),
-                            onHasilClick = onHasilCari
-                        )
-
-                        // Tombol Ikon Lonceng Notifikasi dengan Indikator Badge
-                        Box(
-                            contentAlignment = Alignment.TopEnd
+                                .fillMaxWidth()
+                                .padding(end = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            IconButton(
-                                onClick = onNotificationClick,
+                            SearchBarMateri(
                                 modifier = Modifier
-                                    .size(45.dp)
-                                    .background(Color.White.copy(alpha = 0.25f), CircleShape)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Notifications,
-                                    contentDescription = "Notifikasi",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
+                                    .weight(1f)
+                                    .height(44.dp),
+                                onHasilClick = onHasilCari
+                            )
 
-                            if (unreadCount > 0) {
-                                Box(
+                            Box(contentAlignment = Alignment.TopEnd) {
+                                IconButton(
+                                    onClick = onNotificationClick,
                                     modifier = Modifier
-                                        .size(12.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFFFF3B30))
-                                )
+                                        .size(44.dp)
+                                        .background(Color.White.copy(alpha = 0.20f), CircleShape)
+                                        .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Notifications,
+                                        contentDescription = "Notifikasi",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(21.dp)
+                                    )
+                                }
+
+                                if (unreadCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(x = (-2).dp, y = 2.dp)
+                                            .size(11.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFFFF3B30))
+                                            .border(1.5.dp, SagePrimary, CircleShape)
+                                    )
+                                }
                             }
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = warnaHijauSage,
-                    scrolledContainerColor = warnaHijauSage
+                    containerColor = SagePrimary,
+                    scrolledContainerColor = SagePrimary
                 ),
                 scrollBehavior = scrollBehavior
             )
         }
     ) { paddingValues ->
-
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(SagePrimary)
                 .padding(paddingValues)
+                .verticalScroll(scrollState)
         ) {
-            // Background Hijau Sage Setengah Layar Atas
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.55f)
-                    .background(warnaHijauSage)
-            )
+            // Bagian Atas (Hijau Sage) yang menyatu mulus saat di-scroll di semua tinggi layar
+            ResponsiveContentContainer(maxWidth = 760.dp) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = metrics.horizontalPadding)
+                ) {
+                    Spacer(modifier = Modifier.height(10.dp))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-            ) {
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Salam Sapaan Personalisasi Nama Pengguna
                     Text(
                         text = "Halo, $userName! 👋",
-                        fontSize = 22.sp,
+                        fontSize = 23.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "Siap untuk belajar sains hari ini?",
-                        fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f)
+                        fontSize = 13.5.sp,
+                        color = Color.White.copy(alpha = 0.86f)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
-                    // ==========================================
-                    // KARTU STATUS BARU (Level 1 & Streak 6)
-                    // ==========================================
+                    // Kartu Status Level & Streak Glassmorphic Clean
                     Card(
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),
+                        shape = RoundedCornerShape(22.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.16f)),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.24f)),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 14.dp, horizontal = 20.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                                .padding(vertical = 14.dp, horizontal = 18.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Level Badge
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(38.dp)
+                                        .size(40.dp)
                                         .background(Color(0xFFE1F5FE), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF00B0FF), modifier = Modifier.size(20.dp))
+                                    Icon(
+                                        Icons.Default.Star,
+                                        contentDescription = null,
+                                        tint = Color(0xFF0288D1),
+                                        modifier = Modifier.size(21.dp)
+                                    )
                                 }
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
                                 Column {
-                                    Text(text = "Level 1", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                                    Text(text = "Pemula", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+                                    Text(
+                                        text = "Level 1",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "Pemula",
+                                        fontSize = 11.5.sp,
+                                        color = Color.White.copy(alpha = 0.82f)
+                                    )
                                 }
                             }
 
-                            // Garis Pemisah
-                            Box(modifier = Modifier.height(30.dp).width(1.dp).background(Color.White.copy(alpha = 0.3f)))
+                            Box(
+                                modifier = Modifier
+                                    .height(32.dp)
+                                    .width(1.dp)
+                                    .background(Color.White.copy(alpha = 0.28f))
+                            )
 
-                            // Streak Badge
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(38.dp)
+                                        .size(40.dp)
                                         .background(Color(0xFFFFF3E0), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color(0xFFFF6D00), modifier = Modifier.size(20.dp))
+                                    Icon(
+                                        Icons.Default.LocalFireDepartment,
+                                        contentDescription = null,
+                                        tint = Color(0xFFFF6D00),
+                                        modifier = Modifier.size(21.dp)
+                                    )
                                 }
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
                                 Column {
-                                    Text(text = "6 Hari", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
-                                    Text(text = "Streak Aktif", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+                                    Text(
+                                        text = "6 Hari",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "Streak Aktif",
+                                        fontSize = 11.5.sp,
+                                        color = Color.White.copy(alpha = 0.82f)
+                                    )
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(22.dp))
 
-                    Text(
-                        text = "Lanjutkan Belajar",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Lanjutkan Belajar",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "${pagerState.currentPage + 1}/${daftarMateri.size}",
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxWidth(),
-                        pageSpacing = 16.dp
+                        pageSpacing = 14.dp
                     ) { page ->
                         val materi = daftarMateri[page]
                         CardUtama(
@@ -255,59 +308,84 @@ fun BerandaScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp),
+                            .padding(top = 14.dp, bottom = 24.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         repeat(daftarMateri.size) { iteration ->
                             val isSelected = pagerState.currentPage == iteration
+                            val dotWidth by animateDpAsState(
+                                targetValue = if (isSelected) 24.dp else 8.dp,
+                                label = "pagerDot"
+                            )
                             Box(
                                 modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .height(8.dp)
-                                    .width(if (isSelected) 24.dp else 8.dp)
+                                    .padding(horizontal = 3.5.dp)
+                                    .height(7.dp)
+                                    .width(dotWidth)
                                     .clip(CircleShape)
-                                    .background(if (isSelected) Color.White else Color.White.copy(alpha = 0.4f))
+                                    .background(
+                                        if (isSelected) Color.White else Color.White.copy(alpha = 0.4f)
+                                    )
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(32.dp))
                 }
+            }
 
-                // Bagian Bawah: Konten Putih Melengkung (Aktivitas Seru)
-                Surface(
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                    color = Color.White,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
+            // Bagian Bawah: Sheet Putih Melengkung
+            Surface(
+                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 360.dp)
+            ) {
+                ResponsiveContentContainer(maxWidth = 760.dp) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(
+                                start = metrics.horizontalPadding,
+                                end = metrics.horizontalPadding,
+                                top = 26.dp,
+                                bottom = 104.dp
+                            )
+                    ) {
                         Text(
                             text = "Aktivitas Seru Hari Ini",
-                            fontSize = 20.sp,
+                            fontSize = 18.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            color = TextPrimary
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Eksplorasi simulasi interaktif & wawasan baru",
+                            fontSize = 13.sp,
+                            color = TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         CardAksi(
                             judul = "Eksperimen Virtual \uD83D\uDD2C",
-                            deskripsi = "Simulasikan hukum gravitasi di berbagai planet.",
+                            deskripsi = "Simulasikan hukum gravitasi, gaya Newton, hingga indikator pH secara langsung.",
                             teksTombol = "Mainkan",
                             ikon = Icons.Default.Science,
-                            warnaBackground = Color(0xFFE8ECE7),
-                            warnaTombol = warnaHijauSage,
+                            warnaBackground = SageSoft,
+                            warnaTombol = SagePrimary,
                             onClick = onNavigateToEksperimen
                         )
+
                         CardAksi(
                             judul = "Fakta Menarik \uD83D\uDCA1",
-                            deskripsi = if (isLoadingFakta) "Memuat Fakta Menarik" else faktaSains,
-                            teksTombol = if (isLoadingFakta) "Memuat..." else "Fakta Baru \uD83D\uDCA1",
-                            ikon = Icons.Default.Person,
-                            warnaBackground = Color(0xFFE8ECE7),
-                            warnaTombol = warnaHijauSage,
+                            deskripsi = if (isLoadingFakta) "Memuat fakta menarik hari ini..." else faktaSains,
+                            teksTombol = if (isLoadingFakta) "Memuat..." else "Fakta Baru",
+                            ikon = Icons.Default.Lightbulb,
+                            warnaBackground = Color(0xFFFFFBEB),
+                            warnaTombol = Color(0xFFD97706),
                             onClick = { viewModel.muatFaktaBaru() }
                         )
-                        Spacer(modifier = Modifier.height(120.dp))
                     }
                 }
             }

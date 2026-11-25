@@ -1,10 +1,11 @@
 package com.kelompoksix.siencehub.ui.screens
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,9 +17,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kelompoksix.siencehub.ui.navigation.Routes
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
 import com.kelompoksix.siencehub.utils.UserSessionManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,29 +29,25 @@ import kotlinx.coroutines.launch
 @Composable
 fun SplashScreen(navController: NavController) {
     val context = LocalContext.current
-    // Membuat nilai awal untuk animasi ukuran (scale) dan transparansi (alpha)
-    val scale = remember { Animatable(0.5f) }
+    val scale = remember { Animatable(0.82f) }
     val alpha = remember { Animatable(0f) }
 
     LaunchedEffect(key1 = true) {
-        // Menjalankan animasi bersamaan (zoom-in dan fade-in) selama 1 detik (1000ms)
         launch {
             scale.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 1000)
+                animationSpec = tween(durationMillis = 850, easing = FastOutSlowInEasing)
             )
         }
         launch {
             alpha.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 1000)
+                animationSpec = tween(durationMillis = 850)
             )
         }
 
-        // Jeda waktu total 2 detik sebelum berpindah
-        delay(2000L)
+        delay(1800L)
 
-        // Cek jika pengguna sudah login
         if (UserSessionManager.isLoggedIn(context)) {
             navController.navigate(Routes.HOME) {
                 popUpTo(Routes.SPLASH) { inclusive = true }
@@ -63,17 +62,36 @@ fun SplashScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF7A8B76)),
+            .background(SagePrimary)
+            .systemBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "ScienceHub",
-            color = Color.White,
-            fontSize = 36.sp,
-            fontWeight = FontWeight.Bold,
+        Box(
             modifier = Modifier
-                .scale(scale.value) // Menerapkan animasi perubahan ukuran
-                .alpha(alpha.value) // Menerapkan animasi kemunculan transparan
+                .size(240.dp)
+                .background(Color.White.copy(alpha = 0.06f), CircleShape)
         )
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .scale(scale.value)
+                .alpha(alpha.value)
+        ) {
+            Text(
+                text = "ScienceHub",
+                color = Color.White,
+                fontSize = 36.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 0.5.sp
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Belajar Sains Lebih Interaktif",
+                color = Color.White.copy(alpha = 0.82f),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }

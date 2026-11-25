@@ -157,6 +157,27 @@ object LocalLearningRepository {
                     today
                 )
             )
+            val matchingTopic = MateriRepository.getDaftarTopik().find {
+                it.kategori.equals(subjectName.trim(), ignoreCase = true) ||
+                it.judul.contains(subjectName.trim(), ignoreCase = true) ||
+                subjectName.contains(it.kategori, ignoreCase = true)
+            }
+            if (matchingTopic != null) {
+                matchingTopic.daftarBab.forEach { bab ->
+                    db.insertWithOnConflict(
+                        "chapter_completions",
+                        null,
+                        android.content.ContentValues().apply {
+                            put("user_id", normalizedUserId)
+                            put("topic_id", matchingTopic.id)
+                            put("chapter_id", bab.id)
+                            put("completed_at", today)
+                            put("experience_points", CHAPTER_XP)
+                        },
+                        SQLiteDatabase.CONFLICT_IGNORE
+                    )
+                }
+            }
             recordLearningDay(db, normalizedUserId, today)
             db.setTransactionSuccessful()
         } finally {
@@ -216,7 +237,7 @@ object LocalLearningRepository {
             db.rawQuery(
                 """
                 SELECT DISTINCT LOWER(subject_name) FROM quiz_attempts
-                WHERE user_id = ? AND total_score > 0 AND score >= total_score
+                WHERE user_id = ? AND score > 0
                 """.trimIndent(),
                 arrayOf(normalizedUserId)
             ).use { cursor ->

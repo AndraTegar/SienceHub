@@ -1,5 +1,6 @@
 package com.kelompoksix.siencehub.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.ui.components.EksperimenScaffold
 import com.kelompoksix.siencehub.ui.components.PilihanChip
+import com.kelompoksix.siencehub.ui.theme.AccentBlue
+import com.kelompoksix.siencehub.ui.theme.AccentBlueSoft
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import kotlin.math.sqrt
 
 private data class Planet(val nama: String, val g: Float, val warna: Color)
@@ -33,8 +40,8 @@ private val daftarPlanet = listOf(
 
 @Composable
 fun GravitasiPlanetScreen(onBackClick: () -> Unit) {
-    val tinggi = 20f // meter
-    var planet by remember { mutableStateOf(daftarPlanet[5]) } // Bumi
+    val tinggi = 20f
+    var planet by remember { mutableStateOf(daftarPlanet[5]) }
     var massa by remember { mutableFloatStateOf(50f) }
     var jatuh by remember { mutableStateOf(false) }
     var jarak by remember { mutableFloatStateOf(0f) }
@@ -58,15 +65,26 @@ fun GravitasiPlanetScreen(onBackClick: () -> Unit) {
     }
 
     EksperimenScaffold("GRAVITASI PLANET", onBackClick) {
-        Text("Pilih planet:", fontWeight = FontWeight.SemiBold)
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Pilih planet:", fontWeight = FontWeight.SemiBold, color = TextPrimary)
+        Row(
+            Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             daftarPlanet.forEach { p ->
                 PilihanChip(p.nama, p == planet) { planet = p; reset() }
             }
         }
 
-        Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2A44))) {
-            Canvas(Modifier.fillMaxWidth().height(220.dp).padding(horizontal = 12.dp)) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2A44))
+        ) {
+            Canvas(
+                Modifier
+                    .fillMaxWidth()
+                    .height(210.dp)
+                    .padding(horizontal = 12.dp)
+            ) {
                 val tanah = size.height - 16.dp.toPx()
                 val r = 16.dp.toPx()
                 drawLine(Color(0xFF8D6E63), Offset(0f, tanah), Offset(size.width, tanah), 6.dp.toPx())
@@ -76,30 +94,56 @@ fun GravitasiPlanetScreen(onBackClick: () -> Unit) {
         }
 
         val waktuJatuh = sqrt(2 * tinggi / planet.g)
-        Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFC9DDF5))) {
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("g di ${planet.nama} = ${"%.2f".format(planet.g)} m/s²", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E3A8A))
-                Text("Waktu jatuh dari ${tinggi.toInt()} m: ${"%.2f".format(waktuJatuh)} s", fontSize = 14.sp, color = Color.DarkGray)
-                Text("Waktu berjalan: ${"%.2f".format(waktu)} s   |   Kecepatan: ${"%.1f".format(kecepatan)} m/s", fontSize = 14.sp, color = Color.DarkGray)
-                Text("Berat ${massa.toInt()} kg di sini: ${"%.0f".format(massa * planet.g)} N", fontSize = 14.sp, color = Color.DarkGray)
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = AccentBlueSoft)
+        ) {
+            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    "g di ${planet.nama} = ${"%.2f".format(planet.g)} m/s²",
+                    fontSize = 15.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AccentBlue
+                )
+                Text("Waktu jatuh dari ${tinggi.toInt()} m: ${"%.2f".format(waktuJatuh)} s", fontSize = 13.5.sp, color = TextPrimary)
+                Text("Waktu berjalan: ${"%.2f".format(waktu)} s   •   Kecepatan: ${"%.1f".format(kecepatan)} m/s", fontSize = 13.5.sp, color = TextPrimary)
+                Text("Berat ${massa.toInt()} kg di sini: ${"%.0f".format(massa * planet.g)} N", fontSize = 13.5.sp, color = TextPrimary)
             }
         }
 
-        Text("Massa benda: ${massa.toInt()} kg", fontWeight = FontWeight.SemiBold)
-        Slider(value = massa, onValueChange = { massa = it }, valueRange = 1f..100f)
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            border = BorderStroke(1.dp, BorderSubtle)
+        ) {
+            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Massa benda: ${massa.toInt()} kg", fontWeight = FontWeight.SemiBold, color = TextPrimary)
+                Slider(
+                    value = massa,
+                    onValueChange = { massa = it },
+                    valueRange = 1f..100f,
+                    colors = SliderDefaults.colors(thumbColor = SagePrimary, activeTrackColor = SagePrimary)
+                )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(
-                onClick = { if (jarak >= tinggi) reset(); jatuh = true },
-                enabled = !jatuh,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7D9078))
-            ) { Text("Jatuhkan") }
-            OutlinedButton(onClick = { reset() }) { Text("Reset") }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = { if (jarak >= tinggi) reset(); jatuh = true },
+                        enabled = !jatuh,
+                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
+                        shape = RoundedCornerShape(12.dp)
+                    ) { Text("Jatuhkan") }
+                    OutlinedButton(
+                        onClick = { reset() },
+                        shape = RoundedCornerShape(12.dp)
+                    ) { Text("Reset") }
+                }
+            }
         }
 
         Text(
             "Ubah massa: waktu jatuh tetap sama, hanya beratnya yang berubah. Bandingkan Bulan dan Jupiter.",
-            fontSize = 13.sp, color = Color.DarkGray
+            fontSize = 12.5.sp,
+            color = TextSecondary
         )
     }
 }

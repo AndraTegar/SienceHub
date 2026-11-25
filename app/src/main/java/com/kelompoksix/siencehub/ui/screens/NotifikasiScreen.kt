@@ -1,16 +1,16 @@
 package com.kelompoksix.siencehub.ui.screens
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Lightbulb
@@ -25,22 +25,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.models.Notifikasi
 import com.kelompoksix.siencehub.data.models.TipeNotifikasi
 import com.kelompoksix.siencehub.data.repositories.NotifikasiRepository
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.SageSoft
+import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotifikasiScreen(
     onBackClick: () -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
     val notifikasiList by NotifikasiRepository.notifikasiList.collectAsState()
+    val metrics = rememberResponsiveMetrics()
 
-    var filterSelected by remember { mutableIntStateOf(0) } // 0: Semua, 1: Belum Dibaca
+    var filterSelected by remember { mutableIntStateOf(0) }
 
     val listFiltered = remember(notifikasiList, filterSelected) {
         when (filterSelected) {
@@ -56,184 +65,194 @@ fun NotifikasiScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(SagePrimary)
     ) {
-        // Header Notifikasi
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 48.dp, start = 20.dp, end = 20.dp, bottom = 20.dp),
+                .statusBarsPadding()
+                .padding(horizontal = metrics.horizontalPadding, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
+                Surface(
                     onClick = onBackClick,
-                    modifier = Modifier
-                        .background(Color.White, shape = RoundedCornerShape(50))
-                        .size(40.dp)
+                    shape = CircleShape,
+                    color = Color.White,
+                    modifier = Modifier.size(40.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBackIosNew,
-                        contentDescription = "Kembali",
-                        tint = sageGreen,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "Kembali",
+                            tint = SagePrimary,
+                            modifier = Modifier.size(17.dp)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
                 Column {
                     Text(
                         text = "Notifikasi",
                         color = Color.White,
-                        fontSize = 22.sp,
+                        fontSize = 21.sp,
                         fontWeight = FontWeight.Bold
                     )
                     if (unreadCount > 0) {
                         Text(
                             text = "$unreadCount belum dibaca",
-                            color = Color.White.copy(alpha = 0.8f),
+                            color = Color.White.copy(alpha = 0.82f),
                             fontSize = 12.sp
                         )
                     }
                 }
             }
 
-            // Tombol Tandai Semua Dibaca
             if (unreadCount > 0) {
-                TextButton(
+                Surface(
                     onClick = { NotifikasiRepository.tandaiSemuaDibaca() },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.18f)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.DoneAll,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Baca Semua",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DoneAll,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Baca Semua",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }
 
-        // Body Notifikasi (Surface Putih)
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFFAFAFA),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = SurfaceOffWhite,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 20.dp)
-            ) {
-                // Filter Chip
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ResponsiveContentContainer(maxWidth = 680.dp) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .navigationBarsPadding()
+                        .padding(horizontal = metrics.horizontalPadding, vertical = 20.dp)
                 ) {
-                    FilterChip(
-                        selected = filterSelected == 0,
-                        onClick = { filterSelected = 0 },
-                        label = { Text("Semua (${notifikasiList.size})") },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = sageGreen,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = Color.Gray
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = filterSelected == 0,
-                            borderColor = Color.LightGray.copy(alpha = 0.5f),
-                            selectedBorderColor = sageGreen
-                        )
-                    )
-
-                    FilterChip(
-                        selected = filterSelected == 1,
-                        onClick = { filterSelected = 1 },
-                        label = { Text("Belum Dibaca ($unreadCount)") },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = sageGreen,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = Color.Gray
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = filterSelected == 1,
-                            borderColor = Color.LightGray.copy(alpha = 0.5f),
-                            selectedBorderColor = sageGreen
-                        )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (listFiltered.isEmpty()) {
-                    // Tampilan Jika Kosong
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(24.dp)
+                        FilterChip(
+                            selected = filterSelected == 0,
+                            onClick = { filterSelected = 0 },
+                            label = { Text("Semua (${notifikasiList.size})") },
+                            shape = CircleShape,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = SagePrimary,
+                                selectedLabelColor = Color.White,
+                                containerColor = Color.White,
+                                labelColor = TextSecondary
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = filterSelected == 0,
+                                borderColor = BorderSubtle,
+                                selectedBorderColor = SagePrimary
+                            )
+                        )
+
+                        FilterChip(
+                            selected = filterSelected == 1,
+                            onClick = { filterSelected = 1 },
+                            label = { Text("Belum Dibaca ($unreadCount)") },
+                            shape = CircleShape,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = SagePrimary,
+                                selectedLabelColor = Color.White,
+                                containerColor = Color.White,
+                                labelColor = TextSecondary
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = filterSelected == 1,
+                                borderColor = BorderSubtle,
+                                selectedBorderColor = SagePrimary
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (listFiltered.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .background(sageGreen.copy(alpha = 0.1f), CircleShape),
-                                contentAlignment = Alignment.Center
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(24.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.NotificationsNone,
-                                    contentDescription = null,
-                                    tint = sageGreen,
-                                    modifier = Modifier.size(40.dp)
+                                Box(
+                                    modifier = Modifier
+                                        .size(76.dp)
+                                        .background(SageSoft, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.NotificationsNone,
+                                        contentDescription = null,
+                                        tint = SagePrimary,
+                                        modifier = Modifier.size(36.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = if (filterSelected == 1) "Tidak ada notifikasi belum dibaca" else "Belum ada notifikasi",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.5.sp,
+                                    color = TextPrimary,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Pemberitahuan aktivitas, materi baru, dan pencapaian kamu akan muncul di sini.",
+                                    fontSize = 13.sp,
+                                    color = TextSecondary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 20.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = if (filterSelected == 1) "Tidak ada notifikasi belum dibaca" else "Belum ada notifikasi",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = Color.DarkGray
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Pemberitahuan aktivitas, materi baru, dan pencapaian kamu akan muncul di sini.",
-                                fontSize = 13.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(horizontal = 20.dp)
-                            )
                         }
-                    }
-                } else {
-                    // Daftar Notifikasi
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(bottom = 24.dp)
-                    ) {
-                        items(
-                            items = listFiltered,
-                            key = { it.id }
-                        ) { item ->
-                            ItemNotifikasiCard(
-                                notifikasi = item,
-                                onClick = {
-                                    NotifikasiRepository.tandaiDibaca(item.id)
-                                },
-                                onDelete = {
-                                    NotifikasiRepository.hapusNotifikasi(item.id)
-                                }
-                            )
+                    } else {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(bottom = 24.dp)
+                        ) {
+                            items(
+                                items = listFiltered,
+                                key = { it.id }
+                            ) { item ->
+                                ItemNotifikasiCard(
+                                    notifikasi = item,
+                                    onClick = { NotifikasiRepository.tandaiDibaca(item.id) },
+                                    onDelete = { NotifikasiRepository.hapusNotifikasi(item.id) }
+                                )
+                            }
                         }
                     }
                 }
@@ -249,7 +268,7 @@ fun ItemNotifikasiCard(
     onDelete: () -> Unit
 ) {
     val bgColor by animateColorAsState(
-        targetValue = if (notifikasi.isDibaca) Color.White else Color(0xFFF3F6F2),
+        targetValue = if (notifikasi.isDibaca) Color.White else Color(0xFFF3F7F2),
         label = "bgColor"
     )
 
@@ -257,17 +276,20 @@ fun ItemNotifikasiCard(
         TipeNotifikasi.STREAK -> Triple(Icons.Default.LocalFireDepartment, Color(0xFFFFF3E0), Color(0xFFFF6D00))
         TipeNotifikasi.MATERI -> Triple(Icons.Default.Book, Color(0xFFE1F5FE), Color(0xFF0288D1))
         TipeNotifikasi.KUIS -> Triple(Icons.Default.Quiz, Color(0xFFF3E5F5), Color(0xFF8E24AA))
-        TipeNotifikasi.EKSPERIMEN -> Triple(Icons.Default.Science, Color(0xFFE8ECE7), Color(0xFF7A8B76))
+        TipeNotifikasi.EKSPERIMEN -> Triple(Icons.Default.Science, SageSoft, SagePrimary)
         TipeNotifikasi.INFO -> Triple(Icons.Default.Lightbulb, Color(0xFFFFFDE7), Color(0xFFFBC02D))
     }
 
     Card(
+        onClick = onClick,
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = bgColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (notifikasi.isDibaca) 1.dp else 3.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
+        elevation = CardDefaults.cardElevation(defaultElevation = if (notifikasi.isDibaca) 0.dp else 2.dp),
+        border = BorderStroke(
+            1.dp,
+            if (notifikasi.isDibaca) BorderSubtle else SagePrimary.copy(alpha = 0.28f)
+        ),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -275,7 +297,6 @@ fun ItemNotifikasiCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Ikon Jenis Notifikasi
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -286,16 +307,13 @@ fun ItemNotifikasiCard(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(21.dp)
                 )
             }
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            // Isi Notifikasi
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -304,21 +322,20 @@ fun ItemNotifikasiCard(
                     Text(
                         text = notifikasi.judul,
                         fontWeight = if (notifikasi.isDibaca) FontWeight.SemiBold else FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = Color.Black,
+                        fontSize = 14.5.sp,
+                        color = TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Dot belum dibaca
                     if (!notifikasi.isDibaca) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF7A8B76))
+                                .background(SagePrimary)
                         )
                     }
                 }
@@ -328,8 +345,8 @@ fun ItemNotifikasiCard(
                 Text(
                     text = notifikasi.pesan,
                     fontSize = 13.sp,
-                    color = Color.DarkGray.copy(alpha = 0.85f),
-                    lineHeight = 18.sp
+                    color = TextSecondary,
+                    lineHeight = 19.sp
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -337,21 +354,20 @@ fun ItemNotifikasiCard(
                 Text(
                     text = notifikasi.waktu,
                     fontSize = 11.sp,
-                    color = Color.Gray
+                    color = TextSecondary.copy(alpha = 0.75f)
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
-            // Tombol Hapus Single Notifikasi
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(26.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Hapus",
-                    tint = Color.Gray.copy(alpha = 0.6f),
+                    tint = TextSecondary.copy(alpha = 0.65f),
                     modifier = Modifier.size(16.dp)
                 )
             }

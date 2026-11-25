@@ -21,6 +21,10 @@ import androidx.compose.ui.window.Dialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
@@ -36,8 +40,6 @@ fun EditProfilDialog(
     var nomorTelepon by remember { mutableStateOf(currentPhone) }
     var isLoading by remember { mutableStateOf(false) }
 
-    val sageGreen = Color(0xFF7A8B76)
-
     val handleSaveProfile: () -> Unit = {
         val newName = nama.trim()
         val newPhone = nomorTelepon.trim()
@@ -52,17 +54,14 @@ fun EditProfilDialog(
         } else {
             isLoading = true
 
-            // Pesan spesifik berdasarkan perubahan
             val toastMessage = when {
                 isNameChanged && isPhoneChanged -> "Nama & Nomor HP Berhasil Diperbarui!"
                 isNameChanged -> "Nama Berhasil Diubah menjadi \"$newName\"!"
                 else -> "Nomor HP Berhasil Diperbarui!"
             }
 
-            // 1. Simpan ke Local Preferences (instan)
             UserSessionManager.updateProfile(context, newName, newPhone)
 
-            // 2. Simpan ke Firebase Auth & Cloud Firestore di background
             val firebaseUser = FirebaseAuth.getInstance().currentUser
             if (firebaseUser != null) {
                 val profileUpdates = UserProfileChangeRequest.Builder()
@@ -98,7 +97,10 @@ fun EditProfilDialog(
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            modifier = Modifier.fillMaxWidth().padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 420.dp)
+                .padding(8.dp)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -106,41 +108,43 @@ fun EditProfilDialog(
             ) {
                 Text(
                     text = "Edit Profil",
-                    fontSize = 20.sp,
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = TextPrimary
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Input Nama
                 OutlinedTextField(
                     value = nama,
                     onValueChange = { nama = it },
                     label = { Text("Nama Lengkap") },
-                    leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null, tint = sageGreen) },
+                    leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null, tint = SagePrimary) },
                     singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = sageGreen,
-                        focusedLabelColor = sageGreen
+                        focusedBorderColor = SagePrimary,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedLabelColor = SagePrimary
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Input Nomor Telepon
                 OutlinedTextField(
                     value = nomorTelepon,
                     onValueChange = { nomorTelepon = it },
                     label = { Text("Nomor Telepon") },
                     placeholder = { Text("0812xxxxxxxx") },
-                    leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = sageGreen) },
+                    leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = SagePrimary) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = sageGreen,
-                        focusedLabelColor = sageGreen
+                        focusedBorderColor = SagePrimary,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedLabelColor = SagePrimary
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -149,13 +153,14 @@ fun EditProfilDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(
                         onClick = onDismissRequest,
                         enabled = !isLoading
                     ) {
-                        Text("Batal", color = Color.Gray)
+                        Text("Batal", color = TextSecondary, fontWeight = FontWeight.Medium)
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -163,7 +168,7 @@ fun EditProfilDialog(
                     Button(
                         onClick = handleSaveProfile,
                         enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(containerColor = sageGreen),
+                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         if (isLoading) {
@@ -173,7 +178,7 @@ fun EditProfilDialog(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Text("Simpan", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text("Simpan", color = Color.White, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }

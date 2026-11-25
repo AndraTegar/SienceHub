@@ -1,8 +1,11 @@
 package com.kelompoksix.siencehub.ui.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,8 +19,25 @@ import androidx.compose.ui.unit.dp
 import com.kelompoksix.siencehub.data.models.TopikMateri
 import com.kelompoksix.siencehub.data.repositories.MateriRepository
 import com.kelompoksix.siencehub.ui.components.FloatingBottomNav
+import com.kelompoksix.siencehub.ui.screens.AchievementScreen
+import com.kelompoksix.siencehub.ui.screens.BabScreen
+import com.kelompoksix.siencehub.ui.screens.BerandaScreen
+import com.kelompoksix.siencehub.ui.screens.DetailMateriScreen
+import com.kelompoksix.siencehub.ui.screens.EditProfilScreen
+import com.kelompoksix.siencehub.ui.screens.EksperimenScreen
+import com.kelompoksix.siencehub.ui.screens.GravitasiPlanetScreen
+import com.kelompoksix.siencehub.ui.screens.LeaderboardScreen
+import com.kelompoksix.siencehub.ui.screens.MateriScreen
+import com.kelompoksix.siencehub.ui.screens.NotifikasiScreen
+import com.kelompoksix.siencehub.ui.screens.ProfilScreen
+import com.kelompoksix.siencehub.ui.screens.QuizResultScreen
+import com.kelompoksix.siencehub.ui.screens.QuizReviewScreen
+import com.kelompoksix.siencehub.ui.screens.QuizScreen
+import com.kelompoksix.siencehub.ui.screens.SettingScreen
+import com.kelompoksix.siencehub.ui.screens.SimulatorNewtonScreen
+import com.kelompoksix.siencehub.ui.screens.TimbanganScreen
+import com.kelompoksix.siencehub.ui.screens.UjiPhScreen
 
-// Data class penampung hasil kuis untuk dilempar ke Result & Review Screen
 data class HasilKuisData(
     val subjectName: String,
     val score: Int,
@@ -29,33 +49,47 @@ data class HasilKuisData(
 @Composable
 fun KerangkaAplikasi(
     onLogout: () -> Unit,
-    onStartQuiz: (String) -> Unit // <-- Menggunakan callback kuis
+    onStartQuiz: (String) -> Unit
 ) {
     var indexAktif by remember { mutableIntStateOf(0) }
 
-    //experimen fisika
     var tampilkanEksperimen by remember { mutableStateOf(false) }
     var eksperimenAktif by remember { mutableStateOf<String?>(null) }
 
-    // Status untuk halaman tambahan yang menutupi Navbar (Overlay Screen)
     var tampilkanPengaturan by remember { mutableStateOf(false) }
     var tampilkanAchievement by remember { mutableStateOf(false) }
     var tampilkanLeaderboard by remember { mutableStateOf(false) }
     var tampilkanNotifikasi by remember { mutableStateOf(false) }
     var tampilkanEditProfil by remember { mutableStateOf(false) }
 
-    // Status untuk menyimpan topik materi yang sedang dibuka
     var topikAktif by remember { mutableStateOf<TopikMateri?>(null) }
     var babAktif by remember { mutableStateOf<Int?>(null) }
 
-    // VARIABEL KUIS, RESULT, DAN REVIEW
     var kuisAktif by remember { mutableStateOf<String?>(null) }
     var hasilKuisAktif by remember { mutableStateOf<HasilKuisData?>(null) }
     var reviewAktif by remember { mutableStateOf<String?>(null) }
 
-    // Tombol Back Android Handler (Menutup overlay, review, hasil, kuis, atau materi secara bertahap)
-    BackHandler(enabled = indexAktif != 0 || tampilkanPengaturan || tampilkanAchievement || tampilkanLeaderboard || tampilkanNotifikasi || tampilkanEditProfil || topikAktif != null || kuisAktif != null || hasilKuisAktif != null || reviewAktif != null || tampilkanEksperimen || eksperimenAktif != null) {
+    BackHandler(
+        enabled = indexAktif != 0 ||
+                tampilkanPengaturan ||
+                tampilkanAchievement ||
+                tampilkanLeaderboard ||
+                tampilkanNotifikasi ||
+                tampilkanEditProfil ||
+                topikAktif != null ||
+                kuisAktif != null ||
+                hasilKuisAktif != null ||
+                reviewAktif != null ||
+                tampilkanEksperimen ||
+                eksperimenAktif != null
+    ) {
         when {
+            reviewAktif != null -> reviewAktif = null
+            hasilKuisAktif != null -> {
+                hasilKuisAktif = null
+                kuisAktif = null
+            }
+            kuisAktif != null -> kuisAktif = null
             babAktif != null -> babAktif = null
             topikAktif != null -> topikAktif = null
             eksperimenAktif != null -> eksperimenAktif = null
@@ -69,21 +103,18 @@ fun KerangkaAplikasi(
         }
     }
 
-    // Menampilkan layar penuh (overlay / detail / kuis / hasil / review / eksperimen) berdasarkan prioritas
     when {
-        // 1. Jika Sedang Melihat Ulasan Soal (QuizReviewScreen)
         reviewAktif != null -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.QuizReviewScreen(
+            QuizReviewScreen(
                 subjectName = reviewAktif!!,
                 onBackClick = { reviewAktif = null }
             )
         }
 
-        // 2. Jika Kuis Selesai dan Menampilkan Hasil (QuizResultScreen)
         hasilKuisAktif != null -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.QuizResultScreen(
+            QuizResultScreen(
                 score = hasilKuisAktif!!.score,
-                totalQuestions = hasilKuisAktif!!.total / 20, // Sesuaikan jika per soal bernilai 20 poin
+                totalQuestions = hasilKuisAktif!!.total / 20,
                 correctCount = hasilKuisAktif!!.correct,
                 wrongCount = hasilKuisAktif!!.wrong,
                 onBackClick = {
@@ -94,32 +125,28 @@ fun KerangkaAplikasi(
                     reviewAktif = hasilKuisAktif!!.subjectName
                 },
                 onHomeClick = {
-                    // BERSIHKAN SEMUA STATE KUIS AGAR KEMBALI KE BERANDA/MATERI UTAMA
                     hasilKuisAktif = null
                     kuisAktif = null
                     topikAktif = null
                     babAktif = null
                 },
                 onLeaderboardClick = {
-                    // BERSIHKAN STATE KUIS DAN AKTIFKAN LEADERBOARD SECARA LANGSUNG
                     hasilKuisAktif = null
                     kuisAktif = null
                     topikAktif = null
                     babAktif = null
-                    tampilkanLeaderboard = true // Langsung buka leaderboard
+                    tampilkanLeaderboard = true
                 }
             )
         }
-        // 3. Jika Kuis Sedang Berjalan (QuizScreen)
+
         kuisAktif != null -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.QuizScreen(
+            QuizScreen(
                 subjectName = kuisAktif!!,
                 onBackClick = { kuisAktif = null },
                 onQuizFinished = { score, total, correct, wrong ->
                     val subjekSelesai = kuisAktif!!
-                    // Tutup kuis yang sedang berjalan
                     kuisAktif = null
-                    // Buka layar hasil kuis dengan membawa data skor
                     hasilKuisAktif = HasilKuisData(
                         subjectName = subjekSelesai,
                         score = score,
@@ -131,156 +158,128 @@ fun KerangkaAplikasi(
             )
         }
 
-        // 4. Jika Sedang Membaca Bab Materi
         topikAktif != null && babAktif != null -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.BabScreen(
+            BabScreen(
                 topikMateri = topikAktif!!,
                 babId = babAktif!!,
-                onBackClick = { babAktif = null },
+                onBackClick = { babAktif = null }
             )
         }
 
-        // 5. Jika Sedang di Daftar Bab / Detail Materi
         topikAktif != null -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.DetailMateriScreen(
+            DetailMateriScreen(
                 topikMateri = topikAktif!!,
                 onBackClick = { topikAktif = null },
                 onBabClick = { idBab -> babAktif = idBab },
                 onKuisClick = {
-                    // Membuka kuis berdasarkan kategori materi (contoh: "Fisika", "Biologi", dll)
                     kuisAktif = topikAktif!!.kategori
                 }
             )
         }
 
-        // Halaman Edit Profil Khusus
         tampilkanEditProfil -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.EditProfilScreen(
+            EditProfilScreen(
                 onBackClick = { tampilkanEditProfil = false }
             )
         }
 
-        // 6. Layar Pengaturan
         tampilkanPengaturan -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.SettingScreen(
+            SettingScreen(
                 onBackClick = { tampilkanPengaturan = false },
                 onLogoutClick = { onLogout() },
                 onNavigateToEditProfile = { tampilkanEditProfil = true }
             )
         }
 
-        // 7. Layar Achievement
         tampilkanAchievement -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.AchievementScreen(
+            AchievementScreen(
                 onBackClick = { tampilkanAchievement = false }
             )
         }
 
-        // 8. Layar Leaderboard
         tampilkanLeaderboard -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.LeaderboardScreen(
+            LeaderboardScreen(
                 onBackClick = { tampilkanLeaderboard = false }
             )
         }
 
-        // Layar Notifikasi
         tampilkanNotifikasi -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.NotifikasiScreen(
+            NotifikasiScreen(
                 onBackClick = { tampilkanNotifikasi = false }
             )
         }
 
-        // 9. Layar Simulator Eksperimen Spesifik
         eksperimenAktif != null -> {
             when (eksperimenAktif) {
-                "fisika_newton2" -> _root_ide_package_.com.kelompoksix.siencehub.ui.screens.SimulatorNewtonScreen(
-                    onBackClick = { eksperimenAktif = null })
-                "astronomi_gravitasi" -> _root_ide_package_.com.kelompoksix.siencehub.ui.screens.GravitasiPlanetScreen(
-                    onBackClick = { eksperimenAktif = null })
-                "kimia_ph" -> _root_ide_package_.com.kelompoksix.siencehub.ui.screens.UjiPhScreen(
-                    onBackClick = { eksperimenAktif = null })
-                "matematika_timbangan" -> _root_ide_package_.com.kelompoksix.siencehub.ui.screens.TimbanganScreen(
-                    onBackClick = { eksperimenAktif = null })
+                "fisika_newton2" -> SimulatorNewtonScreen(onBackClick = { eksperimenAktif = null })
+                "astronomi_gravitasi" -> GravitasiPlanetScreen(onBackClick = { eksperimenAktif = null })
+                "kimia_ph" -> UjiPhScreen(onBackClick = { eksperimenAktif = null })
+                "matematika_timbangan" -> TimbanganScreen(onBackClick = { eksperimenAktif = null })
                 else -> eksperimenAktif = null
             }
         }
 
-        // 10. Layar Daftar Eksperimen Virtual
         tampilkanEksperimen -> {
-            _root_ide_package_.com.kelompoksix.siencehub.ui.screens.EksperimenScreen(
+            EksperimenScreen(
                 onBackClick = { tampilkanEksperimen = false },
-                onPilih = { idEksperimen ->
-                    eksperimenAktif = idEksperimen
-                }
+                onPilih = { idEksperimen -> eksperimenAktif = idEksperimen }
             )
         }
 
-        // 9. LAYAR UTAMA DENGAN BOTTOM NAVIGATION
         else -> {
             Box(modifier = Modifier.fillMaxSize()) {
+                Crossfade(
+                    targetState = indexAktif,
+                    animationSpec = tween(220),
+                    label = "MainTabCrossfade"
+                ) { tab ->
+                    when (tab) {
+                        0 -> BerandaScreen(
+                            onNavigateToMateri = { judulMateri ->
+                                val topikDitemukan = MateriRepository.getDaftarTopik().find {
+                                    it.judul.equals(judulMateri, ignoreCase = true) ||
+                                            it.judul.contains(judulMateri, ignoreCase = true) ||
+                                            it.kategori.contains(judulMateri, ignoreCase = true)
+                                }
+                                topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
+                            },
+                            onHasilCari = { topik, babId ->
+                                topikAktif = topik
+                                babAktif = babId
+                            },
+                            onNavigateToEksperimen = { tampilkanEksperimen = true },
+                            onMulaiKuis = { kategori -> kuisAktif = kategori },
+                            onNotificationClick = { tampilkanNotifikasi = true }
+                        )
 
-            // LAYER 1: KONTEN HALAMAN BERDASARKAN TAB AKTIF
-            when (indexAktif) {
-                0 -> _root_ide_package_.com.kelompoksix.siencehub.ui.screens.BerandaScreen(
-                    onNavigateToMateri = { judulMateri ->
-                        val topikDitemukan = MateriRepository.getDaftarTopik().find {
-                            it.judul.equals(judulMateri, ignoreCase = true) ||
-                                    it.judul.contains(judulMateri, ignoreCase = true) ||
-                                    it.kategori.contains(judulMateri, ignoreCase = true)
-                        }
+                        1 -> MateriScreen(
+                            onMateriClick = { judulKategori ->
+                                val topikDitemukan = MateriRepository.getDaftarTopik().find {
+                                    it.judul.contains(judulKategori, ignoreCase = true) ||
+                                            it.kategori.contains(judulKategori, ignoreCase = true)
+                                }
+                                topikAktif = topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
+                            }
+                        )
 
-                        topikAktif =
-                            topikDitemukan ?: MateriRepository.getDaftarTopik().firstOrNull()
-                    },
-                    onHasilCari = { topik, babId ->
-                        topikAktif = topik
-                        babAktif = babId
-                    },
-                    onNavigateToEksperimen = { tampilkanEksperimen = true },
-                    onMulaiKuis = { kategori -> kuisAktif = kategori },
-                    onNotificationClick = { tampilkanNotifikasi = true }
-                )
-
-                1 -> _root_ide_package_.com.kelompoksix.siencehub.ui.screens.MateriScreen(
-                    onMateriClick = { judulKategori ->
-                        // Mencocokkan kartu materi yang diklik dengan data di repository
-                        val topikDitemukan = MateriRepository.getDaftarTopik().find {
-                            it.judul.contains(judulKategori, ignoreCase = true) ||
-                                    it.kategori.contains(judulKategori, ignoreCase = true)
-                        }
-
-                        if (topikDitemukan != null) {
-                            topikAktif = topikDitemukan
-                        } else {
-                            // Fallback jika belum ada datanya, buka topik pertama
-                            topikAktif = MateriRepository.getDaftarTopik().firstOrNull()
-                        }
+                        2 -> ProfilScreen(
+                            onNavigateToSettings = { tampilkanPengaturan = true },
+                            onNavigateToAchievement = { tampilkanAchievement = true },
+                            onNavigateToLeaderboard = { tampilkanLeaderboard = true },
+                            onNavigateToEditProfile = { tampilkanEditProfil = true }
+                        )
                     }
-                )
+                }
 
-                2 -> _root_ide_package_.com.kelompoksix.siencehub.ui.screens.ProfilScreen(
-                    onNavigateToSettings = { tampilkanPengaturan = true },
-                    onNavigateToAchievement = { tampilkanAchievement = true },
-                    onNavigateToLeaderboard = { tampilkanLeaderboard = true },
-                    onNavigateToEditProfile = { tampilkanEditProfil = true }
+                FloatingBottomNav(
+                    selectedIndex = indexAktif,
+                    onItemSelected = { index -> indexAktif = index },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
                 )
             }
-
-            // LAYER 2: FLOATING BOTTOM NAVIGATION
-            FloatingBottomNav(
-                selectedIndex = indexAktif,
-                onItemSelected = { index ->
-                    indexAktif = index
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(
-                        start = 30.dp,
-                        end = 30.dp,
-                        bottom = 50.dp
-                    )
-            )
         }
     }
-}
 }

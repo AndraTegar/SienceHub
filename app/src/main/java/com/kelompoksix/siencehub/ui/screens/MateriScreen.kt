@@ -12,62 +12,74 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.repositories.KategoriDataProvider
 import com.kelompoksix.siencehub.ui.components.KartuKategori
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @Composable
 fun MateriScreen(
     onMateriClick: (String) -> Unit = {}
 ) {
-    val warnaHijauSage = Color(0xFF7A8B76)
     val daftarKategori = KategoriDataProvider.getDaftarKategori()
+    val metrics = rememberResponsiveMetrics()
 
     val context = LocalContext.current
     val userName = remember(context) {
         UserSessionManager.getUserName(context).ifBlank { "Pengguna ScienceHub" }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(warnaHijauSage)
-            .padding(horizontal = 20.dp)
+            .background(SagePrimary)
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        ResponsiveContentContainer(maxWidth = 840.dp) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .padding(horizontal = metrics.horizontalPadding)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-        // Sapaan Header
-        Text(
-            text = "Halo, $userName",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "Mau belajar apa hari ini?",
-            fontSize = 16.sp,
-            color = Color.White.copy(alpha = 0.85f)
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Grid Asimetris (Panjang dan Pendek ala Figma)
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(2),
-            contentPadding = PaddingValues(bottom = 120.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalItemSpacing = 16.dp,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(daftarKategori) { kategori ->
-                KartuKategori(
-                    item = kategori,
-                    onClick = { onMateriClick(kategori.judul) }
+                Text(
+                    text = "Halo, $userName",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Mau belajar apa hari ini?",
+                    fontSize = 14.5.sp,
+                    color = Color.White.copy(alpha = 0.86f)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Adaptive(minSize = 152.dp),
+                    contentPadding = PaddingValues(bottom = 112.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalItemSpacing = 14.dp,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(daftarKategori) { kategori ->
+                        KartuKategori(
+                            item = kategori,
+                            onClick = { onMateriClick(kategori.judul) }
+                        )
+                    }
+                }
             }
         }
     }

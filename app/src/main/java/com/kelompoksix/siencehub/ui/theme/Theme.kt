@@ -1,6 +1,5 @@
 package com.kelompoksix.siencehub.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -13,32 +12,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GreenBackground,
+    primary = SagePrimary,
+    onPrimary = Color.White,
     secondary = GreenLight,
-    tertiary = Color.White
+    onSecondary = TextPrimary,
+    tertiary = Cream90,
+    background = Color(0xFF141815),
+    surface = Color(0xFF1D221E),
+    onBackground = Color.White,
+    onSurface = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = GreenBackground,
-    secondary = GreenLight,
-    tertiary = Color(0xFF424242)
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = SagePrimary,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primaryContainer = SageContainer,
+    onPrimaryContainer = SageDark,
+    secondary = GreenLight,
+    onSecondary = TextPrimary,
+    tertiary = GrayColor,
+    background = SurfaceOffWhite,
+    surface = SurfaceWhite,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    surfaceVariant = SurfaceMuted,
+    onSurfaceVariant = TextSecondary,
+    outline = BorderSubtle
 )
 
 @Composable
 fun SienceHubTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = false,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -46,7 +51,6 @@ fun SienceHubTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

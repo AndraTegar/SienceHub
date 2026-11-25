@@ -31,6 +31,14 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.SageSoft
+import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 import com.kelompoksix.siencehub.utils.UserSessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,8 +46,8 @@ import com.kelompoksix.siencehub.utils.UserSessionManager
 fun EditProfilScreen(
     onBackClick: () -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
     val context = LocalContext.current
+    val metrics = rememberResponsiveMetrics()
 
     val initialName = remember(context) { UserSessionManager.getUserName(context) }
     val initialPhone = remember(context) { UserSessionManager.getUserPhone(context) }
@@ -67,7 +75,6 @@ fun EditProfilScreen(
         } else {
             isLoading = true
 
-            // Tentukan Judul & Pesan Pop-up secara spesifik
             when {
                 isNameChanged && isPhoneChanged -> {
                     dialogTitle = "Profil Berhasil Diperbarui"
@@ -83,10 +90,8 @@ fun EditProfilScreen(
                 }
             }
 
-            // 1. Simpan ke Local Preferences (instan)
             UserSessionManager.updateProfile(context, newName, newPhone)
 
-            // 2. Simpan ke Firebase Auth & Cloud Firestore di background
             val firebaseUser = FirebaseAuth.getInstance().currentUser
             if (firebaseUser != null) {
                 val profileUpdates = UserProfileChangeRequest.Builder()
@@ -115,9 +120,6 @@ fun EditProfilScreen(
         }
     }
 
-    // ==========================================
-    // POPUP DIALOG MINIMALIS & CLEAN
-    // ==========================================
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { },
@@ -126,13 +128,13 @@ fun EditProfilScreen(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE8ECE7)),
+                        .background(SageSoft),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = sageGreen,
+                        tint = SagePrimary,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -140,9 +142,9 @@ fun EditProfilScreen(
             title = {
                 Text(
                     text = dialogTitle,
-                    fontSize = 19.sp,
+                    fontSize = 18.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937),
+                    color = TextPrimary,
                     textAlign = TextAlign.Center
                 )
             },
@@ -150,7 +152,7 @@ fun EditProfilScreen(
                 Text(
                     text = dialogMessage,
                     fontSize = 14.sp,
-                    color = Color(0xFF4B5563),
+                    color = TextSecondary,
                     textAlign = TextAlign.Center,
                     lineHeight = 20.sp
                 )
@@ -161,7 +163,7 @@ fun EditProfilScreen(
                         showSuccessDialog = false
                         onBackClick()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = sageGreen),
+                    colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -179,149 +181,152 @@ fun EditProfilScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(SagePrimary)
+            .imePadding()
     ) {
-        // ==========================================
-        // HEADER ATAS (Tombol Back & Judul)
-        // ==========================================
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 48.dp, start = 20.dp, end = 20.dp, bottom = 24.dp),
+                .statusBarsPadding()
+                .padding(horizontal = metrics.horizontalPadding, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
+            Surface(
                 onClick = onBackClick,
-                modifier = Modifier
-                    .background(Color.White, shape = RoundedCornerShape(50))
-                    .size(40.dp)
+                shape = CircleShape,
+                color = Color.White,
+                modifier = Modifier.size(40.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBackIosNew,
-                    contentDescription = "Kembali",
-                    tint = sageGreen,
-                    modifier = Modifier.size(18.dp)
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = "Kembali",
+                        tint = SagePrimary,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "Edit Profil",
                 color = Color.White,
-                fontSize = 22.sp,
+                fontSize = 21.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        // ==========================================
-        // KONTEN UTAMA (Kartu Putih Melengkung)
-        // ==========================================
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFFAFAFA),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = SurfaceOffWhite,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Avatar Pengguna
-                Box(
+            ResponsiveContentContainer(maxWidth = 520.dp) {
+                Column(
                     modifier = Modifier
-                        .size(100.dp)
-                        .border(3.dp, sageGreen, CircleShape)
-                        .clip(CircleShape)
-                        .background(Color.LightGray.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .navigationBarsPadding()
+                        .padding(horizontal = 24.dp, vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(50.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Input Nama Lengkap
-                OutlinedTextField(
-                    value = nama,
-                    onValueChange = { nama = it },
-                    label = { Text("Nama Lengkap") },
-                    leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null, tint = sageGreen) },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = sageGreen,
-                        focusedLabelColor = sageGreen
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Input Nomor Telepon
-                OutlinedTextField(
-                    value = nomorTelepon,
-                    onValueChange = { nomorTelepon = it },
-                    label = { Text("Nomor Telepon") },
-                    placeholder = { Text("0812xxxxxxxx") },
-                    leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = sageGreen) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = sageGreen,
-                        focusedLabelColor = sageGreen
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Informasi Email (Disabled / Readonly)
-                OutlinedTextField(
-                    value = initialEmail.ifBlank { "Tidakar terdaftar" },
-                    onValueChange = {},
-                    readOnly = true,
-                    enabled = false,
-                    label = { Text("Email (Tidakar dapat diubah)") },
-                    leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = Color.Gray) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // Tombol Simpan Perubahan
-                Button(
-                    onClick = handleSave,
-                    enabled = !isLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = sageGreen),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            text = "Simpan Perubahan",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                    Box(
+                        modifier = Modifier
+                            .size(96.dp)
+                            .border(3.dp, SagePrimary, CircleShape)
+                            .clip(CircleShape)
+                            .background(SageSoft),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = SagePrimary,
+                            modifier = Modifier.size(48.dp)
                         )
                     }
-                }
 
-                Spacer(modifier = Modifier.height(40.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
+
+                    OutlinedTextField(
+                        value = nama,
+                        onValueChange = { nama = it },
+                        label = { Text("Nama Lengkap") },
+                        leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null, tint = SagePrimary) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = SagePrimary,
+                            unfocusedBorderColor = BorderSubtle,
+                            focusedLabelColor = SagePrimary,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = nomorTelepon,
+                        onValueChange = { nomorTelepon = it },
+                        label = { Text("Nomor Telepon") },
+                        placeholder = { Text("0812xxxxxxxx") },
+                        leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null, tint = SagePrimary) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = SagePrimary,
+                            unfocusedBorderColor = BorderSubtle,
+                            focusedLabelColor = SagePrimary,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = initialEmail.ifBlank { "Tidak terdaftar" },
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = false,
+                        shape = RoundedCornerShape(14.dp),
+                        label = { Text("Email (Tidak dapat diubah)") },
+                        leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = TextSecondary) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Button(
+                        onClick = handleSave,
+                        enabled = !isLoading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(22.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Simpan Perubahan",
+                                color = Color.White,
+                                fontSize = 15.5.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
         }
     }

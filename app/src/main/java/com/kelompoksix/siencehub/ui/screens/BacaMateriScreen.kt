@@ -21,6 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.models.BlokKonten
 import com.kelompoksix.siencehub.data.models.IsiBab
+import com.kelompoksix.siencehub.ui.theme.AccentBlue
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 
 @Composable
 fun BacaMateriScreen(
@@ -29,20 +34,19 @@ fun BacaMateriScreen(
     onBackClick: () -> Unit,
     onMulaiKuisClick: () -> Unit = {}
 ) {
-    val darkChalkBg = Color(0xFF1E1E1E)
+    val darkChalkBg = Color(0xFF1A202C)
+    val metrics = rememberResponsiveMetrics()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(darkChalkBg)
     ) {
-        Spacer(modifier = Modifier.height(44.dp))
-
-        // Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .statusBarsPadding()
+                .padding(horizontal = metrics.horizontalPadding, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {
@@ -62,9 +66,6 @@ fun BacaMateriScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Konten Utama
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,138 +73,139 @@ fun BacaMateriScreen(
             color = Color.White,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Looping Blok Konten
-                isiBab.blok.forEach { blok ->
-                    when (blok) {
-                        is BlokKonten.Paragraf -> {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                if (!blok.judul.isNullOrEmpty()) {
-                                    Text(
-                                        text = blok.judul,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF1E3A8A)
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                }
-                                Text(
-                                    text = blok.teks,
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,
-                                    lineHeight = 22.sp
-                                )
-                            }
-                        }
-
-                        is BlokKonten.TeksGambar -> {
-                            Card(
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    if (blok.gambar != null) {
-                                        Image(
-                                            painter = painterResource(id = blok.gambar),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(70.dp)
-                                                .clip(RoundedCornerShape(12.dp)),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                    }
-                                    Text(
-                                        text = blok.teks,
-                                        fontSize = 14.sp,
-                                        color = Color.DarkGray,
-                                        lineHeight = 20.sp,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            }
-                        }
-
-                        is BlokKonten.Rumus -> {
-                            Card(
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF3E8FF)),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    if (blok.judul.isNotEmpty()) {
+            ResponsiveContentContainer(maxWidth = 720.dp) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .navigationBarsPadding()
+                        .padding(horizontal = metrics.horizontalPadding, vertical = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    isiBab.blok.forEach { blok ->
+                        when (blok) {
+                            is BlokKonten.Paragraf -> {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    if (!blok.judul.isNullOrEmpty()) {
                                         Text(
                                             text = blok.judul,
+                                            fontSize = 17.sp,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 15.sp,
-                                            color = Color(0xFF6B21A8)
+                                            color = AccentBlue
                                         )
                                         Spacer(modifier = Modifier.height(6.dp))
                                     }
                                     Text(
-                                        text = blok.isi,
-                                        fontSize = 14.sp,
-                                        color = Color(0xFF4C1D95),
-                                        lineHeight = 20.sp
+                                        text = blok.teks,
+                                        fontSize = 14.5.sp,
+                                        color = TextSecondary,
+                                        lineHeight = 22.sp
                                     )
                                 }
                             }
-                        }
 
-                        is BlokKonten.Gambar -> {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Image(
-                                    painter = painterResource(id = blok.gambar),
-                                    contentDescription = blok.keterangan,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp)
-                                        .clip(RoundedCornerShape(16.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-                                if (!blok.keterangan.isNullOrEmpty()) {
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = blok.keterangan,
-                                        fontSize = 12.sp,
-                                        color = Color.Gray
+                            is BlokKonten.TeksGambar -> {
+                                Card(
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (blok.gambar != null) {
+                                            Image(
+                                                painter = painterResource(id = blok.gambar),
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(72.dp)
+                                                    .clip(RoundedCornerShape(12.dp)),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                        }
+                                        Text(
+                                            text = blok.teks,
+                                            fontSize = 14.sp,
+                                            color = TextPrimary,
+                                            lineHeight = 20.sp,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+                            }
+
+                            is BlokKonten.Rumus -> {
+                                Card(
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF3E8FF)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        if (blok.judul.isNotEmpty()) {
+                                            Text(
+                                                text = blok.judul,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 15.sp,
+                                                color = Color(0xFF6B21A8)
+                                            )
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                        }
+                                        Text(
+                                            text = blok.isi,
+                                            fontSize = 14.sp,
+                                            color = Color(0xFF4C1D95),
+                                            lineHeight = 20.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            is BlokKonten.Gambar -> {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = blok.gambar),
+                                        contentDescription = blok.keterangan,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(min = 160.dp, max = 240.dp)
+                                            .clip(RoundedCornerShape(16.dp)),
+                                        contentScale = ContentScale.Crop
                                     )
+                                    if (!blok.keterangan.isNullOrEmpty()) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = blok.keterangan,
+                                            fontSize = 12.sp,
+                                            color = TextSecondary
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Tombol Lanjut ke Kuis
-                if (isiBab.kuis.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = onMulaiKuisClick,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E3A8A)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    ) {
-                        Text(
-                            text = "Lanjut ke Kuis",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                    if (isiBab.kuis.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = onMulaiKuisClick,
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentBlue),
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                        ) {
+                            Text(
+                                text = "Lanjut ke Kuis",
+                                fontSize = 15.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }

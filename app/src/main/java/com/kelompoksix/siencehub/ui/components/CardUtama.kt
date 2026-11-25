@@ -1,92 +1,144 @@
 package com.kelompoksix.siencehub.ui.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kelompoksix.siencehub.ui.theme.CreamBeige
+import com.kelompoksix.siencehub.ui.theme.SageDark
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
 
 @Composable
 fun CardUtama(
     judulMateri: String,
-    progress: Float, // Nilai dari 0.0f (0%) sampai 1.0f (100%)
+    progress: Float,
     onClick: () -> Unit
 ) {
-    val warnaBeige = Color(0xFFE2D4C0)
+    val clampedProgress = progress.coerceIn(0f, 1f)
 
     Card(
+        onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = warnaBeige),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = CreamBeige),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.55f)),
         modifier = Modifier
             .fillMaxWidth()
-            .height(170.dp)
-            .clickable { onClick() }
+            .heightIn(min = 158.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(20.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // BAGIAN ATAS: Label kecil dan Judul Materi
-            Column {
-                // Label kecil penanda bagian
-                Text(
-                    text = "LANJUTKAN BELAJAR",
-                    color = Color.DarkGray.copy(alpha = 0.7f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.sp
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.65f)
+                    ) {
+                        Text(
+                            text = "LANJUTKAN BELAJAR",
+                            color = SageDark,
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                Text(
-                    text = judulMateri,
-                    color = Color.Black,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                    Text(
+                        text = judulMateri,
+                        color = TextPrimary,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 25.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(SagePrimary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Buka Materi",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
 
-            // BAGIAN BAWAH: Progress Bar
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Progres Belajar",
+                        color = TextPrimary.copy(alpha = 0.65f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "${(clampedProgress * 100).toInt()}%",
+                        color = SageDark,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 LinearProgressIndicator(
-                    progress = { progress },
+                    progress = { clampedProgress },
                     modifier = Modifier
-                        .weight(1f)
-                        .height(8.dp),
-                    color = Color(0xFF869E83),
-                    trackColor = Color.White,
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(CircleShape),
+                    color = SagePrimary,
+                    trackColor = Color.White.copy(alpha = 0.85f),
                     strokeCap = StrokeCap.Round
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "${(progress * 100).toInt()}%",
-                    color = Color.DarkGray,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF869E83)
+@Preview(showBackground = true, backgroundColor = 0xFF7A8B76)
 @Composable
 fun CardUtamaPreview() {
     Box(modifier = Modifier.padding(16.dp)) {

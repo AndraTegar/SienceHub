@@ -1,5 +1,6 @@
 package com.kelompoksix.siencehub.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -19,18 +20,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kelompoksix.siencehub.data.models.UserRank
 import com.kelompoksix.siencehub.data.repositories.LeaderboardRepository
+import com.kelompoksix.siencehub.ui.theme.BorderSubtle
+import com.kelompoksix.siencehub.ui.theme.ResponsiveContentContainer
+import com.kelompoksix.siencehub.ui.theme.SageDark
+import com.kelompoksix.siencehub.ui.theme.SagePrimary
+import com.kelompoksix.siencehub.ui.theme.SageSoft
+import com.kelompoksix.siencehub.ui.theme.SurfaceOffWhite
+import com.kelompoksix.siencehub.ui.theme.TextPrimary
+import com.kelompoksix.siencehub.ui.theme.TextSecondary
+import com.kelompoksix.siencehub.ui.theme.rememberResponsiveMetrics
 
 @Composable
 fun LeaderboardScreen(
     onBackClick: () -> Unit
 ) {
-    val sageGreen = Color(0xFF7A8B76)
+    val metrics = rememberResponsiveMetrics()
 
-    // Dengarkan perubahan data Leaderboard Real-Time dari Firebase Cloud
     DisposableEffect(Unit) {
         LeaderboardRepository.listenRealtimeLeaderboard()
         onDispose {
@@ -39,95 +49,106 @@ fun LeaderboardScreen(
     }
 
     val daftarUser by LeaderboardRepository.leaderboardFlow.collectAsState()
-
-    // Memisahkan 3 besar untuk podium dan sisanya untuk list
     val topThree = daftarUser.take(3)
     val remainingUsers = if (daftarUser.size > 3) daftarUser.drop(3) else emptyList()
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(sageGreen)
+            .background(SagePrimary)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = metrics.horizontalPadding, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // ==========================================
-            // HEADER (Tombol Kembali & Judul)
-            // ==========================================
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 48.dp, start = 20.dp, end = 20.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Surface(
+                onClick = onBackClick,
+                shape = CircleShape,
+                color = Color.White,
+                modifier = Modifier.size(40.dp)
             ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier
-                        .background(Color.White, shape = RoundedCornerShape(50))
-                        .size(40.dp)
-                ) {
+                Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.ArrowBackIosNew,
                         contentDescription = "Kembali",
-                        tint = sageGreen,
-                        modifier = Modifier.size(18.dp)
+                        tint = SagePrimary,
+                        modifier = Modifier.size(17.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Leaderboard",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
             }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Leaderboard",
+                color = Color.White,
+                fontSize = 21.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
-            // ==========================================
-            // AREA PODIUM 3 BESAR (Lurus & Presisi)
-            // ==========================================
+        // Area Podium 3 Besar (Responsif dengan weight(1f) agar presisi di semua lebar layar)
+        ResponsiveContentContainer(maxWidth = 480.dp) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .padding(horizontal = 16.dp, vertical = if (metrics.isShortScreen) 8.dp else 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.Bottom
             ) {
-                // Peringkat 2 (Kiri - Posisi Sedang)
-                if (topThree.size > 1) {
-                    PodiumItem(user = topThree[1])
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
+                    if (topThree.size > 1) {
+                        PodiumItem(user = topThree[1])
+                    }
                 }
-                // Peringkat 1 (Tengah - Posisi Paling Tinggi)
-                if (topThree.isNotEmpty()) {
-                    PodiumItem(user = topThree[0])
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
+                    if (topThree.isNotEmpty()) {
+                        PodiumItem(user = topThree[0])
+                    }
                 }
-                // Peringkat 3 (Kanan - Posisi Paling Bawah)
-                if (topThree.size > 2) {
-                    PodiumItem(user = topThree[2])
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
+                    if (topThree.size > 2) {
+                        PodiumItem(user = topThree[2])
+                    }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-            // ==========================================
-            // DAFTAR PERINGKAT BAWAH (Background Putih)
-            // ==========================================
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                color = Color(0xFFFAFAFA),
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-            ) {
-                LazyColumn(
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(remainingUsers) { user ->
-                        LeaderboardItemCard(user = user)
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = SurfaceOffWhite,
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+        ) {
+            ResponsiveContentContainer(maxWidth = 680.dp) {
+                if (daftarUser.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = SagePrimary)
                     }
-                    item {
-                        Spacer(modifier = Modifier.height(40.dp))
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .navigationBarsPadding(),
+                        contentPadding = PaddingValues(
+                            horizontal = metrics.horizontalPadding,
+                            vertical = 20.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(remainingUsers) { user ->
+                            LeaderboardItemCard(user = user)
+                        }
+                        item {
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
                     }
                 }
             }
@@ -135,32 +156,30 @@ fun LeaderboardScreen(
     }
 }
 
-// Komponen Podium dengan Lebar Tetap dan Offset Presisi
 @Composable
 fun PodiumItem(user: UserRank) {
     val ringColor = when (user.rank) {
-        1 -> Color(0xFFFFD700) // Emas
-        2 -> Color(0xFFE0E0E0) // Perak
-        else -> Color(0xFFCD7F32) // Perunggu
+        1 -> Color(0xFFFFD700)
+        2 -> Color(0xFFE2E8F0)
+        else -> Color(0xFFCD7F32)
     }
 
-    // Mengatur ketinggian/posisi vertikal berdasarkan rank (1 Paling atas, 3 Paling bawah)
     val verticalOffset = when (user.rank) {
-        1 -> (-28.dp) // Juara 1 diangkat ke atas
-        2 -> (-10.dp) // Juara 2 di tengah
-        else -> 0.dp  // Juara 3 sebagai dasar
+        1 -> (-20).dp
+        2 -> (-6).dp
+        else -> 0.dp
     }
 
-    val avatarSize = if (user.rank == 1) 76.dp else 64.dp
-    val iconSize = if (user.rank == 1) 38.dp else 30.dp
+    val avatarSize = if (user.rank == 1) 74.dp else 62.dp
+    val iconSize = if (user.rank == 1) 36.dp else 28.dp
 
     Column(
         modifier = Modifier
-            .width(100.dp) // Lebar kolom disamakan agar tidak saling dorong
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp)
             .offset(y = verticalOffset),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Kontainer Avatar & Mahkota
         Box(
             contentAlignment = Alignment.TopCenter,
             modifier = Modifier.height(avatarSize + 20.dp)
@@ -168,10 +187,10 @@ fun PodiumItem(user: UserRank) {
             if (user.rank == 1) {
                 Text(
                     text = "👑",
-                    fontSize = 22.sp,
+                    fontSize = 20.sp,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .offset(y = (-4.dp))
+                        .offset(y = (-4).dp)
                 )
             }
 
@@ -179,7 +198,7 @@ fun PodiumItem(user: UserRank) {
                 modifier = Modifier
                     .size(avatarSize)
                     .align(Alignment.BottomCenter)
-                    .border(3.5.dp, ringColor, CircleShape)
+                    .border(3.dp, ringColor, CircleShape)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
@@ -188,22 +207,21 @@ fun PodiumItem(user: UserRank) {
                     modifier = Modifier
                         .size(avatarSize - 8.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE8ECE7)),
+                        .background(SageSoft),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Person,
                         contentDescription = null,
-                        tint = Color(0xFF7A8B76),
+                        tint = SagePrimary,
                         modifier = Modifier.size(iconSize)
                     )
                 }
             }
 
-            // Badge Nomor Rank di Bawah Foto
             Box(
                 modifier = Modifier
-                    .size(26.dp)
+                    .size(24.dp)
                     .align(Alignment.BottomCenter)
                     .offset(y = 8.dp)
                     .background(ringColor, CircleShape)
@@ -212,9 +230,9 @@ fun PodiumItem(user: UserRank) {
             ) {
                 Text(
                     text = "${user.rank}",
-                    fontSize = 12.sp,
+                    fontSize = 11.5.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.DarkGray
+                    color = TextPrimary
                 )
             }
         }
@@ -222,10 +240,11 @@ fun PodiumItem(user: UserRank) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = user.nama,
-            fontSize = 13.sp,
+            fontSize = 12.5.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
@@ -241,65 +260,67 @@ fun PodiumItem(user: UserRank) {
     }
 }
 
-// Komponen Baris Daftar Peringkat Bawah
 @Composable
 fun LeaderboardItemCard(user: UserRank) {
-    val backgroundColor = if (user.isMe) Color(0xFFEAF1E8) else Color.White
-    val borderColor = if (user.isMe) Color(0xFF7A8B76) else Color.Transparent
-    val textColor = if (user.isMe) Color(0xFF2C352A) else Color.DarkGray
+    val backgroundColor = if (user.isMe) SageSoft else Color.White
+    val borderColor = if (user.isMe) SagePrimary else BorderSubtle
+    val textColor = TextPrimary
 
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (user.isMe) 3.dp else 1.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(if (user.isMe) 1.5.dp else 0.dp, borderColor, RoundedCornerShape(16.dp))
+        elevation = CardDefaults.cardElevation(defaultElevation = if (user.isMe) 2.dp else 0.dp),
+        border = BorderStroke(if (user.isMe) 1.5.dp else 1.dp, borderColor),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "${user.rank}",
-                fontSize = 15.sp,
+                fontSize = 14.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = textColor,
+                color = if (user.isMe) SageDark else TextSecondary,
                 modifier = Modifier.width(30.dp)
             )
 
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
-                    .background(if (user.isMe) Color(0xFF7A8B76).copy(alpha = 0.2f) else Color(0xFFF0F0F0)),
+                    .background(if (user.isMe) SagePrimary.copy(alpha = 0.18f) else SurfaceOffWhite),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (user.isMe) Icons.Default.EmojiEvents else Icons.Default.Person,
                     contentDescription = null,
-                    tint = if (user.isMe) Color(0xFF7A8B76) else Color.Gray,
-                    modifier = Modifier.size(20.dp)
+                    tint = if (user.isMe) SagePrimary else TextSecondary,
+                    modifier = Modifier.size(19.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             Text(
                 text = user.nama,
-                fontSize = 15.sp,
-                fontWeight = if (user.isMe) FontWeight.ExtraBold else FontWeight.Medium,
+                fontSize = 14.5.sp,
+                fontWeight = if (user.isMe) FontWeight.Bold else FontWeight.Medium,
                 color = textColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
 
+            Spacer(modifier = Modifier.width(8.dp))
+
             Text(
                 text = "${user.poin} pts",
-                fontSize = 14.sp,
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (user.isMe) Color(0xFF556052) else Color.DarkGray
+                color = if (user.isMe) SageDark else TextPrimary
             )
         }
     }
