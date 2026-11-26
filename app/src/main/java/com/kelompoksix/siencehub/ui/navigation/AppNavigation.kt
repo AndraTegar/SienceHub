@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kelompoksix.siencehub.ui.navigation.KerangkaAplikasi
+import com.kelompoksix.siencehub.ui.screens.LeaderboardScreen
 import com.kelompoksix.siencehub.ui.screens.LoginScreen
 import com.kelompoksix.siencehub.ui.screens.QuizResultScreen
 import com.kelompoksix.siencehub.ui.screens.QuizReviewScreen
@@ -159,11 +160,17 @@ fun AppNavigation() {
             val wrong = backStackEntry.arguments?.getInt("wrong") ?: 0
             val subjectName = backStackEntry.arguments?.getString("subjectName") ?: ""
 
+            val questionCount = if (correct + wrong > 0) correct + wrong else (total / 20).coerceAtLeast(1)
+
             QuizResultScreen(
                 score = score,
-                totalQuestions = total,
+                totalQuestions = questionCount,
                 correctCount = correct,
                 wrongCount = wrong,
+                subjectName = subjectName,
+                onBackClick = {
+                    navController.popBackStack()
+                },
                 onHomeClick = {
                     navController.popBackStack(Routes.HOME, inclusive = false)
                 },
@@ -171,8 +178,15 @@ fun AppNavigation() {
                     navController.navigate(Routes.createQuizReviewRoute(subjectName))
                 },
                 onLeaderboardClick = {
-                    // Navigasi ke halaman Leaderboard jika rutenya ada
-                    // navController.navigate(Routes.LEADERBOARD)
+                    navController.navigate(Routes.LEADERBOARD)
+                }
+            )
+        }
+
+        composable(Routes.LEADERBOARD) {
+            LeaderboardScreen(
+                onBackClick = {
+                    navController.popBackStack()
                 }
             )
         }

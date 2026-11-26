@@ -106,6 +106,7 @@ fun KerangkaAplikasi(
             eksperimenAktif != null
     ) {
         when {
+            tampilkanLeaderboard -> tampilkanLeaderboard = false
             reviewAktif != null -> reviewAktif = null
             hasilKuisAktif != null -> {
                 hasilKuisAktif = null
@@ -119,13 +120,18 @@ fun KerangkaAplikasi(
             tampilkanEditProfil -> tampilkanEditProfil = false
             tampilkanPengaturan -> tampilkanPengaturan = false
             tampilkanAchievement -> tampilkanAchievement = false
-            tampilkanLeaderboard -> tampilkanLeaderboard = false
             tampilkanNotifikasi -> tampilkanNotifikasi = false
             else -> indexAktif = 0
         }
     }
 
     when {
+        tampilkanLeaderboard -> {
+            LeaderboardScreen(
+                onBackClick = { tampilkanLeaderboard = false }
+            )
+        }
+
         reviewAktif != null -> {
             QuizReviewScreen(
                 subjectName = reviewAktif!!,
@@ -139,6 +145,7 @@ fun KerangkaAplikasi(
                 totalQuestions = hasilKuisAktif!!.total / 20,
                 correctCount = hasilKuisAktif!!.correct,
                 wrongCount = hasilKuisAktif!!.wrong,
+                subjectName = hasilKuisAktif!!.subjectName,
                 onBackClick = {
                     hasilKuisAktif = null
                     kuisAktif = null
@@ -151,12 +158,9 @@ fun KerangkaAplikasi(
                     kuisAktif = null
                     topikAktif = null
                     babAktif = null
+                    indexAktif = 0
                 },
                 onLeaderboardClick = {
-                    hasilKuisAktif = null
-                    kuisAktif = null
-                    topikAktif = null
-                    babAktif = null
                     tampilkanLeaderboard = true
                 }
             )
@@ -238,12 +242,6 @@ fun KerangkaAplikasi(
             AchievementScreen(
                 learningStats = learningStats,
                 onBackClick = { tampilkanAchievement = false }
-            )
-        }
-
-        tampilkanLeaderboard -> {
-            LeaderboardScreen(
-                onBackClick = { tampilkanLeaderboard = false }
             )
         }
 
